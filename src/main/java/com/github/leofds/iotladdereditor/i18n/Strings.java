@@ -80,6 +80,7 @@ public class Strings {
 	public static String remove() { return bundle.getString("remove"); }
 	public static String property() { return bundle.getString("property"); }
 	public static String properties() { return bundle.getString("properties"); }
+	public static String chooseController() { return bundle.getString("chooseControler"); }   //added
 	public static String memory() { return bundle.getString("memory"); }
 	public static String file() { return bundle.getString("file"); }
 	public static String open() { return bundle.getString("open"); }
