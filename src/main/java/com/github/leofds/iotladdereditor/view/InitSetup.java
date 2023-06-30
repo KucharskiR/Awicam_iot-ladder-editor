@@ -23,21 +23,17 @@ import java.awt.Font;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -46,17 +42,16 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.SwingConstants;
 import javax.swing.UIManager;
+import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.AbstractTableModel;
 
-import org.apache.commons.lang3.RandomStringUtils;
-
 import com.github.leofds.iotladdereditor.application.Mediator;
 import com.github.leofds.iotladdereditor.compiler.domain.CodeOptions;
-import com.github.leofds.iotladdereditor.compiler.domain.CodeOptionsStartUp;
+import com.github.leofds.iotladdereditor.compiler.domain.CodeOptionsDevice;
+import com.github.leofds.iotladdereditor.compiler.domain.CodeOptionsDevice2;
 import com.github.leofds.iotladdereditor.device.Device;
 import com.github.leofds.iotladdereditor.device.IO;
 import com.github.leofds.iotladdereditor.device.Peripheral;
@@ -71,32 +66,35 @@ public class InitSetup extends JDialog {
 	private static final long serialVersionUID = 1L;
 	
 	private final JPanel contentPanel = new JPanel();
-	private JTextField textFieldSsid;
-	private JTextField textFieldPassword;
-	private JTextField textFieldCAFile;
-	private JTextField textFieldClientCertFile;
-	private JTextField textFieldClientPkFile;
+//	private JTextField textFieldSsid;
+//	private JTextField textFieldPassword;
+//	private JTextField textFieldCAFile;
+//	private JTextField textFieldClientCertFile;
+//	private JTextField textFieldClientPkFile;
 	private JTextField textFieldBrokerAddress;
-	private JTextField textFieldPubTopic;
-	private JTextField textFieldSubTopic;
+//	private JTextField textFieldPubTopic;
+//	private JTextField textFieldSubTopic;
 	private JTextField textFieldBokerPort;
-	private JTextField textFieldClientID;
-	private JButton btnChooseCaFile;
-	private JButton btnChooseClientCert;
-	private JButton btnChooseClientPk;
-	private JCheckBox checkBoxUseClientCertificate;
-	private JCheckBox checkBoxEnableSsl;
-	private JTextField textFieldUserUsername;
-	private JTextField textFieldUserPassword;
+//	private JTextField textFieldClientID;
+//	private JButton btnChooseCaFile;
+//	private JButton btnChooseClientCert;
+//	private JButton btnChooseClientPk;
+//	private JCheckBox checkBoxUseClientCertificate;
+//	private JCheckBox checkBoxEnableSsl;
+//	private JTextField textFieldUserUsername;
+//	private JTextField textFieldUserPassword;
 	private JTextField textFieldTelemetrySeconds;
-	private JCheckBox checkBoxEnableTelemetry;
-	private JCheckBox checkBoxTelemetryMemory;
-	private JCheckBox checkBoxTelemetryOutput;
-	private JCheckBox checkBoxTelemetryInput;
+//	private JCheckBox checkBoxEnableTelemetry;
+//	private JCheckBox checkBoxTelemetryMemory;
+//	private JCheckBox checkBoxTelemetryOutput;
+//	private JCheckBox checkBoxTelemetryInput;
 	private LadderProgram ladderProgram;
-	private JComboBox<CodeOptionsStartUp> comboBox_code;
+	private JComboBox<CodeOptionsDevice> comboBox_code;
 	private JTable tablePinMapping;
 	private Device device;
+	private List<String> devices;
+
+	private JComboBox<CodeOptionsDevice2> comboBox_device2;
 	
 	
 
@@ -111,7 +109,9 @@ public class InitSetup extends JDialog {
 		
 		setBounds(100, 100, 820, 508);
 		getContentPane().setLayout(new BorderLayout());
+		Border border = BorderFactory.createTitledBorder("Init setup");
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		contentPanel.setBorder(border);
 		contentPanel.setPreferredSize(new Dimension(800, 460));
 		getContentPane().add(contentPanel, BorderLayout.NORTH);
 		contentPanel.setLayout(null);
@@ -134,11 +134,21 @@ public class InitSetup extends JDialog {
 		});
 		btnCancel.setBounds(693, 425, 97, 25);
 		contentPanel.add(btnCancel);
+		
+		/*
+		 * 
+		 * Tab panel
+		 */
 
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-		tabbedPane.setBounds(10, 112, 780, 303);
+		tabbedPane.setBounds(12, 132, 778, 285);
 		contentPanel.add(tabbedPane);
 
+		/*
+		 * Mqtt panel
+		 * 
+		 * 
+		 
 		JPanel panel_2 = new JPanel();
 		tabbedPane.addTab(Strings.mqtt(), null, panel_2, null);
 		panel_2.setLayout(null);
@@ -417,35 +427,90 @@ public class InitSetup extends JDialog {
 										});
 										btnGenerateClientID.setBounds(639, 74, 92, 21);
 										panel_2.add(btnGenerateClientID);
+										 * 
+										 * 
+										 */
 
-		JPanel panel_3 = new JPanel();
-		tabbedPane.addTab(Strings.pinMapping(), null, panel_3, null);
-		panel_3.setLayout(null);
+//		JPanel panel_3 = new JPanel();
+//		tabbedPane.addTab(Strings.pinMapping(), null, panel_3, null);
+//		panel_3.setLayout(null);
+//
+//		tablePinMapping = new JTable();
+//		tablePinMapping.setBounds(649, 146, 1, 1);
+//		tablePinMapping.setModel(new PinModel(device));	//FIXME comment WindowBuilder
+//		tablePinMapping.addMouseListener(new TableMouseListener(tablePinMapping));
+//		
+//		JPopupMenu popupMenuPinMapping = new JPopupMenu();
+//		JMenuItem deleteItem = new JMenuItem(Strings.delete());
+//		deleteItem.addActionListener(new ActionListener() {
+//
+//			@Override
+//			public void actionPerformed(ActionEvent e) {
+//				deletePin();
+//			}
+//		});
+//		JMenuItem addOutputItem = new JMenuItem(Strings.addOutput());
+//		addOutputItem.addActionListener(new ActionListener() {
+//
+//			@Override
+//			public void actionPerformed(ActionEvent e) {
+//				addOutput();
+//			}
+//		});
+//		JMenuItem addInputItem = new JMenuItem(Strings.addInput());
+//		addInputItem.addActionListener(new ActionListener() {
+//
+//			@Override
+//			public void actionPerformed(ActionEvent e) {
+//				addInput();
+//			}
+//		});
+//
+//		popupMenuPinMapping.add(deleteItem);
+//		popupMenuPinMapping.add(addOutputItem);
+//		popupMenuPinMapping.add(addInputItem);
+//
+//		tablePinMapping.setComponentPopupMenu(popupMenuPinMapping);
+//
+//		JScrollPane scrollPane = new JScrollPane(tablePinMapping);
+//		scrollPane.setBounds(199, 26, 359, 220);
+//		panel_3.add(scrollPane);
+		
+		/*
+		 * 
+		 * Device 2 List Tab
+		 *  
+		 * 
+		 */
+		
+		JPanel panel_8 = new JPanel();
+		tabbedPane.addTab(Strings.device2Table(), null, panel_8, null);
+		panel_8.setLayout(null);
 
 		tablePinMapping = new JTable();
 		tablePinMapping.setBounds(649, 146, 1, 1);
-		tablePinMapping.setModel(new PinModel(device));	//FIXME comment WindowBuilder
+		tablePinMapping.setModel(new Device2Model(device));	//FIXME comment WindowBuilder
 		tablePinMapping.addMouseListener(new TableMouseListener(tablePinMapping));
 		
-		JPopupMenu popupMenuPinMapping = new JPopupMenu();
-		JMenuItem deleteItem = new JMenuItem(Strings.delete());
-		deleteItem.addActionListener(new ActionListener() {
+		JPopupMenu popMenuDevice2Table = new JPopupMenu();
+		JMenuItem deleteItemDevice2 = new JMenuItem(Strings.delete());
+		deleteItemDevice2.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				deletePin();
 			}
 		});
-		JMenuItem addOutputItem = new JMenuItem(Strings.addOutput());
-		addOutputItem.addActionListener(new ActionListener() {
+		JMenuItem addOutputItemDevice2 = new JMenuItem(Strings.addOutput());
+		addOutputItemDevice2.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				addOutput();
 			}
 		});
-		JMenuItem addInputItem = new JMenuItem(Strings.addInput());
-		addInputItem.addActionListener(new ActionListener() {
+		JMenuItem addInputItemDevice2 = new JMenuItem(Strings.addInput());
+		addInputItemDevice2.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -453,83 +518,149 @@ public class InitSetup extends JDialog {
 			}
 		});
 
-		popupMenuPinMapping.add(deleteItem);
-		popupMenuPinMapping.add(addOutputItem);
-		popupMenuPinMapping.add(addInputItem);
+		popMenuDevice2Table.add(deleteItemDevice2);
+		popMenuDevice2Table.add(addOutputItemDevice2);
+		popMenuDevice2Table.add(addInputItemDevice2);
 
-		tablePinMapping.setComponentPopupMenu(popupMenuPinMapping);
+		tablePinMapping.setComponentPopupMenu(popMenuDevice2Table);
 
-		JScrollPane scrollPane = new JScrollPane(tablePinMapping);
-		scrollPane.setBounds(199, 26, 359, 220);
-		panel_3.add(scrollPane);
+		JScrollPane scrollPaneDevice2 = new JScrollPane(tablePinMapping);
+		scrollPaneDevice2.setBounds(199, 26, 359, 220);
+		panel_8.add(scrollPaneDevice2);
+		
+		/*
+		 * 
+		 * 
+		 *  Device 1
+		 * 
+		 * 
+		 */
 
 
 		JPanel panel = new JPanel();
-		panel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), Strings.codeGenerator(), TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-		panel.setBounds(10, 9, 369, 98);
+		panel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), Strings.device(), TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
+		panel.setBounds(10, 15, 369, 115);
 		contentPanel.add(panel);
 		panel.setLayout(null);
 
-		comboBox_code = new JComboBox<CodeOptionsStartUp>();
+		comboBox_code = new JComboBox<CodeOptionsDevice>();
 		comboBox_code.setBounds(72, 40, 229, 21);
 		panel.add(comboBox_code);
-		comboBox_code.setModel(new DefaultComboBoxModel<CodeOptionsStartUp>(CodeOptionsStartUp.values()));
+		comboBox_code.setModel(new DefaultComboBoxModel<CodeOptionsDevice>(CodeOptionsDevice.values()));
+		
+		/*
+		 * 
+		 * Device 2
+		 * 
+		 */
 		comboBox_code.setFont(new Font("Tahoma", Font.PLAIN, 12));
 
-		JPanel panel_1 = new JPanel();
-		panel_1.setBorder(new TitledBorder(null, Strings.wifi(), TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel_1.setBounds(391, 9, 399, 98);
-		contentPanel.add(panel_1);
-		panel_1.setLayout(null);
-
-		JLabel lblSsid = new JLabel(Strings.ssid());
-		lblSsid.setBounds(12, 31, 131, 16);
-		panel_1.add(lblSsid);
-		lblSsid.setHorizontalAlignment(SwingConstants.RIGHT);
-
-		textFieldSsid = new JTextField();
-		textFieldSsid.setBounds(155, 28, 162, 22);
-		panel_1.add(textFieldSsid);
-		textFieldSsid.setColumns(10);
-
-		JLabel lblPassword = new JLabel(Strings.password());
-		lblPassword.setBounds(12, 56, 131, 16);
-		panel_1.add(lblPassword);
-		lblPassword.setHorizontalAlignment(SwingConstants.RIGHT);
-
-		textFieldPassword = new JTextField();
-		textFieldPassword.setBounds(155, 55, 162, 22);
-		panel_1.add(textFieldPassword);
-		textFieldPassword.setColumns(10);
+		JPanel panelDevice2 = new JPanel();
+		panelDevice2.setBorder(new TitledBorder(null, Strings.device2(), TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		panelDevice2.setBounds(391, 15, 399, 115);
+		contentPanel.add(panelDevice2);
+		panelDevice2.setLayout(null);
+		
+		comboBox_device2 = new JComboBox<CodeOptionsDevice2>();
+		comboBox_device2.setBounds(72, 40, 229, 21);
+		panelDevice2.add(comboBox_device2);
+		comboBox_device2.setModel(new DefaultComboBoxModel<CodeOptionsDevice2>(CodeOptionsDevice2.values()));
+		comboBox_device2.setFont(new Font("Tahoma", Font.PLAIN, 12));
+		
+		/*
+		 *   BUTTON EXAMPLE
+		 * 
+		JButton btnGenerateClientID = new JButton( Strings.generate() );
+		btnGenerateClientID.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				textFieldClientID.setText(RandomStringUtils.randomAlphabetic(20));
+			}
+		});
+		btnGenerateClientID.setBounds(639, 74, 92, 21);
+		panel_2.add(btnGenerateClientID);
+		 * 
+		 * 
+		 * 
+		 * 
+		 */
+		
+		JButton btnAddDevice = new JButton( Strings.addDevice() );
+		btnAddDevice.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				try {
+//					devices.add(comboBox_device2.getSelectedItem().toString());
+					System.out.println(comboBox_device2.getSelectedItem().toString());
+				} catch (Exception e2) {
+					// TODO: handle exception
+					System.out.println("Null pointer exception");
+				}
+			}
+		});
+		btnAddDevice.setBounds(72, 70, 229, 21);
+		panelDevice2.add(btnAddDevice);
+		
+//
+//		JLabel lblSsid = new JLabel(Strings.ssid());
+//		lblSsid.setBounds(12, 31, 131, 16);
+//		panel_1.add(lblSsid);
+//		lblSsid.setHorizontalAlignment(SwingConstants.RIGHT);
+//
+//		textFieldSsid = new JTextField();
+//		textFieldSsid.setBounds(155, 28, 162, 22);
+//		panel_1.add(textFieldSsid);
+//		textFieldSsid.setColumns(10);
+//
+//		JLabel lblPassword = new JLabel(Strings.password());
+//		lblPassword.setBounds(12, 56, 131, 16);
+//		panel_1.add(lblPassword);
+//		lblPassword.setHorizontalAlignment(SwingConstants.RIGHT);
+//
+//		textFieldPassword = new JTextField();
+//		textFieldPassword.setBounds(155, 55, 162, 22);
+//		panel_1.add(textFieldPassword);
+//		textFieldPassword.setColumns(10);
 
 		loadFields();
 	}
+	
+	/*
+	 * 
+	 * 
+	 *     Methods
+	 * 
+	 * 
+	 * 
+	 */
+	
 
 	private void loadFields() {
 		ProgramProperties properties = ladderProgram.getProperties();
 		comboBox_code.setSelectedItem( properties.getCodeOption() );
-		textFieldSsid.setText( properties.getWifiSsid() );
-		textFieldPassword.setText( properties.getWifiPassword() );
-		textFieldBrokerAddress.setText( properties.getBrokerAddress() );
-		textFieldBokerPort.setText( ""+properties.getBrokerPort() );
-		textFieldClientID.setText( properties.getMqttClientID() );
-		textFieldUserUsername.setText( properties.getMqttUsername() );
-		textFieldUserPassword.setText( properties.getMqttPassword() );
-		checkBoxEnableSsl.setSelected( properties.isEnableSsl() );
-		checkBoxUseClientCertificate.setSelected( properties.isUseClientCert() );
-		enableSsl( properties.isEnableSsl() );
-		useClientCert( properties.isUseClientCert() );
-		textFieldCAFile.setText( properties.getMqttCa() );
-		textFieldClientCertFile.setText( properties.getMqttClientCert() );
-		textFieldClientPkFile.setText( properties.getMqttClientPrivateKey() );
-		textFieldPubTopic.setText( properties.getMqttPubTopic() );
-		textFieldSubTopic.setText( properties.getMqttSubTopic() );
-		textFieldTelemetrySeconds.setText( ""+properties.getTelemetrySeconds() );
-		checkBoxEnableTelemetry.setSelected( properties.getEnableTelemetry() );
-		checkBoxTelemetryInput.setSelected( properties.getTelemetryPubInput() );
-		checkBoxTelemetryOutput.setSelected( properties.getTelemetryPutOutput() );
-		checkBoxTelemetryMemory.setSelected( properties.getTelemetryPubMemory() );
-		enableTelemetry( checkBoxEnableTelemetry.isSelected() );
+//		textFieldSsid.setText( properties.getWifiSsid() );
+//		textFieldPassword.setText( properties.getWifiPassword() );
+//		textFieldBrokerAddress.setText( properties.getBrokerAddress() );
+//		textFieldBokerPort.setText( ""+properties.getBrokerPort() );
+//		textFieldClientID.setText( properties.getMqttClientID() );
+//		textFieldUserUsername.setText( properties.getMqttUsername() );
+//		textFieldUserPassword.setText( properties.getMqttPassword() );
+//		checkBoxEnableSsl.setSelected( properties.isEnableSsl() );
+//		checkBoxUseClientCertificate.setSelected( properties.isUseClientCert() );
+//		enableSsl( properties.isEnableSsl() );
+//		useClientCert( properties.isUseClientCert() );
+//		textFieldCAFile.setText( properties.getMqttCa() );
+//		textFieldClientCertFile.setText( properties.getMqttClientCert() );
+//		textFieldClientPkFile.setText( properties.getMqttClientPrivateKey() );
+//		textFieldPubTopic.setText( properties.getMqttPubTopic() );
+//		textFieldSubTopic.setText( properties.getMqttSubTopic() );
+//		textFieldTelemetrySeconds.setText( ""+properties.getTelemetrySeconds() );
+//		checkBoxEnableTelemetry.setSelected( properties.getEnableTelemetry() );
+//		checkBoxTelemetryInput.setSelected( properties.getTelemetryPubInput() );
+//		checkBoxTelemetryOutput.setSelected( properties.getTelemetryPutOutput() );
+//		checkBoxTelemetryMemory.setSelected( properties.getTelemetryPubMemory() );
+//		enableTelemetry( checkBoxEnableTelemetry.isSelected() );
 	}
 
 	private void save() {
@@ -538,28 +669,28 @@ public class InitSetup extends JDialog {
 			CodeOptions codeOpt = (CodeOptions) comboBox_code.getSelectedItem();
 			ProgramProperties properties = ladderProgram.getProperties();
 			properties.setCodeOption(codeOpt);
-			properties.setWifiSsid( textFieldSsid.getText() );
-			properties.setWifiPassword( textFieldPassword.getText() );
+//			properties.setWifiSsid( textFieldSsid.getText() );
+//			properties.setWifiPassword( textFieldPassword.getText() );
 			properties.setBrokerAddress( textFieldBrokerAddress.getText() );
 			try {
 				properties.setBrokerPort( Integer.parseInt( textFieldBokerPort.getText() ) );
 			} catch (Exception e) {
 				properties.setBrokerPort( 1883 );
 			}
-			properties.setMqttClientID( textFieldClientID.getText() );
-			properties.setMqttUsername( textFieldUserUsername.getText() );
-			properties.setMqttPassword( textFieldUserPassword.getText() );
-			properties.setEnableSsl( checkBoxEnableSsl.isSelected() );
-			properties.setUseClientCert( checkBoxUseClientCertificate.isSelected() );
-			properties.setMqttCa( textFieldCAFile.getText() );
-			properties.setMqttClientCert( textFieldClientCertFile.getText() );
-			properties.setMqttClientPrivateKey( textFieldClientPkFile.getText() );
-			properties.setMqttPubTopic( textFieldPubTopic.getText() );
-			properties.setMqttSubTopic( textFieldSubTopic.getText() );
-			properties.setEnableTelemetry( checkBoxEnableTelemetry.isSelected() );
-			properties.setTelemetryPubInput( checkBoxTelemetryInput.isSelected() );
-			properties.setTelemetryPutOutput( checkBoxTelemetryOutput.isSelected() );
-			properties.setTelemetryPubMemory( checkBoxTelemetryMemory.isSelected() );
+//			properties.setMqttClientID( textFieldClientID.getText() );
+//			properties.setMqttUsername( textFieldUserUsername.getText() );
+//			properties.setMqttPassword( textFieldUserPassword.getText() );
+//			properties.setEnableSsl( checkBoxEnableSsl.isSelected() );
+//			properties.setUseClientCert( checkBoxUseClientCertificate.isSelected() );
+//			properties.setMqttCa( textFieldCAFile.getText() );
+//			properties.setMqttClientCert( textFieldClientCertFile.getText() );
+//			properties.setMqttClientPrivateKey( textFieldClientPkFile.getText() );
+//			properties.setMqttPubTopic( textFieldPubTopic.getText() );
+//			properties.setMqttSubTopic( textFieldSubTopic.getText() );
+//			properties.setEnableTelemetry( checkBoxEnableTelemetry.isSelected() );
+//			properties.setTelemetryPubInput( checkBoxTelemetryInput.isSelected() );
+//			properties.setTelemetryPutOutput( checkBoxTelemetryOutput.isSelected() );
+//			properties.setTelemetryPubMemory( checkBoxTelemetryMemory.isSelected() );
 			String teleSec = textFieldTelemetrySeconds.getText();
 			if(teleSec.isEmpty() || teleSec.equals("0")) {
 				teleSec = "5";
@@ -649,43 +780,43 @@ public class InitSetup extends JDialog {
 		}
 	}
 	
-	private void enableSsl(boolean enable) {
-		if(enable) {
-			checkBoxUseClientCertificate.setEnabled(true);
-			btnChooseCaFile.setEnabled(true);
-			textFieldCAFile.setEnabled(true);
-		}else{
-			checkBoxUseClientCertificate.setEnabled(false);
-			checkBoxUseClientCertificate.setSelected(false);
-			btnChooseCaFile.setEnabled(false);
-			btnChooseClientCert.setEnabled(false);
-			btnChooseClientPk.setEnabled(false);
-			textFieldCAFile.setEnabled(false);
-			textFieldClientCertFile.setEnabled(false);
-			textFieldClientPkFile.setEnabled(false);
-		}
-	}
-	
-	private void useClientCert(boolean use) {
-		if(use) {
-			btnChooseClientCert.setEnabled(true);
-			btnChooseClientPk.setEnabled(true);
-			textFieldClientCertFile.setEnabled(true);
-			textFieldClientPkFile.setEnabled(true);
-		}else{
-			btnChooseClientCert.setEnabled(false);
-			btnChooseClientPk.setEnabled(false);
-			textFieldClientCertFile.setEnabled(false);
-			textFieldClientPkFile.setEnabled(false);
-		}
-	}
-	
-	private void enableTelemetry(boolean enable) {
-		textFieldTelemetrySeconds.setEnabled(enable);
-		checkBoxTelemetryInput.setEnabled(enable);
-		checkBoxTelemetryOutput.setEnabled(enable);
-		checkBoxTelemetryMemory.setEnabled(enable);
-	}
+//	private void enableSsl(boolean enable) {
+//		if(enable) {
+//			checkBoxUseClientCertificate.setEnabled(true);
+//			btnChooseCaFile.setEnabled(true);
+//			textFieldCAFile.setEnabled(true);
+//		}else{
+//			checkBoxUseClientCertificate.setEnabled(false);
+//			checkBoxUseClientCertificate.setSelected(false);
+//			btnChooseCaFile.setEnabled(false);
+//			btnChooseClientCert.setEnabled(false);
+//			btnChooseClientPk.setEnabled(false);
+//			textFieldCAFile.setEnabled(false);
+//			textFieldClientCertFile.setEnabled(false);
+//			textFieldClientPkFile.setEnabled(false);
+//		}
+//	}
+//	
+//	private void useClientCert(boolean use) {
+//		if(use) {
+//			btnChooseClientCert.setEnabled(true);
+//			btnChooseClientPk.setEnabled(true);
+//			textFieldClientCertFile.setEnabled(true);
+//			textFieldClientPkFile.setEnabled(true);
+//		}else{
+//			btnChooseClientCert.setEnabled(false);
+//			btnChooseClientPk.setEnabled(false);
+//			textFieldClientCertFile.setEnabled(false);
+//			textFieldClientPkFile.setEnabled(false);
+//		}
+//	}
+//	
+//	private void enableTelemetry(boolean enable) {
+//		textFieldTelemetrySeconds.setEnabled(enable);
+//		checkBoxTelemetryInput.setEnabled(enable);
+//		checkBoxTelemetryOutput.setEnabled(enable);
+//		checkBoxTelemetryMemory.setEnabled(enable);
+//	}
 	
 	class TableMouseListener extends MouseAdapter{
 		
@@ -703,13 +834,13 @@ public class InitSetup extends JDialog {
 		}
 	}
 
-	class PinModel extends AbstractTableModel {
+	class Device2Model extends AbstractTableModel {
 
 		private static final long serialVersionUID = 1L;
-		private String[] columnNames = {Strings.name(),"pin", "type"};
+		private String[] columnNames = {Strings.device2()};
 		private Device device;
 
-		public PinModel(Device device) {
+		public Device2Model(Device device) {
 			this.device = device;
 		}
 
@@ -720,11 +851,13 @@ public class InitSetup extends JDialog {
 
 		@Override
 		public int getRowCount() {
-			int count = 0;
-			for(Peripheral peripheral: device.getPeripherals()) {
-				count += peripheral.getPeripheralItems().size();
-			}
-			return count;
+//			int count = 0;
+//			for(Peripheral peripheral: device.getPeripherals()) {
+//				count += peripheral.getPeripheralItems().size();
+//			}
+			if(devices != null)
+				return (devices.size() == 0) ? 1 : devices.size();
+			return 0;
 		}
 
 		@Override

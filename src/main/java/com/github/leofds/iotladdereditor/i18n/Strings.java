@@ -172,4 +172,9 @@ public class Strings {
 	public static String theExtensionMustBe() { return bundle.getString("theExtensionMustBe"); }
 	public static String doYouWantToOverwriteTheFile() { return bundle.getString("doYouWantToOverwriteTheFile"); }
 	public static String generate() { return bundle.getString("generate"); }
+
+	public static String device2() { return bundle.getString("device2"); }
+	public static String addDevice() { return bundle.getString("addDevice"); }
+	public static String device2Table() { return bundle.getString("device2Table"); }
+	
 }

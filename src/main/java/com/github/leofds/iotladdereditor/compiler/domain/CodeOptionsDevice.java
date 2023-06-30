@@ -16,18 +16,18 @@
  ******************************************************************************/
 package com.github.leofds.iotladdereditor.compiler.domain;
 
-public enum CodeOptionsStartUp{
+public enum CodeOptionsDevice{
 
 	W1VC_64R("W1VC 64R"),W1VC_128R("W1VC 128R");
 	
 	String value;
 	
-	private CodeOptionsStartUp(String value) {
+	private CodeOptionsDevice(String value) {
 		this.value = value;
 	}
 	
-	public static CodeOptionsStartUp getByName(String name) {
-		for(CodeOptionsStartUp code: CodeOptionsStartUp.values()) {
+	public static CodeOptionsDevice getByName(String name) {
+		for(CodeOptionsDevice code: CodeOptionsDevice.values()) {
 			if(code.name().equals(name)) {
 				return code;
 			}
