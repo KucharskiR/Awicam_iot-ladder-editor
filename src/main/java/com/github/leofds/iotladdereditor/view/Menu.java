@@ -220,7 +220,7 @@ public class Menu extends JMenuBar {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				ProjectProperties dialog = new ProjectProperties();
+				InitSetup dialog = new InitSetup();
 				dialog.setModal(true);
 				dialog.setResizable(false);
 				dialog.pack();
