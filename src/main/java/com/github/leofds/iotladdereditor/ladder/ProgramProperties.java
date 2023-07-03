@@ -43,6 +43,9 @@ public class ProgramProperties implements Serializable{
 	private Boolean telemetryPutOutput;
 	private Boolean telemetryPubMemory;
 	private Integer telemetrySeconds;
+//	
+	private String codeOptionDevice;
+	private String codeOptionDevice2;
 	
 	public ProgramProperties() {
 		wifiSsid = "";
@@ -64,6 +67,8 @@ public class ProgramProperties implements Serializable{
 		telemetryPutOutput = true;
 		telemetryPubMemory = true;
 		telemetrySeconds = 5;
+		codeOptionDevice = "";
+		codeOptionDevice2 = "";
 	}
 	public CodeOptions getCodeOption() {
 		return CodeOptions.getByName(codeOption);
@@ -184,5 +189,23 @@ public class ProgramProperties implements Serializable{
 	}
 	public void setTelemetrySeconds(Integer telemetrySeconds) {
 		this.telemetrySeconds = telemetrySeconds;
+		
+	/*
+	 * Added RK
+	 * 	
+	 */
 	}
+	public String getCodeOptionDevice() {
+		return codeOptionDevice;
+	}
+	public void setCodeOptionDevice(String codeOptionDevice) {
+		this.codeOptionDevice = codeOptionDevice;
+	}
+	public String getCodeOptionDevice2() {
+		return codeOptionDevice2;
+	}
+	public void setCodeOptionDevice2(String codeOptionDevice2) {
+		this.codeOptionDevice2 = codeOptionDevice2;
+	}
+	
 }

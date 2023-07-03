@@ -175,6 +175,8 @@ public class Strings {
 
 	public static String device2() { return bundle.getString("device2"); }
 	public static String addDevice() { return bundle.getString("addDevice"); }
-	public static String device2Table() { return bundle.getString("device2Table"); }
+	public static String device2Table() { return bundle.getString("additionalDevices"); }
+	public static String mainDevice() { return bundle.getString("mainDevice"); }
+	public static String initialize() { return bundle.getString("initialize"); }
 	
 }
