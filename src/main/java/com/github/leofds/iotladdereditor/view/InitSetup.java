@@ -49,9 +49,12 @@ import javax.swing.table.AbstractTableModel;
 import com.github.leofds.iotladdereditor.application.Mediator;
 import com.github.leofds.iotladdereditor.compiler.domain.CodeOptionsDevice;
 import com.github.leofds.iotladdereditor.compiler.domain.CodeOptionsDevice2;
+import com.github.leofds.iotladdereditor.device.Device;
+import com.github.leofds.iotladdereditor.device.DeviceFactory;
 import com.github.leofds.iotladdereditor.i18n.Strings;
 import com.github.leofds.iotladdereditor.ladder.LadderProgram;
 import com.github.leofds.iotladdereditor.ladder.ProgramProperties;
+import com.github.leofds.iotladdereditor.util.FileUtils;
 
 /**
  * @author kucha
@@ -91,8 +94,7 @@ public class InitSetup extends JDialog {
 	private LadderProgram ladderProgram;
 	private JComboBox<CodeOptionsDevice> comboBox_code;
 	private JTable tablePinMapping;
-//	private Device device;
-	private String mainDevice;
+	private Device device;
 	private List<String> devices;
 
 	private JComboBox<CodeOptionsDevice2> comboBox_device2;
@@ -105,7 +107,7 @@ public class InitSetup extends JDialog {
 	public InitSetup() {
 
 		ladderProgram = Mediator.getInstance().getProject().getLadderProgram();
-//		device = ladderProgram.getDevice().clone();
+		device = ladderProgram.getDevice().clone();
 		devices = new ArrayList<>();
 
 		
@@ -119,7 +121,7 @@ public class InitSetup extends JDialog {
 		contentPanel.setLayout(null);
 
 
-		JButton btnSave = new JButton(Strings.initialize());
+		JButton btnSave = new JButton(Strings.save());
 		btnSave.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				save();
@@ -347,10 +349,19 @@ public class InitSetup extends JDialog {
 		int dialogResult = JOptionPane.showConfirmDialog(this, Strings.confirmSaveProjectProperties(), Strings.titleSaveProjectProperties(), JOptionPane.YES_NO_OPTION);
 		if(dialogResult == 0) {
 			
+			CodeOptionsDevice codeOpt = (CodeOptionsDevice) comboBox_code.getSelectedItem();
 			ProgramProperties properties = ladderProgram.getProperties();
-			properties.setCodeOptionDevice(mainDevice);
+			properties.setCodeOptionDevice(codeOpt);
+			properties.setDevices(devices);
 			
-
+			device = new DeviceFactory().getDevice();
+			
+			Mediator me = Mediator.getInstance();
+			me.getProject().setChanged(true);
+			FileUtils.saveLadderProgram();
+			me.clearConsole();
+			me.updateDevice(device);
+			this.dispose();
 		}
 	}
 	
