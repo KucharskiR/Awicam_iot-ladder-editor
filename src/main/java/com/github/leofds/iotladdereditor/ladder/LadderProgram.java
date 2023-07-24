@@ -47,7 +47,8 @@ public class LadderProgram implements Serializable{
 		rungs = new Rungs();
 		properties = new ProgramProperties();
 		properties.setCodeOption( CodeOptions.values()[0] );
-		device = DeviceFactory.createEsp32();
+//		device = DeviceFactory.createEsp32();
+		device = new DeviceFactory().getDevice();
 		
 		integerMemory = new ArrayList<DeviceMemory>();
 		floatMemory = new ArrayList<DeviceMemory>();

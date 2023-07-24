@@ -80,6 +80,7 @@ public class Strings {
 	public static String remove() { return bundle.getString("remove"); }
 	public static String property() { return bundle.getString("property"); }
 	public static String properties() { return bundle.getString("properties"); }
+	public static String chooseController() { return bundle.getString("chooseControler"); }   //added
 	public static String memory() { return bundle.getString("memory"); }
 	public static String file() { return bundle.getString("file"); }
 	public static String open() { return bundle.getString("open"); }
@@ -171,4 +172,11 @@ public class Strings {
 	public static String theExtensionMustBe() { return bundle.getString("theExtensionMustBe"); }
 	public static String doYouWantToOverwriteTheFile() { return bundle.getString("doYouWantToOverwriteTheFile"); }
 	public static String generate() { return bundle.getString("generate"); }
+
+	public static String device2() { return bundle.getString("device2"); }
+	public static String addDevice() { return bundle.getString("addDevice"); }
+	public static String device2Table() { return bundle.getString("additionalDevices"); }
+	public static String mainDevice() { return bundle.getString("mainDevice"); }
+	public static String initialize() { return bundle.getString("initialize"); }
+	
 }

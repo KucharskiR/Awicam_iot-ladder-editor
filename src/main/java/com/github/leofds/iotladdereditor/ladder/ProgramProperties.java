@@ -17,8 +17,12 @@
 package com.github.leofds.iotladdereditor.ladder;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.github.leofds.iotladdereditor.compiler.domain.CodeOptions;
+import com.github.leofds.iotladdereditor.compiler.domain.CodeOptionsDevice;
+import com.github.leofds.iotladdereditor.compiler.domain.CodeOptionsDevice2;
 
 public class ProgramProperties implements Serializable{
 
@@ -43,6 +47,9 @@ public class ProgramProperties implements Serializable{
 	private Boolean telemetryPutOutput;
 	private Boolean telemetryPubMemory;
 	private Integer telemetrySeconds;
+//	
+	private String codeOptionDevice;
+	private List<String> devices;
 	
 	public ProgramProperties() {
 		wifiSsid = "";
@@ -64,7 +71,13 @@ public class ProgramProperties implements Serializable{
 		telemetryPutOutput = true;
 		telemetryPubMemory = true;
 		telemetrySeconds = 5;
+		codeOptionDevice = "";
+		devices = new ArrayList<String>();
+		
+		devices.add(CodeOptionsDevice2.BB20.name());
+		devices.add(CodeOptionsDevice2.BB28.name());
 	}
+	
 	public CodeOptions getCodeOption() {
 		return CodeOptions.getByName(codeOption);
 	}
@@ -184,5 +197,24 @@ public class ProgramProperties implements Serializable{
 	}
 	public void setTelemetrySeconds(Integer telemetrySeconds) {
 		this.telemetrySeconds = telemetrySeconds;
+		
+	/*
+	 * Added by RK 03.07.2023
+	 * 	
+	 */
 	}
+	public String getCodeOptionDevice() {
+		return codeOptionDevice;
+	}
+	public void setCodeOptionDevice(CodeOptionsDevice codeOptionDevice) {
+		this.codeOptionDevice = codeOptionDevice.name();
+	}
+	public List<String> getDevices() {
+		return devices;
+	}
+	public void setDevices(List<String> devices) {
+		this.devices = devices;
+	}
+	
+	
 }

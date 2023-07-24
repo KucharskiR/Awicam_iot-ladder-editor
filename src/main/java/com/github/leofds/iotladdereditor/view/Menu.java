@@ -59,6 +59,7 @@ public class Menu extends JMenuBar {
 		JMenu menuProject = new JMenu(Strings.project());
 		JMenuItem projectBuild = new JMenuItem(Strings.build());
 		JMenuItem projectBuildRun = new JMenuItem(Strings.buildRun());
+		JMenuItem projectChoose = new JMenuItem(Strings.chooseController());
 		JMenuItem projectProprerties = new JMenuItem(Strings.properties());
 		JMenu menuHelp = new JMenu(Strings.help());
 		helpLang = new JMenu(Strings.language());
@@ -89,6 +90,7 @@ public class Menu extends JMenuBar {
 		fileExit.addActionListener(getFileExitAction());
 		projectBuild.addActionListener(getProjectBuild());
 		projectBuildRun.addActionListener(getProjectBuildRun());
+		projectChoose.addActionListener(getProjectChoose());
 		projectProprerties.addActionListener(getProjectProperties());
 		helpAbout.addActionListener(getHelpAbout());
 
@@ -135,6 +137,7 @@ public class Menu extends JMenuBar {
 		menuFile.add(fileExit);
 		menuProject.add(projectBuild);
 		menuProject.add(projectBuildRun);
+		menuProject.add(projectChoose);
 		menuProject.addSeparator();
 		menuProject.add(projectProprerties);
 		menuHelp.add(helpLang);
@@ -211,7 +214,22 @@ public class Menu extends JMenuBar {
 			}
 		};
 	}
-
+	public AbstractAction getProjectChoose() {
+		return new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				InitSetup dialog = new InitSetup();
+				dialog.setModal(true);
+				dialog.setResizable(false);
+				dialog.pack();
+				dialog.setLocationRelativeTo(null);
+				dialog.setVisible(true);
+			}
+		};
+	}
+	
 	private AbstractAction getProjectBuild() {
 		return new AbstractAction() {
 			private static final long serialVersionUID = 1L;

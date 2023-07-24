@@ -19,6 +19,7 @@ package com.github.leofds.iotladdereditor.device;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Peripheral implements Serializable{
 
@@ -61,4 +62,22 @@ public class Peripheral implements Serializable{
 	public String toString() {
 		return name;
 	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(name, symbol);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Peripheral other = (Peripheral) obj;
+		return Objects.equals(name, other.name) && Objects.equals(symbol, other.symbol);
+	}
+	
 }
