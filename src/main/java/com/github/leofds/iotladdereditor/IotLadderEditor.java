@@ -56,7 +56,6 @@ public class IotLadderEditor{
 		try{
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 			EventQueue.invokeLater(new Runnable() {
-
 				@Override
 				public void run() {
 					new UI().setVisible(true);
