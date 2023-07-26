@@ -167,7 +167,24 @@ public class InitSetup extends JDialog {
 		tablePinMapping.setModel(tableModel);
 		tablePinMapping.addMouseListener(new TableMouseListener(tablePinMapping));
 		
+		/*
+		 * 
+		 *  Delete device 
+		 * 
+		 */
+		
 		JPopupMenu popMenuDevice2Table = new JPopupMenu();
+		
+		JMenuItem propertiesBB = new JMenuItem(Strings.propertiesBB());
+		propertiesBB.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+//				deletePin();
+				tableModel.fireTableDataChanged();
+			}
+		});
+		
 		JMenuItem deleteItemDevice2 = new JMenuItem(Strings.delete());
 		deleteItemDevice2.addActionListener(new ActionListener() {
 
@@ -177,25 +194,10 @@ public class InitSetup extends JDialog {
 				tableModel.fireTableDataChanged();
 			}
 		});
-//		JMenuItem addOutputItemDevice2 = new JMenuItem(Strings.addOutput());
-//		addOutputItemDevice2.addActionListener(new ActionListener() {
-//
-//			@Override
-//			public void actionPerformed(ActionEvent e) {
-//				addOutput();
-//			}
-//		});
-//		JMenuItem addInputItemDevice2 = new JMenuItem(Strings.addInput());
-//		addInputItemDevice2.addActionListener(new ActionListener() {
-//
-//			@Override
-//			public void actionPerformed(ActionEvent e) {
-//				addInput();
-//			}
-//		});
 
+
+		popMenuDevice2Table.add(propertiesBB);
 		popMenuDevice2Table.add(deleteItemDevice2);
-//		popMenuDevice2Table.add(addOutputItemDevice2);
 //		popMenuDevice2Table.add(addInputItemDevice2);
 
 		tablePinMapping.setComponentPopupMenu(popMenuDevice2Table);
@@ -256,6 +258,12 @@ public class InitSetup extends JDialog {
 		btnGenerateClientID.setBounds(639, 74, 92, 21);
 		panel_2.add(btnGenerateClientID);
 		 * 
+		 * 
+		 * 
+		 * 
+		 */
+		
+		/*
 		 * 
 		 * 
 		 * 
