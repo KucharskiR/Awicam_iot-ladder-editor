@@ -169,7 +169,7 @@ public class InitSetup extends JDialog {
 		
 		/*
 		 * 
-		 *  Delete device 
+		 *  Delete, SettingsBB  menu 
 		 * 
 		 */
 		
@@ -181,6 +181,12 @@ public class InitSetup extends JDialog {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 //				deletePin();
+				SettingsBB dialogSettings = new SettingsBB();
+				dialogSettings.setModal(true);
+				dialogSettings.setResizable(false);
+				dialogSettings.pack();
+				dialogSettings.setLocationRelativeTo(null);
+				dialogSettings.setVisible(true);
 				tableModel.fireTableDataChanged();
 			}
 		});
