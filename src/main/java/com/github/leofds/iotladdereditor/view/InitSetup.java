@@ -25,7 +25,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -108,7 +107,8 @@ public class InitSetup extends JDialog {
 
 		ladderProgram = Mediator.getInstance().getProject().getLadderProgram();
 		device = ladderProgram.getDevice().clone();
-		devices = new ArrayList<>();
+//		devices = new ArrayList<>();
+		devices = ladderProgram.getProperties().getDevices();
 
 		
 		setBounds(100, 100, 820, 508);
@@ -207,7 +207,7 @@ public class InitSetup extends JDialog {
 		/*
 		 * 
 		 * 
-		 *  Device 1
+		 *  Device 1  ComboBox
 		 * 
 		 * 
 		 */
@@ -223,10 +223,11 @@ public class InitSetup extends JDialog {
 		comboBox_code.setBounds(72, 40, 229, 21);
 		panel.add(comboBox_code);
 		comboBox_code.setModel(new DefaultComboBoxModel<CodeOptionsDevice>(CodeOptionsDevice.values()));
+		comboBox_code.setSelectedItem(CodeOptionsDevice.getByName(device.getName()));
 		
 		/*
 		 * 
-		 * Device 2
+		 * Device 2  ComboBox
 		 * 
 		 */
 		comboBox_code.setFont(new Font("Tahoma", Font.PLAIN, 12));

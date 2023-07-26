@@ -90,7 +90,8 @@ public class DeviceFactory {
 			}
 
 		} catch (Exception e) {
-			device = createDefaultDevice();
+//			device = createDefaultDevice();
+			device = createW1VC(CodeOptionsDevice.W1VC_64R.name());
 			System.out.println("default Device Factory");
 		}
 	}

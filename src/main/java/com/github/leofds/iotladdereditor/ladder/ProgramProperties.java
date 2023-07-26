@@ -22,7 +22,6 @@ import java.util.List;
 
 import com.github.leofds.iotladdereditor.compiler.domain.CodeOptions;
 import com.github.leofds.iotladdereditor.compiler.domain.CodeOptionsDevice;
-import com.github.leofds.iotladdereditor.compiler.domain.CodeOptionsDevice2;
 
 public class ProgramProperties implements Serializable{
 
@@ -73,9 +72,7 @@ public class ProgramProperties implements Serializable{
 		telemetrySeconds = 5;
 		codeOptionDevice = "";
 		devices = new ArrayList<String>();
-		
-		devices.add(CodeOptionsDevice2.BB20.name());
-		devices.add(CodeOptionsDevice2.BB28.name());
+	
 	}
 	
 	public CodeOptions getCodeOption() {
