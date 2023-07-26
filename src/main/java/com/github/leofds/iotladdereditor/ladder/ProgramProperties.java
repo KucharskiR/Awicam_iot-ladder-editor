@@ -47,7 +47,7 @@ public class ProgramProperties implements Serializable{
 	private Boolean telemetryPubMemory;
 	private Integer telemetrySeconds;
 //	
-	private String codeOptionDevice;
+	private CodeOptionsDevice codeOptionDevice;
 	private List<String> devices;
 	
 	public ProgramProperties() {
@@ -70,7 +70,7 @@ public class ProgramProperties implements Serializable{
 		telemetryPutOutput = true;
 		telemetryPubMemory = true;
 		telemetrySeconds = 5;
-		codeOptionDevice = "";
+		codeOptionDevice = null;
 		devices = new ArrayList<String>();
 	
 	}
@@ -200,11 +200,12 @@ public class ProgramProperties implements Serializable{
 	 * 	
 	 */
 	}
-	public String getCodeOptionDevice() {
+	public CodeOptionsDevice getCodeOptionDevice() {
 		return codeOptionDevice;
 	}
 	public void setCodeOptionDevice(CodeOptionsDevice codeOptionDevice) {
-		this.codeOptionDevice = codeOptionDevice.name();
+//		this.codeOptionDevice = codeOptionDevice.name();
+		this.codeOptionDevice = codeOptionDevice;
 	}
 	public List<String> getDevices() {
 		return devices;

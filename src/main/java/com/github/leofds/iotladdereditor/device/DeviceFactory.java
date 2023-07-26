@@ -32,7 +32,8 @@ public class DeviceFactory {
 		try {
 			ladderProgram = Mediator.getInstance().getProject().getLadderProgram();
 
-			String mainDevice = ladderProgram.getProperties().getCodeOptionDevice();
+//			String mainDevice = ladderProgram.getProperties().getCodeOptionDevice();
+			String mainDevice = ladderProgram.getProperties().getCodeOptionDevice().name();
 			List<String> peripheralDevices = ladderProgram.getProperties().getDevices();
 
 			this.device = createW1VC(mainDevice);

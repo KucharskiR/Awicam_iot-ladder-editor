@@ -34,6 +34,7 @@ import javax.swing.border.EmptyBorder;
 
 import com.github.leofds.iotladdereditor.application.Mediator;
 import com.github.leofds.iotladdereditor.application.Preferences;
+import com.github.leofds.iotladdereditor.device.DeviceFactory;
 import com.github.leofds.iotladdereditor.example.Example;
 import com.github.leofds.iotladdereditor.example.ExampleFactory;
 import com.github.leofds.iotladdereditor.i18n.Strings;
@@ -155,6 +156,7 @@ public class Menu extends JMenuBar {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				FileUtils.openLadderProgram();
+				me.updateDevice(new DeviceFactory().getDevice());
 			}
 		};
 	}
