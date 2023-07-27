@@ -1,14 +1,14 @@
 package com.github.leofds.iotladdereditor.view;
 
-import java.awt.Dimension;
-
-import javax.swing.JDialog;
-import javax.swing.JPanel;
 import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
+import javax.swing.JDialog;
+import javax.swing.JPanel;
 
 public class SettingsBB extends JDialog{
 
@@ -19,13 +19,16 @@ public class SettingsBB extends JDialog{
 	
 	private final JPanel panel = new JPanel();
 
-	public SettingsBB() {
+    public SettingsBB() {
+    }
+    
+	public SettingsBB(int deviceId, String deviceName) {
 		super();
 		
 		try {
 			
 			setPreferredSize(new Dimension(400, 500));
-			setTitle("Settings");
+			setTitle("Settings of "+ deviceName +" device ID: "+ String.valueOf(deviceId));
 			
 			setModal(true);
 			setResizable(true);
@@ -74,4 +77,5 @@ public class SettingsBB extends JDialog{
 		
 		
 	}
+
 }
