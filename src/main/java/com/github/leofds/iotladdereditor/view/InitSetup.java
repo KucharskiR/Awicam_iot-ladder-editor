@@ -33,6 +33,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -280,7 +281,7 @@ public class InitSetup extends JDialog {
 		
 		/*
 		 * 
-		 * 
+		 *  Add device button
 		 * 
 		 */
 		
@@ -291,13 +292,17 @@ public class InitSetup extends JDialog {
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
 				try {
-					if(devices.size()>=32) return;
+					if(devices.size()>=32) {
+						JFrame frame = new JFrame();
+						JOptionPane.showMessageDialog(frame, Strings.tooMuchDevices());
+						return;
+					}
 					devices.add(comboBox_device2.getSelectedItem().toString());
 					System.out.println(devices.size());
 					tableModel.fireTableDataChanged();
 				} catch (Exception e2) {
 					// TODO: handle exception
-					System.out.println("Null pointer exception");
+					System.out.println(e2.toString() + " - add button error");
 				}
 			}
 		});

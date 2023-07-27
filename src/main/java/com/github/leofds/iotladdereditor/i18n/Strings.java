@@ -179,5 +179,6 @@ public class Strings {
 	public static String mainDevice() { return bundle.getString("mainDevice"); }
 	public static String initialize() { return bundle.getString("initialize"); }
 	public static String propertiesBB() { return bundle.getString("propertiesBB"); }
+	public static String tooMuchDevices() { return bundle.getString("tooMuchDevices"); }
 	
 }
