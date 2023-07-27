@@ -21,6 +21,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Point;
+import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -39,6 +40,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
+import javax.swing.JTextPane;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
@@ -161,6 +163,7 @@ public class InitSetup extends JDialog {
 		panel_8.setLayout(null);
 
 		tablePinMapping = new JTable();
+		tablePinMapping.setCellSelectionEnabled(true);
 		tablePinMapping.setBounds(649, 146, 1, 1);
 //		tablePinMapping.setModel(new Device2Model(device));	//FIXME comment WindowBuilder
 		Device2Model tableModel = new Device2Model(devices);
@@ -209,8 +212,14 @@ public class InitSetup extends JDialog {
 		tablePinMapping.setComponentPopupMenu(popMenuDevice2Table);
 
 		JScrollPane scrollPaneDevice2 = new JScrollPane(tablePinMapping);
-		scrollPaneDevice2.setBounds(89, 11, 565, 223);
+		scrollPaneDevice2.setBounds(10, 11, 241, 223);
 		panel_8.add(scrollPaneDevice2);
+		
+		JTextPane txtpnTekst = new JTextPane();
+		txtpnTekst.setText("Init setup description:\r\n- Main Device - choose main device\r\n- Additional Device - add addictional device (max. 32)\r\n\r\nAdditional devices description:\r\n- right mouse clik - delete device or setup properties\r\n");
+		txtpnTekst.setBackground(SystemColor.menu);
+		txtpnTekst.setBounds(285, 11, 478, 223);
+		panel_8.add(txtpnTekst);
 		
 		/*
 		 * 
@@ -623,86 +632,4 @@ public class InitSetup extends JDialog {
 		
 		
 	}
-	
-	/*
-	 * 
-	 * 
-	 * 
-	 * 
-	 */
-/*
-	class Device2Model extends AbstractTableModel {
-
-		private static final long serialVersionUID = 1L;
-		private String[] columnNames = {Strings.device2()};
-		private Device device;
-
-		public Device2Model(Device device) {
-			this.device = device;
-		}
-
-		@Override
-		public String getColumnName(int column) {
-			return columnNames[column];
-		}
-
-		@Override
-		public int getRowCount() {
-//			int count = 0;
-//			for(Peripheral peripheral: device.getPeripherals()) {
-//				count += peripheral.getPeripheralItems().size();
-//			}
-				return devices.size();
-//			return 0;
-		}
-
-		@Override
-		public int getColumnCount() {
-			return columnNames.length;
-		}
-
-		@Override
-		public Object getValueAt(int rowIndex, int columnIndex) {
-			int count = 0;
-			for(Peripheral peripheral: device.getPeripherals()) {
-				for(PeripheralIO item: peripheral.getPeripheralItems()) {
-					if(rowIndex == count) {
-						switch(columnIndex) {
-						case 0:
-							return item.getName();
-						case 1:
-							return item.getPin();
-						case 2:
-							return peripheral.getName();
-						}
-					}
-					count++;
-				}
-			}
-			return null;
-		}
-
-		@Override
-		public boolean isCellEditable(int rowIndex, int columnIndex) {
-			if(columnIndex == 1) {
-				return true;
-			}
-			return false;
-		}
-
-		@Override
-		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-			int count = 0;
-			for(Peripheral peripheral: device.getPeripherals()) {
-				for(PeripheralIO item: peripheral.getPeripheralItems()) {
-					if(rowIndex == count) {
-						item.setPin((String) aValue);
-					}
-					count++;
-				}
-			}
-		}
-	}
-	*/
-	
 }
