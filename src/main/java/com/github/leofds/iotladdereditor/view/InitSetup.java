@@ -217,7 +217,7 @@ public class InitSetup extends JDialog {
 		panel_8.add(scrollPaneDevice2);
 		
 		JTextPane txtpnTekst = new JTextPane();
-		txtpnTekst.setText("Init setup:\r\n- Main Device - select main device\r\n- Additional Device - select add addictional devices (max. 32)\r\n\r\nAdditional devices:\r\n- right mouse clik - delete device or setup properties\r\n");
+		txtpnTekst.setText("Init setup:\r\n- Main Device - select main device\r\n- Additional Device - select add addictional devices (max. 32)\r\n\r\nAdditional devices:\r\n- Delete - right click on device -> Delete\r\n- Properties - right click on device -> Properties\r\n");
 		txtpnTekst.setBackground(SystemColor.menu);
 		txtpnTekst.setBounds(285, 11, 478, 223);
 		panel_8.add(txtpnTekst);
