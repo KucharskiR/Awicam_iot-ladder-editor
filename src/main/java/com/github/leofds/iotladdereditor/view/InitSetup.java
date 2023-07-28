@@ -184,7 +184,6 @@ public class InitSetup extends JDialog {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-//				deletePin();
 				int selectedRow = tablePinMapping.getSelectedRow();
 				SettingsBB dialogSettings = new SettingsBB(selectedRow+1, devices.get(selectedRow).toString());
 				dialogSettings.setModal(true);

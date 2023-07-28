@@ -19,7 +19,8 @@ package com.github.leofds.iotladdereditor.compiler.domain;
 public enum CodeOptionsDevice{
 
 	W1VC_64R("W1VC 64R"),
-	W1VC_128R("W1VC 128R");
+	W1VC_128R("W1VC 128R"),
+	W1VC_1616R("W1VC 1616R");
 	
 	String value;
 	

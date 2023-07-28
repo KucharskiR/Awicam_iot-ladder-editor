@@ -232,7 +232,77 @@ public class DeviceFactory {
 				input.addPeripheralItem(pc10in);
 				input.addPeripheralItem(pc11in);
 				input.addPeripheralItem(pc12in);
-			}
+			} else if (mainDevice.equals(CodeOptionsDevice.W1VC_1616R.name())) {
+
+				device.setName(mainDevice);
+
+				PeripheralIO pc1out = new PeripheralIO("Q0.1", Boolean.class, "2", "PIN_Q0.1", IO.OUTPUT);
+				PeripheralIO pc2out = new PeripheralIO("Q0.2", Boolean.class, "4", "PIN_Q0.2", IO.OUTPUT);
+				PeripheralIO pc3out = new PeripheralIO("Q0.3", Boolean.class, "12", "PIN_Q0.3", IO.OUTPUT);
+				PeripheralIO pc4out = new PeripheralIO("Q0.4", Boolean.class, "13", "PIN_Q0.4", IO.OUTPUT);
+				PeripheralIO pc5out = new PeripheralIO("Q0.5", Boolean.class, "33", "PIN_Q0.5", IO.OUTPUT);
+				PeripheralIO pc6out = new PeripheralIO("Q0.6", Boolean.class, "25", "PIN_Q0.6", IO.OUTPUT);
+				PeripheralIO pc7out = new PeripheralIO("Q0.7", Boolean.class, "26", "PIN_Q0.7", IO.OUTPUT);
+				PeripheralIO pc8out = new PeripheralIO("Q0.8", Boolean.class, "27", "PIN_Q0.8", IO.OUTPUT);
+				PeripheralIO pc9out = new PeripheralIO("Q0.9", Boolean.class, "27", "PIN_Q0.9", IO.OUTPUT);
+				PeripheralIO pc10out = new PeripheralIO("Q0.10", Boolean.class, "27", "PIN_Q0.10", IO.OUTPUT);
+				PeripheralIO pc11out = new PeripheralIO("Q0.11", Boolean.class, "27", "PIN_Q0.11", IO.OUTPUT);
+				PeripheralIO pc12out = new PeripheralIO("Q0.12", Boolean.class, "27", "PIN_Q0.12", IO.OUTPUT);
+				PeripheralIO pc13out = new PeripheralIO("Q0.13", Boolean.class, "27", "PIN_Q0.13", IO.OUTPUT);
+				PeripheralIO pc14out = new PeripheralIO("Q0.14", Boolean.class, "27", "PIN_Q0.14", IO.OUTPUT);
+				PeripheralIO pc15out = new PeripheralIO("Q0.15", Boolean.class, "27", "PIN_Q0.15", IO.OUTPUT);
+				PeripheralIO pc16out = new PeripheralIO("Q0.16", Boolean.class, "27", "PIN_Q0.16", IO.OUTPUT);
+
+				PeripheralIO pc1in = new PeripheralIO("I0.1", Boolean.class, "14", "PIN_I0.1", IO.INPUT);
+				PeripheralIO pc2in = new PeripheralIO("I0.2", Boolean.class, "16", "PIN_I0.2", IO.INPUT);
+				PeripheralIO pc3in = new PeripheralIO("I0.3", Boolean.class, "17", "PIN_I0.3", IO.INPUT);
+				PeripheralIO pc4in = new PeripheralIO("I0.4", Boolean.class, "18", "PIN_I0.4", IO.INPUT);
+				PeripheralIO pc5in = new PeripheralIO("I0.5", Boolean.class, "19", "PIN_I0.5", IO.INPUT);
+				PeripheralIO pc6in = new PeripheralIO("I0.6", Boolean.class, "21", "PIN_I0.6", IO.INPUT);
+				PeripheralIO pc7in = new PeripheralIO("I0.7", Boolean.class, "22", "PIN_I0.7", IO.INPUT);
+				PeripheralIO pc8in = new PeripheralIO("I0.8", Boolean.class, "23", "PIN_I0.8", IO.INPUT);
+				PeripheralIO pc9in = new PeripheralIO("I0.9", Boolean.class, "25", "PIN_I0.9", IO.INPUT);
+				PeripheralIO pc10in = new PeripheralIO("I0.10", Boolean.class, "26", "PIN_I0.10", IO.INPUT);
+				PeripheralIO pc11in = new PeripheralIO("I0.11", Boolean.class, "27", "PIN_I0.11", IO.INPUT);
+				PeripheralIO pc12in = new PeripheralIO("I0.12", Boolean.class, "28", "PIN_I0.12", IO.INPUT);
+				PeripheralIO pc13in = new PeripheralIO("I0.13", Boolean.class, "28", "PIN_I0.13", IO.INPUT);
+				PeripheralIO pc14in = new PeripheralIO("I0.14", Boolean.class, "28", "PIN_I0.14", IO.INPUT);
+				PeripheralIO pc15in = new PeripheralIO("I0.15", Boolean.class, "28", "PIN_I0.15", IO.INPUT);
+				PeripheralIO pc16in = new PeripheralIO("I0.16", Boolean.class, "28", "PIN_I0.16", IO.INPUT);
+
+				output.addPeripheralItem(pc1out);
+				output.addPeripheralItem(pc2out);
+				output.addPeripheralItem(pc3out);
+				output.addPeripheralItem(pc4out);
+				output.addPeripheralItem(pc5out);
+				output.addPeripheralItem(pc6out);
+				output.addPeripheralItem(pc7out);
+				output.addPeripheralItem(pc8out);
+				output.addPeripheralItem(pc9out);
+				output.addPeripheralItem(pc10out);
+				output.addPeripheralItem(pc11out);
+				output.addPeripheralItem(pc12out);
+				output.addPeripheralItem(pc13out);
+				output.addPeripheralItem(pc14out);
+				output.addPeripheralItem(pc15out);
+				output.addPeripheralItem(pc16out);
+				input.addPeripheralItem(pc1in);
+				input.addPeripheralItem(pc2in);
+				input.addPeripheralItem(pc3in);
+				input.addPeripheralItem(pc4in);
+				input.addPeripheralItem(pc5in);
+				input.addPeripheralItem(pc6in);
+				input.addPeripheralItem(pc7in);
+				input.addPeripheralItem(pc8in);
+				input.addPeripheralItem(pc9in);
+				input.addPeripheralItem(pc10in);
+				input.addPeripheralItem(pc11in);
+				input.addPeripheralItem(pc12in);
+				input.addPeripheralItem(pc13in);
+				input.addPeripheralItem(pc14in);
+				input.addPeripheralItem(pc15in);
+				input.addPeripheralItem(pc16in);
+			} 
 		}
 		device.addPeripheral(output);
 		device.addPeripheral(input);
