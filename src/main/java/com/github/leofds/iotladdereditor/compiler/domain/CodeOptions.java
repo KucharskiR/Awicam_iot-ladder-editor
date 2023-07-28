@@ -18,7 +18,8 @@ package com.github.leofds.iotladdereditor.compiler.domain;
 
 public enum CodeOptions{
 
-	ESP32_ARDUINO_FREERTOS("ESP32 Arduino [.ino]");
+	ESP32_ARDUINO_FREERTOS("ESP32 Arduino [.ino]"),
+	W1VC_ESP32_FREERTOS("W1VC ESP32 [.ino]");
 	
 	String value;
 	
