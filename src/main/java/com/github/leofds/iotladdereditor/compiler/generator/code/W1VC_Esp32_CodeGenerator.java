@@ -31,6 +31,7 @@ import org.apache.maven.model.Model;
 
 import com.github.leofds.iotladdereditor.application.ProjectContainer;
 import com.github.leofds.iotladdereditor.compiler.SourceCode;
+import com.github.leofds.iotladdereditor.compiler.domain.CodeOptionsDevice;
 import com.github.leofds.iotladdereditor.compiler.domain.GenContext;
 import com.github.leofds.iotladdereditor.compiler.domain.IR;
 import com.github.leofds.iotladdereditor.compiler.domain.Kind;
@@ -504,13 +505,17 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 		c.add(" inputs[0].digitalInputStates = ");
 		c.addl("gpio_get_level(INPUT1_PIN) |");
 		
-		
-		
-		for (int i = 1; i <= 5; i++) {
+		int inputs;
+		 if (device.getName().equalsIgnoreCase(CodeOptionsDevice.W1VC_64R.name()))
+			inputs=5;
+		else
+			inputs=4;
+		 
+		for (int i=1; i <= inputs; i++) {
 			for (int j = 0; j < 7; j++)
 				c.add("\t");
 			c.add("(gpio_get_level(" + "var" + ") << " + i + ")");
-			if (i != 5)
+			if (i != inputs)
 				c.add(" | \n");
 
 		}
@@ -535,14 +540,38 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 	private void addOutputSystemFunction(ProjectContainer project,SourceCode c){
 		c.newLine();
 		c.addl("void "+ProgramFunc.OUTPUT.value+"(){");
+		
+		c.addl("  for (uint8_t i = 1; i < boardsNumber + 1; i++)");
+		c.addl("    SendDigitalOutputs(i, inputs[i].digitalOutputStates);");
+		
+		c.newLine();
+		
+		int outputs;
+		 if (device.getName().equalsIgnoreCase(CodeOptionsDevice.W1VC_64R.name()))
+			outputs=4;
+		else
+			outputs=2;
+		 
+		for (int i=0; i < outputs; i++) {
+			c.addl("  gpio_set_level(OUTPUT1_PIN, inputs[0].digitalOutputStates & 0x000"+ (int)Math.pow(2,i) +");");
+			if (i+1 == outputs)
+				c.newLine();
 
-		Map<String, DeviceMemory> outputFiles = CodeGeneratorUtils.getOutput(project, c);
-		for(Entry<String, DeviceMemory> entry: outputFiles.entrySet()){
-			PeripheralIO peripheral = (PeripheralIO) entry.getValue();
-			c.addl("  digitalWrite("+peripheral.getPath()+", "+cname(peripheral.getName())+");");
 		}
+
 		c.addl("}");
 	}
+//	private void addOutputSystemFunction(ProjectContainer project,SourceCode c){
+//		c.newLine();
+//		c.addl("void "+ProgramFunc.OUTPUT.value+"(){");
+//		
+//		Map<String, DeviceMemory> outputFiles = CodeGeneratorUtils.getOutput(project, c);
+//		for(Entry<String, DeviceMemory> entry: outputFiles.entrySet()){
+//			PeripheralIO peripheral = (PeripheralIO) entry.getValue();
+//			c.addl("  digitalWrite("+peripheral.getPath()+", "+cname(peripheral.getName())+");");
+//		}
+//		c.addl("}");
+//	}
 	/*
 	 * 
 	 * 
