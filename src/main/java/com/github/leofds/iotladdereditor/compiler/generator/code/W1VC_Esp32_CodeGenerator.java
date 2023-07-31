@@ -349,6 +349,14 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 		c.addl("}");
 	}
 	
+	/*
+	 * 
+	 * 
+	 * TODO: Global variables
+	 * 
+	 * 
+	 */
+	
 	private List<Symbol> getGlobalVariables(IR ir,SourceCode c){
 		List<Symbol> vars = new ArrayList<Symbol>();
 		for(Symbol symbol:ir.getSymbolTable()){
@@ -376,6 +384,11 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 			c.addl(dType(symbol.getType())+" "+cname(symbol.getName())+" = 0;");
 		}
 	}
+	/*
+	 * 
+	 * 
+	 * 
+	 */
 	
 	private void addGlobalStructs(IR ir,SourceCode c){
 		c.newLine();
@@ -487,14 +500,37 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 		c.addl("void "+ProgramFunc.INPUT.value+"(){");
 		
 		device.getName();
+		
+		c.add(" inputs[0].digitalInputStates = ");
+		c.addl("gpio_get_level(INPUT1_PIN) |");
+		
+		
+		
+		for (int i = 1; i <= 5; i++) {
+			for (int j = 0; j < 7; j++)
+				c.add("\t");
+			c.add("(gpio_get_level(" + "var" + ") << " + i + ")");
+			if (i != 5)
+				c.add(" | \n");
 
-		Map<String, DeviceMemory> inputFiles = CodeGeneratorUtils.getInput(project, c);
-		for(Entry<String, DeviceMemory> entry: inputFiles.entrySet()){
-			PeripheralIO peripheral = (PeripheralIO) entry.getValue();
-			c.addl("  "+cname(peripheral.getName())+" = digitalRead("+peripheral.getPath()+");");
 		}
+		c.add(";\n");
+		c.addl("while(recivedAll == false) {}");
 		c.addl("}");
 	}
+//	private void addInputSystemFunction(ProjectContainer project,SourceCode c){
+//		c.newLine();
+//		c.addl("void "+ProgramFunc.INPUT.value+"(){");
+//		
+//		device.getName();
+//		
+//		Map<String, DeviceMemory> inputFiles = CodeGeneratorUtils.getInput(project, c);
+//		for(Entry<String, DeviceMemory> entry: inputFiles.entrySet()){
+//			PeripheralIO peripheral = (PeripheralIO) entry.getValue();
+//			c.addl("  "+cname(peripheral.getName())+" = digitalRead("+peripheral.getPath()+");");
+//		}
+//		c.addl("}");
+//	}
 	
 	private void addOutputSystemFunction(ProjectContainer project,SourceCode c){
 		c.newLine();

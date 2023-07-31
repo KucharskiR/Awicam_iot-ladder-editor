@@ -18,14 +18,16 @@ package com.github.leofds.iotladdereditor.compiler.generator.factory;
 
 import com.github.leofds.iotladdereditor.compiler.domain.CodeOptions;
 import com.github.leofds.iotladdereditor.compiler.generator.CodeGenerator;
-import com.github.leofds.iotladdereditor.compiler.generator.code.Esp32ArduinoCodeGenerator;
+import com.github.leofds.iotladdereditor.compiler.generator.code.W1VC_Esp32_CodeGenerator;
 
 public class CodeGeneratorFactory {
 
 	public static CodeGenerator create(CodeOptions option) {
 		switch(option) {
-		case ESP32_ARDUINO_FREERTOS:
-			return new Esp32ArduinoCodeGenerator();
+		case W1VC_ESP32_FREERTOS:
+			return new W1VC_Esp32_CodeGenerator();
+//		case ESP32_ARDUINO_FREERTOS:
+//			return new Esp32ArduinoCodeGenerator();
 		default:
 			return null;
 		}
