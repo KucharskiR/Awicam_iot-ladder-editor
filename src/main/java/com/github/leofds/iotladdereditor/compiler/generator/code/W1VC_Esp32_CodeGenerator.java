@@ -119,6 +119,9 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 		
 		addSetup(c);
 		addLoop(c);
+		for (Symbol symbol : ir.getSymbolTable()) {
+			System.out.println(symbol.toString());
+		}
 	}
 	
 	enum LadderStructs{
