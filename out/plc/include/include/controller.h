@@ -143,18 +143,18 @@ void initController(void) {
 
   
 
-  //configure GPIO
-  gpio_set_direction(INPUT1_PIN, GPIO_MODE_INPUT);
-  gpio_set_direction(INPUT2_PIN, GPIO_MODE_INPUT);
-  gpio_set_direction(INPUT3_PIN, GPIO_MODE_INPUT);
-  gpio_set_direction(INPUT4_PIN, GPIO_MODE_INPUT);
-  gpio_set_direction(INPUT5_PIN, GPIO_MODE_INPUT);
-  // gpio_set_direction(INPUT6_PIN, GPIO_MODE_INPUT);
+  // //configure GPIO
+  // gpio_set_direction(INPUT1_PIN, GPIO_MODE_INPUT);
+  // gpio_set_direction(INPUT2_PIN, GPIO_MODE_INPUT);
+  // gpio_set_direction(INPUT3_PIN, GPIO_MODE_INPUT);
+  // gpio_set_direction(INPUT4_PIN, GPIO_MODE_INPUT);
+  // gpio_set_direction(INPUT5_PIN, GPIO_MODE_INPUT);
+  // // gpio_set_direction(INPUT6_PIN, GPIO_MODE_INPUT);
 
-  gpio_set_direction(OUTPUT1_PIN, GPIO_MODE_OUTPUT);
-  gpio_set_direction(OUTPUT2_PIN, GPIO_MODE_OUTPUT);
-  // gpio_set_direction(OUTPUT3_PIN, GPIO_MODE_OUTPUT);
-  // gpio_set_direction(OUTPUT4_PIN, GPIO_MODE_OUTPUT);
+  // gpio_set_direction(OUTPUT1_PIN, GPIO_MODE_OUTPUT);
+  // gpio_set_direction(OUTPUT2_PIN, GPIO_MODE_OUTPUT);
+  // // gpio_set_direction(OUTPUT3_PIN, GPIO_MODE_OUTPUT);
+  // // gpio_set_direction(OUTPUT4_PIN, GPIO_MODE_OUTPUT);
 
   inputs[0].firmwareVersion = FIRMWARE_VERSION;
 }

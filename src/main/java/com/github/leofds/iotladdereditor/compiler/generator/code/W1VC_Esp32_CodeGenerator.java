@@ -104,6 +104,7 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 		addCountStruct(ir, c);
 		addGlobalSystemVariables(ir, c);
 		addTimerSystemFunction(c);
+		addGpioDirection(c);
 		addGlobalVariables(ir, c);
 		addGlobalStructs(ir, c);
 		if(isConnectionConfigured()) {
@@ -128,6 +129,31 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 		}
 	}
 	
+	private void addGpioDirection(SourceCode c) {
+		// TODO Auto-generated method stub
+//		 gpio_set_direction(INPUT1_PIN, GPIO_MODE_INPUT);
+		List<Peripheral> peripherals = device.getPeripherals();
+
+		int maxInputs = (device.getName().equals(CodeOptionsDevice.W1VC_64R.name()) == true) ? 6 : 5;
+		int maxOutputs = (device.getName().equals(CodeOptionsDevice.W1VC_64R.name()) == true) ? 2 : 4;
+		int inputCount = 0;
+		int outputCount = 0;
+
+		for (Peripheral peripheral : peripherals) {
+			for (PeripheralIO peripheralIO : peripheral.getPeripheralItems()) {
+				if (peripheralIO.getIo() == IO.INPUT) {
+					if (inputCount >= maxInputs) continue;
+					inputCount++;
+						c.addl("gpio_set_direction((gpio_num_t)LD_I" + Integer.toString(inputCount) + ", GPIO_MODE_INPUT);");
+				} else {
+					if (outputCount >= maxOutputs) continue;
+					outputCount++;
+						c.addl("gpio_set_direction((gpio_num_t)LD_Q" + Integer.toString(outputCount) + ", GPIO_MODE_OUTPUT);");
+				}
+			}
+		}
+	}
+
 	private void addIncludes(SourceCode c) {
 		// TODO Auto-generated method stub
 		c.addl("#include \"include/main.h\"\r\n" + "");

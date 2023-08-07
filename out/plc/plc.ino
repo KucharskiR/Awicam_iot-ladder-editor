@@ -43,6 +43,15 @@ union {
 uint64_t getTime(){
   return LD_TIME.v;
 }
+gpio_set_direction((gpio_num_t)LD_Q1, GPIO_MODE_OUTPUT);
+gpio_set_direction((gpio_num_t)LD_Q2, GPIO_MODE_OUTPUT);
+gpio_set_direction((gpio_num_t)LD_Q3, GPIO_MODE_OUTPUT);
+gpio_set_direction((gpio_num_t)LD_Q4, GPIO_MODE_OUTPUT);
+gpio_set_direction((gpio_num_t)LD_I1, GPIO_MODE_INPUT);
+gpio_set_direction((gpio_num_t)LD_I2, GPIO_MODE_INPUT);
+gpio_set_direction((gpio_num_t)LD_I3, GPIO_MODE_INPUT);
+gpio_set_direction((gpio_num_t)LD_I4, GPIO_MODE_INPUT);
+gpio_set_direction((gpio_num_t)LD_I5, GPIO_MODE_INPUT);
 
 uint8_t LD_I0_8 = 0;
 uint8_t LD_Q0_3 = 0;
