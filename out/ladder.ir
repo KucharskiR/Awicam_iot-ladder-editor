@@ -1,0 +1,21 @@
+rung001:
+  _S0 = 1
+
+  ;****** | | (I0_8) ******
+  if I0_8 goto L1
+  _S0 = 0
+L1:
+
+  ;****** ( ) (Q0_3) ******
+  Q0_3 = _S0
+  return
+initContext:
+  return
+main:
+  call initContext,0
+begin:
+  call readInputs,0
+  call refreshTime64bit,0
+  call rung001,0
+  call writeOutputs,0
+  goto begin

@@ -552,7 +552,7 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 		device.getName();
 		
 		c.add(" inputs[0].digitalInputStates = ");
-		c.addl("gpio_get_level(INPUT1_PIN) |");
+		c.addl("gpio_get_level((gpio_num_t)LD_I0_1) |");
 		
 		int inputs;
 		inputs = device.getName().equalsIgnoreCase(CodeOptionsDevice.W1VC_64R.name()) == true ? 5 : 4;
@@ -560,10 +560,9 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 		for (int i=1; i <= inputs; i++) {
 			for (int j = 0; j < 7; j++)
 				c.add("\t");
-			c.add("(gpio_get_level(" + "var" + ") << " + i + ")");
+			c.add("(gpio_get_level((gpio_num_t)" + "LD_I0_" + Integer.toString(i+1) + ") << " + i + ")");
 			if (i != inputs)
 				c.add(" | \n");
-
 		}
 		c.add(";\n");
 		c.addl("while(recivedAll == false) {}");
@@ -599,7 +598,7 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 			outputs=2;
 		 
 		for (int i=0; i < outputs; i++) {
-			c.addl("  gpio_set_level(OUTPUT1_PIN, inputs[0].digitalOutputStates & 0x000"+ (int)Math.pow(2,i) +");");
+			c.addl("  gpio_set_level((gpio_num_t)LD_Q0_" + Integer.toString(i+1) + ", inputs[0].digitalOutputStates & 0x000"+ (int)Math.pow(2,i) +");");
 			if (i+1 == outputs)
 				c.newLine();
 
