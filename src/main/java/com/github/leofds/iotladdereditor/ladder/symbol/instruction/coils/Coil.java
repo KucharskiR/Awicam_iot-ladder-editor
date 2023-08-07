@@ -63,7 +63,6 @@ public class Coil extends CoilInstruction{
 		quadruples.add(QuadrupleFactory.createAssignment( status , value ));
 		return quadruples;
 	}
-//	test
 	
 	@Override
 	public String toString() {

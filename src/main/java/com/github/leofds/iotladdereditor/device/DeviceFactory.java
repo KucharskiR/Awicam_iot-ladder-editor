@@ -97,6 +97,39 @@ public class DeviceFactory {
 		}
 	}
 
+//	private void addPinsSymbolForCommunication(ProjectContainer project, String mainDevice) {
+//		// TODO Auto-generated method stub
+//		try {
+//			 IR ir = project.getIr();
+//		} catch (Exception e) {
+//			// TODO: handle exception
+//			IR ir = new IR(null, null));
+//		}
+//		SymbolTable symbolTable = ir.getSymbolTable();
+//		
+//		List<Peripheral> peripherals = device.getPeripherals();
+//		
+//		if (mainDevice.equals(CodeOptionsDevice.W1VC_64R.name())) {
+//			for (Peripheral peripheral : peripherals) {
+//				for (PeripheralIO peripheralIO : peripheral.getPeripheralItems()) {
+//					if (peripheralIO.getIo() == IO.INPUT) {
+//						symbolTable.add(new Symbol(peripheralIO.getName(), Kind.VARIABLE, Boolean.class, GenContext.GLOBAL_SCOPE));
+//						System.out.println(peripheralIO.getName());
+//					}
+//				}
+//
+//			}
+//		} else {
+//			
+//		}
+//		
+////		symbolTable.add(new Symbol(getMemory().getName(), Kind.VARIABLE, getMemory().getType(), GenContext.GLOBAL_SCOPE));
+//		
+//		
+//		
+//		
+//	}
+
 	public Device getDevice() {
 		return device;
 	}

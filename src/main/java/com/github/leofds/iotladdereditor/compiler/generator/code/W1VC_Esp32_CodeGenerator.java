@@ -45,6 +45,7 @@ import com.github.leofds.iotladdereditor.compiler.generator.LabelList;
 import com.github.leofds.iotladdereditor.compiler.generator.util.CodeGeneratorUtils;
 import com.github.leofds.iotladdereditor.device.Device;
 import com.github.leofds.iotladdereditor.device.DeviceMemory;
+import com.github.leofds.iotladdereditor.device.IO;
 import com.github.leofds.iotladdereditor.device.Peripheral;
 import com.github.leofds.iotladdereditor.device.PeripheralIO;
 import com.github.leofds.iotladdereditor.i18n.Strings;
@@ -79,9 +80,12 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 	
 	private void createSourceFile(ProjectContainer p,SourceCode c){
 		IR ir = p.getIr();
+		
+		addPinsSymbolCommunication(ir);
 
 		c.createNewFile("plc/plc.ino");
 		addFileDescription(c);
+		addIncludes(c);
 		if(isConnectionConfigured()) {
 			addIoTIncludes(c);
 		}
@@ -124,6 +128,48 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 		}
 	}
 	
+	private void addIncludes(SourceCode c) {
+		// TODO Auto-generated method stub
+		c.addl("#include \"include/main.h\"\r\n" + "");
+	}
+	
+	/*
+	 * 
+	 *  Communication variable generator 
+	 *  add variables to symbol table
+	 * 
+	 */
+	private void addPinsSymbolCommunication(IR ir) {
+		// TODO Auto-generated method stub
+		SymbolTable symbolTable = ir.getSymbolTable();
+		
+		List<Peripheral> peripherals = device.getPeripherals();
+		
+		int maxInputs = (device.getName().equals(CodeOptionsDevice.W1VC_64R.name()) == true) ? 6 : 5;
+		int maxOutputs = (device.getName().equals(CodeOptionsDevice.W1VC_64R.name()) == true) ? 2 : 4;
+		int inputCount = 0;
+		int outputCount = 0;
+		
+		for (Peripheral peripheral : peripherals) {
+			for (PeripheralIO peripheralIO : peripheral.getPeripheralItems()) {
+				if (peripheralIO.getIo() == IO.INPUT) {
+					if(inputCount >= maxInputs) continue;
+					inputCount++;
+					symbolTable.add(new Symbol(peripheralIO.getName(), Kind.VARIABLE, Boolean.class, GenContext.GLOBAL_SCOPE));
+					System.out.println(peripheralIO.getName());
+				} else {
+					if(outputCount >= maxOutputs) continue;
+					outputCount++;
+					symbolTable.add(new Symbol(peripheralIO.getName(), Kind.VARIABLE, Boolean.class, GenContext.GLOBAL_SCOPE));
+				}
+			}
+		}
+	}
+	/*
+	 * 
+	 * 
+	 */
+
 	enum LadderStructs{
 		TIMER("LD_TIMER"),
 		COUNTER("LD_COUNTER");
@@ -509,10 +555,7 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 		c.addl("gpio_get_level(INPUT1_PIN) |");
 		
 		int inputs;
-		 if (device.getName().equalsIgnoreCase(CodeOptionsDevice.W1VC_64R.name()))
-			inputs=5;
-		else
-			inputs=4;
+		inputs = device.getName().equalsIgnoreCase(CodeOptionsDevice.W1VC_64R.name()) == true ? 5 : 4;
 		 
 		for (int i=1; i <= inputs; i++) {
 			for (int j = 0; j < 7; j++)
