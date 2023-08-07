@@ -89,7 +89,7 @@ void testLadderDiagramProgram()
 //   #endif
 
 	
-//   init();  //init z controllera
+//   initController();  //init z controllera
 //   xTaskCreate(rx_task, "uart_rx_task", 1024*2, NULL, configMAX_PRIORITIES - 1, NULL);
 //   #ifdef DEBUG
 //   ESP_LOGI(TASK_TAG, "uart_rx_task created!");

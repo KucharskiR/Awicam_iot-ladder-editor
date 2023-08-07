@@ -1076,29 +1076,100 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 		c.addl( "  }");
 		c.addl( "}");
 		c.addl("");
+		
+		/*
+		 * 
+		 * 
+		 *  setup() as in esp32-controller
+		 * 
+		 */
 	}
 	
 	private void addSetup(SourceCode c) {
-		c.newLine();
-		c.addl( "void setup() {\r\n" + 
-				"  Serial.begin(115200);\r\n" + 
-				"  "+ProgramFunc.INIT.value+"();\r\n" + 
-				"  initContext();");
-		if(properties.isEnableSsl()) {
-			c.addl("  wiFiClient.setCACert(root_ca);");
-			if(properties.isUseClientCert()) {
-				c.addl("  wiFiClient.setCertificate(client_certificate);");
-				c.addl("  wiFiClient.setPrivateKey(client_private_key);");
-			}
-		}
-		if(isConnectionConfigured()) {
-			c.addl("  pubqueue = xQueueCreate(1, sizeof(PubMsg));");
-			c.addl("  xTaskCreatePinnedToCore(TaskCom,\"TaskCom\",8192,NULL,2,NULL,ARDUINO_RUNNING_CORE);");
-		}
-		c.addl("  xTaskCreatePinnedToCore(TaskScan,\"TaskScan\",4096,NULL,2,NULL,ARDUINO_RUNNING_CORE);");
-		c.addl("}");
-
+		c.add("void setup()\r\n"
+				+ "{\r\n"
+				+ "  // czasem czeka na otwarcie portu\r\n"
+				+ "  Serial.setRxBufferSize(4096);\r\n"
+				+ "  Serial.begin(115200); \r\n"
+				+ "  \r\n"
+				+ "  vTaskDelay(1000 / portTICK_PERIOD_MS);\r\n"
+				+ "  #ifdef DEBUG\r\n"
+				+ "  Serial.setDebugOutput(true);\r\n"
+				+ "  static const char *TASK_TAG = \"MAIN_TASK\";\r\n"
+				+ "	ESP_LOGI(TASK_TAG, \"---------MAIN-------- \\n\");\r\n"
+				+ "	ESP_LOGI(TASK_TAG, \"portTick_PERIOD_MS %d\\n\", (int)portTICK_PERIOD_MS);\r\n"
+				+ "  #else\r\n"
+				+ "  Serial.setDebugOutput(false);\r\n"
+				+ "  #endif\r\n"
+				+ "\r\n"
+				+ "	\r\n"
+				+ "  initController();  //init z controllera\r\n"
+				+ "  xTaskCreate(rx_task, \"uart_rx_task\", 1024*2, NULL, configMAX_PRIORITIES - 1, NULL);\r\n"
+				+ "  #ifdef DEBUG\r\n"
+				+ "  ESP_LOGI(TASK_TAG, \"uart_rx_task created!\");\r\n"
+				+ "  #endif\r\n"
+				+ "\r\n"
+				+ "  Update.onProgress(updateCallback);\r\n"
+				+ "  xTaskCreate(usbTask, \"usbTask\", 4096*2, NULL, configMAX_PRIORITIES - 5, NULL);\r\n"
+				+ "  #ifdef DEBUG\r\n"
+				+ "	ESP_LOGI(TASK_TAG, \"usbTask created!\");\r\n"
+				+ "  #endif\r\n"
+				+ "\r\n"
+				+ "	// initAP();\r\n"
+				+ "  initMemory();\r\n"
+				+ "  // initWebServer();\r\n"
+				+ "\r\n"
+				+ "/*-------- Progam FPGA ---------*/\r\n"
+				+ "  vTaskDelay(1000 / portTICK_PERIOD_MS);\r\n"
+				+ "  programFPGA();\r\n"
+				+ "  #ifdef DEBUG\r\n"
+				+ "	ESP_LOGI(TASK_TAG, \"Program FPGA done!\");\r\n"
+				+ "  #endif\r\n"
+				+ "\r\n"
+				+ "\r\n"
+				+ "  vTaskDelay(1000 / portTICK_PERIOD_MS);\r\n"
+				+ "\r\n"
+				+ "\r\n"
+				+ "\r\n"
+				+ "  while(1) \r\n"
+				+ "  {\r\n"
+				+ "    readInputs();\r\n"
+				+ "    vTaskDelay(1 / portTICK_PERIOD_MS);\r\n"
+				+ "    testLadderDiagramProgram();\r\n"
+				+ "    writeOutputs();\r\n"
+				+ "  \r\n"
+				+ "    // for(int i = 1; i < boardsNumber + 1; i++) {\r\n"
+				+ "    // SendDigitalOutputs(i, 0xFFFF);\r\n"
+				+ "    // vTaskDelay(500 / portTICK_PERIOD_MS);\r\n"
+				+ "    // SendDigitalOutputs(i, 0x0000);\r\n"
+				+ "    // vTaskDelay(500 / portTICK_PERIOD_MS);\r\n"
+				+ "    // }\r\n"
+				+ "  }\r\n"
+				+ "}");
+		
 	}
+	
+//	private void addSetup(SourceCode c) {
+//		c.newLine();
+//		c.addl( "void setup() {\r\n" + 
+//				"  Serial.begin(115200);\r\n" + 
+//				"  "+ProgramFunc.INIT.value+"();\r\n" + 
+//				"  initContext();");
+//		if(properties.isEnableSsl()) {
+//			c.addl("  wiFiClient.setCACert(root_ca);");
+//			if(properties.isUseClientCert()) {
+//				c.addl("  wiFiClient.setCertificate(client_certificate);");
+//				c.addl("  wiFiClient.setPrivateKey(client_private_key);");
+//			}
+//		}
+//		if(isConnectionConfigured()) {
+//			c.addl("  pubqueue = xQueueCreate(1, sizeof(PubMsg));");
+//			c.addl("  xTaskCreatePinnedToCore(TaskCom,\"TaskCom\",8192,NULL,2,NULL,ARDUINO_RUNNING_CORE);");
+//		}
+//		c.addl("  xTaskCreatePinnedToCore(TaskScan,\"TaskScan\",4096,NULL,2,NULL,ARDUINO_RUNNING_CORE);");
+//		c.addl("}");
+//
+//	}
 	
 	private void addLoop(SourceCode c) {
 		c.newLine();

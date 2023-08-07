@@ -94,7 +94,12 @@ void rung001(void){
 void initContext(void){
 }
 
-
+void init(){
+  LD_TIME.v = 0;
+  refreshTime64bit();
+  pinMode(PIN_I0_8, INPUT);
+  pinMode(PIN_Q0_3, OUTPUT);
+}
 
 void TaskScan(void *pvParameters){
   for(;;){
@@ -105,9 +110,66 @@ void TaskScan(void *pvParameters){
     writeOutputs();
   }
 }
+void setup()
+{
+  // czasem czeka na otwarcie portu
+  Serial.setRxBufferSize(4096);
+  Serial.begin(115200); 
+  
+  vTaskDelay(1000 / portTICK_PERIOD_MS);
+  #ifdef DEBUG
+  Serial.setDebugOutput(true);
+  static const char *TASK_TAG = "MAIN_TASK";
+	ESP_LOGI(TASK_TAG, "---------MAIN-------- \n");
+	ESP_LOGI(TASK_TAG, "portTick_PERIOD_MS %d\n", (int)portTICK_PERIOD_MS);
+  #else
+  Serial.setDebugOutput(false);
+  #endif
+
+	
+  initController();  //init z controllera
+  xTaskCreate(rx_task, "uart_rx_task", 1024*2, NULL, configMAX_PRIORITIES - 1, NULL);
+  #ifdef DEBUG
+  ESP_LOGI(TASK_TAG, "uart_rx_task created!");
+  #endif
+
+  Update.onProgress(updateCallback);
+  xTaskCreate(usbTask, "usbTask", 4096*2, NULL, configMAX_PRIORITIES - 5, NULL);
+  #ifdef DEBUG
+	ESP_LOGI(TASK_TAG, "usbTask created!");
+  #endif
+
+	// initAP();
+  initMemory();
+  // initWebServer();
+
+/*-------- Progam FPGA ---------*/
+  vTaskDelay(1000 / portTICK_PERIOD_MS);
+  programFPGA();
+  #ifdef DEBUG
+	ESP_LOGI(TASK_TAG, "Program FPGA done!");
+  #endif
+
+
+  vTaskDelay(1000 / portTICK_PERIOD_MS);
 
 
 
+  while(1) 
+  {
+    readInputs();
+    vTaskDelay(1 / portTICK_PERIOD_MS);
+    testLadderDiagramProgram();
+    writeOutputs();
+  
+    // for(int i = 1; i < boardsNumber + 1; i++) {
+    // SendDigitalOutputs(i, 0xFFFF);
+    // vTaskDelay(500 / portTICK_PERIOD_MS);
+    // SendDigitalOutputs(i, 0x0000);
+    // vTaskDelay(500 / portTICK_PERIOD_MS);
+    // }
+  }
+}
 void loop() {
 }
 
