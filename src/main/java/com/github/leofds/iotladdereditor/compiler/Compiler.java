@@ -23,6 +23,9 @@ import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+
 import com.github.leofds.iotladdereditor.application.Mediator;
 import com.github.leofds.iotladdereditor.application.ProjectContainer;
 import com.github.leofds.iotladdereditor.compiler.analizer.SemanticAnalyzer;
@@ -73,23 +76,24 @@ public class Compiler{
 	}
 
 	public static void compile() {
-		// TODO command cmd compile function
-		
+		// command cmd compile function
+
 		// Info string
 		String info = Strings.compilationStartInfo();
-		
+
 		// Output to the console
 		consoleOutput(info);
+		
+		// Create waiting window
+//		createAndShowWaitingWindow();
 
 		try {
 			// Command to run
 			String command = "cmd /c arduino-cli compile --fqbn esp32:esp32:esp32s2 plc.ino"; // Replace "dir" with your desired command
 
-			
 			String currentWorkingDirectory = System.getProperty("user.dir");
 //			System.out.println("Current Working Directory: " + currentWorkingDirectory);
 
-			
 			// Working directory
 			String workingDirectory = currentWorkingDirectory + "/out/plc"; // Replace with your desired directory path
 			/*
@@ -104,8 +108,8 @@ public class Compiler{
 			 * // String workingDirectory = "C:/path/to/your/directory"; // Replace with
 			 * your desired directory path
 			 * 
-			 */			
-			
+			 */
+
 			// Create the process builder
 			ProcessBuilder processBuilder = new ProcessBuilder(command.split(" "));
 
@@ -135,6 +139,30 @@ public class Compiler{
 			consoleOutput(e.getMessage());
 		}
 	}
+
+//	private static void createAndShowWaitingWindow() {
+//		// Create and show waiting window
+//		JFrame frame = new JFrame("Waiting Window");
+//		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//		frame.setSize(300, 100);
+//		frame.setLocationRelativeTo(null); // Center the window
+//
+//		JLabel label = new JLabel("Please wait...");
+//		label.setHorizontalAlignment(JLabel.CENTER);
+//
+//		frame.add(label);
+//
+//		frame.setVisible(true);
+//
+//		// Simulate some processing
+//		try {
+//			Thread.sleep(3000); // Simulating a 3-second wait
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
+//
+//		frame.dispose(); // Close the window after processing
+//	 }
 
 	private static void consoleOutput(String msg) {
 		Mediator.getInstance().outputConsoleMessage(msg);
