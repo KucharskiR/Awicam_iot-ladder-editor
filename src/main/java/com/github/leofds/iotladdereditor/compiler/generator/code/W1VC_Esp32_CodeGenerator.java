@@ -104,8 +104,8 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 		addCountStruct(ir, c);
 		addGlobalSystemVariables(ir, c);
 		addTimerSystemFunction(c);
-		addGpioDirection(c);
 		addGlobalVariables(ir, c);
+		
 		addGlobalStructs(ir, c);
 		if(isConnectionConfigured()) {
 			addTaskCom(c);
@@ -132,6 +132,7 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 	private void addGpioDirection(SourceCode c) {
 		// TODO Auto-generated method stub
 //		 gpio_set_direction(INPUT1_PIN, GPIO_MODE_INPUT);
+		c.newLine();
 		List<Peripheral> peripherals = device.getPeripherals();
 
 		int maxInputs = (device.getName().equals(CodeOptionsDevice.W1VC_64R.name()) == true) ? 6 : 5;
@@ -144,11 +145,11 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 				if (peripheralIO.getIo() == IO.INPUT) {
 					if (inputCount >= maxInputs) continue;
 					inputCount++;
-						c.addl("gpio_set_direction((gpio_num_t)LD_I" + Integer.toString(inputCount) + ", GPIO_MODE_INPUT);");
+						c.addl("gpio_set_direction(INPUT" + Integer.toString(inputCount) + "_PIN, GPIO_MODE_INPUT);");
 				} else {
 					if (outputCount >= maxOutputs) continue;
 					outputCount++;
-						c.addl("gpio_set_direction((gpio_num_t)LD_Q" + Integer.toString(outputCount) + ", GPIO_MODE_OUTPUT);");
+						c.addl("gpio_set_direction(OUTPUT" + Integer.toString(outputCount) + "_PIN, GPIO_MODE_OUTPUT);");
 				}
 			}
 		}
@@ -561,6 +562,8 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 				c.addl("  telemetryTime = getTime();");
 			}
 		}
+		
+		addGpioDirection(c);
 		c.addl("}");
 	}
 	
@@ -578,7 +581,7 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 		device.getName();
 		
 		c.add(" inputs[0].digitalInputStates = ");
-		c.addl("gpio_get_level((gpio_num_t)LD_I0_1) |");
+		c.addl("gpio_get_level(INPUT1_PIN) |");
 		
 		int inputs;
 		inputs = device.getName().equalsIgnoreCase(CodeOptionsDevice.W1VC_64R.name()) == true ? 5 : 4;
@@ -586,7 +589,7 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 		for (int i=1; i <= inputs; i++) {
 			for (int j = 0; j < 7; j++)
 				c.add("\t");
-			c.add("(gpio_get_level((gpio_num_t)" + "LD_I0_" + Integer.toString(i+1) + ") << " + i + ")");
+			c.add("(gpio_get_level(INPUT" + Integer.toString(i+1) + "_PIN) << " + i + ")");
 			if (i != inputs)
 				c.add(" | \n");
 		}
@@ -624,7 +627,7 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 			outputs=2;
 		 
 		for (int i=0; i < outputs; i++) {
-			c.addl("  gpio_set_level((gpio_num_t)LD_Q0_" + Integer.toString(i+1) + ", inputs[0].digitalOutputStates & 0x000"+ (int)Math.pow(2,i) +");");
+			c.addl("  gpio_set_level(OUTPUT" + Integer.toString(i+1) + "_PIN, inputs[0].digitalOutputStates & 0x000"+ (int)Math.pow(2,i) +");");
 			if (i+1 == outputs)
 				c.newLine();
 
@@ -1033,6 +1036,7 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 	
 	private void addTaskScan(IR ir, SourceCode c) {
 		c.newLine();
+		c.addl("/* zamiast TaskScan pętla while(1) w setup()"); // begin comment TaskScan
 		c.addl("void TaskScan(void *pvParameters){");
 		c.addl("  for(;;){");
 		c.addl("    vTaskDelay(1);");
@@ -1055,6 +1059,7 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 		c.addl("    "+ProgramFunc.OUTPUT.value+"();");
 		c.addl("  }");
 		c.addl("}");		
+		c.addl("*/"); //end comment TaskScan
 	}
 	
 	private void addSendMsg(SourceCode c) {
