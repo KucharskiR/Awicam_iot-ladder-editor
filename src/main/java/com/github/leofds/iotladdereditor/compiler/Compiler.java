@@ -23,9 +23,6 @@ import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-
 import com.github.leofds.iotladdereditor.application.Mediator;
 import com.github.leofds.iotladdereditor.application.ProjectContainer;
 import com.github.leofds.iotladdereditor.compiler.analizer.SemanticAnalyzer;
