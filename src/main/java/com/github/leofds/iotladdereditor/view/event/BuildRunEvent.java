@@ -44,10 +44,16 @@ public class BuildRunEvent implements Observer {
 	private void buildRun() {
 		Mediator me = Mediator.getInstance();
 		build();
+		Compiler.compile();
 		try {
 			switch(me.getProject().getLadderProgram().getProperties().getCodeOption()) {
 			case ESP32_ARDUINO_FREERTOS:
 				Desktop.getDesktop().open(new File("out/plc/plc.ino"));
+				break;
+			case W1VC_ESP32_FREERTOS:
+				Desktop.getDesktop().open(new File("out/plc/plc.ino"));
+				break;
+			default:
 				break;
 			}
 		} catch (Exception e) {

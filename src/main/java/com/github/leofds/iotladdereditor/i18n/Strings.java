@@ -180,5 +180,6 @@ public class Strings {
 	public static String initialize() { return bundle.getString("initialize"); }
 	public static String propertiesBB() { return bundle.getString("propertiesBB"); }
 	public static String tooMuchDevices() { return bundle.getString("tooMuchDevices"); }
+	public static String compilationStartInfo() { return bundle.getString("compilationStartInfo"); }
 	
 }

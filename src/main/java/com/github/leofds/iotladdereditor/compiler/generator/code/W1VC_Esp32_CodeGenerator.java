@@ -630,9 +630,15 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 			c.addl("  gpio_set_level(OUTPUT" + Integer.toString(i+1) + "_PIN, inputs[0].digitalOutputStates & 0x000"+ (int)Math.pow(2,i) +");");
 			if (i+1 == outputs)
 				c.newLine();
-
 		}
 
+		c.addl("// outputs from ladder program");
+		Map<String, DeviceMemory> outputFiles = CodeGeneratorUtils.getOutput(project, c);
+		for(Entry<String, DeviceMemory> entry: outputFiles.entrySet()){
+			PeripheralIO peripheral = (PeripheralIO) entry.getValue();
+			c.addl("  digitalWrite("+peripheral.getPath()+", "+cname(peripheral.getName())+");");
+		}
+		
 		c.addl("}");
 	}
 //	private void addOutputSystemFunction(ProjectContainer project,SourceCode c){
