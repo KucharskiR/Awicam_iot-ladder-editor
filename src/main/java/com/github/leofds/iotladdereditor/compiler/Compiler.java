@@ -69,22 +69,43 @@ public class Compiler{
 	private static void printDate() {
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		String date = simpleDateFormat.format(new Date());
-		Mediator.getInstance().outputConsoleMessage(date);
+		consoleOutput(date);
 	}
 
 	public static void compile() {
-		// TODO Auto-generated method stub
+		// TODO command cmd compile function
+		
+		// Info string
+		String info = Strings.compilationStartInfo();
+		
+		// Output to the console
+		consoleOutput(info);
 
 		try {
 			// Command to run
 			String command = "cmd /c arduino-cli compile --fqbn esp32:esp32:esp32s2 plc.ino"; // Replace "dir" with your desired command
 
-			// Working directory
-//			C:\Users\Dell\Documents\KucharskiR_projects\20230803_Ladder_Editor\Awicam_iot-ladder-editor\out\plc
-			String workingDirectory = "C:/Users/Dell/Documents/KucharskiR_projects/"
-					+ "20230803_Ladder_Editor/Awicam_iot-ladder-editor/out/plc"; // Replace with your desired directory path
-//			String workingDirectory = "C:/path/to/your/directory"; // Replace with your desired directory path
+			
+			String currentWorkingDirectory = System.getProperty("user.dir");
+//			System.out.println("Current Working Directory: " + currentWorkingDirectory);
 
+			
+			// Working directory
+			String workingDirectory = currentWorkingDirectory + "/out/plc"; // Replace with your desired directory path
+			/*
+			 * //
+			 * C:\Users\Dell\Documents\KucharskiR_projects\20230803_Ladder_Editor\Awicam_iot
+			 * -ladder-editor\out\plc
+			 * 
+			 * // String workingDirectory = "C:/Users/Dell/Documents/KucharskiR_projects/"
+			 * // + "20230803_Ladder_Editor/Awicam_iot-ladder-editor/out/plc"; // Replace
+			 * with your desired directory path
+			 * 
+			 * // String workingDirectory = "C:/path/to/your/directory"; // Replace with
+			 * your desired directory path
+			 * 
+			 */			
+			
 			// Create the process builder
 			ProcessBuilder processBuilder = new ProcessBuilder(command.split(" "));
 
@@ -102,7 +123,7 @@ public class Compiler{
 			String line;
 			while ((line = reader.readLine()) != null) {
 				System.out.println(line);
-				Mediator.getInstance().outputConsoleMessage(line);
+				consoleOutput(line);
 			}
 
 			// Wait for the process to complete
@@ -111,6 +132,11 @@ public class Compiler{
 
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
+			consoleOutput(e.getMessage());
 		}
+	}
+
+	private static void consoleOutput(String msg) {
+		Mediator.getInstance().outputConsoleMessage(msg);
 	}
 }
