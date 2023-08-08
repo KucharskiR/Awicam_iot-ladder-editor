@@ -68,4 +68,9 @@ public class Compiler{
 		String date = simpleDateFormat.format(new Date());
 		Mediator.getInstance().outputConsoleMessage(date);
 	}
+
+	public static void compile() {
+		// TODO Auto-generated method stub
+		
+	}
 }

@@ -216,7 +216,7 @@ public class Menu extends JMenuBar {
 			}
 		};
 	}
-	public AbstractAction getProjectChoose() {
+	private AbstractAction getProjectChoose() {
 		return new AbstractAction() {
 			private static final long serialVersionUID = 1L;
 			
