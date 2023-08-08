@@ -16,7 +16,10 @@
  ******************************************************************************/
 package com.github.leofds.iotladdereditor.compiler;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -71,6 +74,43 @@ public class Compiler{
 
 	public static void compile() {
 		// TODO Auto-generated method stub
-		
+
+		try {
+			// Command to run
+			String command = "cmd /c arduino-cli compile --fqbn esp32:esp32:esp32s2 plc.ino"; // Replace "dir" with your desired command
+
+			// Working directory
+//			C:\Users\Dell\Documents\KucharskiR_projects\20230803_Ladder_Editor\Awicam_iot-ladder-editor\out\plc
+			String workingDirectory = "C:/Users/Dell/Documents/KucharskiR_projects/"
+					+ "20230803_Ladder_Editor/Awicam_iot-ladder-editor/out/plc"; // Replace with your desired directory path
+//			String workingDirectory = "C:/path/to/your/directory"; // Replace with your desired directory path
+
+			// Create the process builder
+			ProcessBuilder processBuilder = new ProcessBuilder(command.split(" "));
+
+			// Set the working directory
+			processBuilder.directory(new File(workingDirectory));
+
+			// Redirect error stream to output stream
+			processBuilder.redirectErrorStream(true);
+
+			// Start the process
+			Process process = processBuilder.start();
+
+			// Get the process output
+			BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+			String line;
+			while ((line = reader.readLine()) != null) {
+				System.out.println(line);
+				Mediator.getInstance().outputConsoleMessage(line);
+			}
+
+			// Wait for the process to complete
+			int exitCode = process.waitFor();
+			Mediator.getInstance().outputConsoleMessage("Process exited with code: " + exitCode);
+
+		} catch (IOException | InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 }
