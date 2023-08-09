@@ -96,8 +96,8 @@ public class Compiler{
 			 */
 			
 			// Command to run
-			String command = "cmd /c start cmd /k arduino-cli compile --fqbn esp32:esp32:esp32s2 plc.ino"; // Replace "dir" with your desired command
-//			String command = "cmd /c arduino-cli compile --fqbn esp32:esp32:esp32s2 plc.ino"; // Replace "dir" with your desired command
+//			String command = "cmd /c start cmd /k arduino-cli compile --fqbn esp32:esp32:esp32s2 plc.ino"; // Replace "dir" with your desired command
+			String command = "cmd /c arduino-cli compile --fqbn esp32:esp32:esp32s2 plc.ino"; // Replace "dir" with your desired command
 
 			String currentWorkingDirectory = System.getProperty("user.dir");
 //			System.out.println("Current Working Directory: " + currentWorkingDirectory);
@@ -140,7 +140,7 @@ public class Compiler{
 
 			// Wait for the process to complete
 			int exitCode = process.waitFor();
-			Mediator.getInstance().outputConsoleMessage("Process exited with code: " + exitCode);
+			consoleOutput("Process exited with code: " + exitCode);
 
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
