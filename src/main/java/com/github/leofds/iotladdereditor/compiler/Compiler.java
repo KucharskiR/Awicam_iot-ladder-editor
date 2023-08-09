@@ -85,8 +85,19 @@ public class Compiler{
 //		createAndShowWaitingWindow();
 
 		try {
+			/*
+			 * 
+			 * Replace "your-command-here" with the actual command you want to 
+			 * run in the separate cmd window. The "/c" flag is used to indicate 
+			 * that the command should be executed and then the cmd window should be closed.
+			 *  The "start" command is used to open a new cmd window, and the "/k" flag 
+			 *  is used to keep the cmd window open after the command execution.
+			 * 
+			 */
+			
 			// Command to run
-			String command = "cmd /c arduino-cli compile --fqbn esp32:esp32:esp32s2 plc.ino"; // Replace "dir" with your desired command
+			String command = "cmd /c start cmd /k arduino-cli compile --fqbn esp32:esp32:esp32s2 plc.ino"; // Replace "dir" with your desired command
+//			String command = "cmd /c arduino-cli compile --fqbn esp32:esp32:esp32s2 plc.ino"; // Replace "dir" with your desired command
 
 			String currentWorkingDirectory = System.getProperty("user.dir");
 //			System.out.println("Current Working Directory: " + currentWorkingDirectory);
