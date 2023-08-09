@@ -96,8 +96,8 @@ public class Compiler{
 			 */
 			
 			// Command to run
-			String command = "cmd /c start cmd /k arduino-cli compile --fqbn esp32:esp32:esp32s2 plc.ino"; // Replace "dir" with your desired command
-//			String command = "cmd /c arduino-cli compile --fqbn esp32:esp32:esp32s2 plc.ino"; // Replace "dir" with your desired command
+//			String command = "cmd /c start cmd /k arduino-cli compile --fqbn esp32:esp32:esp32s2 plc.ino"; // Replace "dir" with your desired command
+			String command = "cmd /c arduino-cli compile --fqbn esp32:esp32:esp32s2 plc.ino"; // Replace "dir" with your desired command
 
 			String currentWorkingDirectory = System.getProperty("user.dir");
 //			System.out.println("Current Working Directory: " + currentWorkingDirectory);
@@ -140,37 +140,13 @@ public class Compiler{
 
 			// Wait for the process to complete
 			int exitCode = process.waitFor();
-			Mediator.getInstance().outputConsoleMessage("Process exited with code: " + exitCode);
+			consoleOutput("Process exited with code: " + exitCode);
 
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
 			consoleOutput(e.getMessage());
 		}
 	}
-
-//	private static void createAndShowWaitingWindow() {
-//		// Create and show waiting window
-//		JFrame frame = new JFrame("Waiting Window");
-//		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//		frame.setSize(300, 100);
-//		frame.setLocationRelativeTo(null); // Center the window
-//
-//		JLabel label = new JLabel("Please wait...");
-//		label.setHorizontalAlignment(JLabel.CENTER);
-//
-//		frame.add(label);
-//
-//		frame.setVisible(true);
-//
-//		// Simulate some processing
-//		try {
-//			Thread.sleep(3000); // Simulating a 3-second wait
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//		}
-//
-//		frame.dispose(); // Close the window after processing
-//	 }
 
 	private static void consoleOutput(String msg) {
 		Mediator.getInstance().outputConsoleMessage(msg);
