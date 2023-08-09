@@ -82,8 +82,9 @@ public class BuildRunEvent implements Observer {
 			JProgressBar progressBar = new JProgressBar(0,100);
 			progressBar.setStringPainted(true); // Display the percentage on the bar
 			progressBar.setPreferredSize(new Dimension(250, 30));
-			frame.setLayout(new FlowLayout());
+			frame.setLayout(new FlowLayout(FlowLayout.CENTER));
 			frame.add(progressBar);
+			frame.setLocationRelativeTo(null);
 			frame.pack();
 			frame.setVisible(true);
 			
@@ -92,11 +93,13 @@ public class BuildRunEvent implements Observer {
 				try {
 					if (!sharedResource.getData()) {
 						if (i > 80) {
+							Thread.sleep(1500); // Simulating progress updates
+						} else if (i > 50) {
 							Thread.sleep(800); // Simulating progress updates
 						} else {
 							Thread.sleep(400); // Simulating progress updates
 						}
-					} else if(sharedResource.getData()) {
+					} else if (sharedResource.getData()) {
 						Thread.sleep(50); // Simulating progress updates
 					}
 				} catch (InterruptedException e) {
@@ -108,7 +111,6 @@ public class BuildRunEvent implements Observer {
 				JOptionPane.showMessageDialog(frame, "Operation completed!", "Information",
 						JOptionPane.INFORMATION_MESSAGE);
 			});
-			
 			frame.dispose();
 		});
 		
@@ -127,7 +129,6 @@ public class BuildRunEvent implements Observer {
 //			System.out.println("Yes");
 			try {
 				Thread.sleep(10); // Wait for 2 seconds
-				consoleOutput("Compilation running...");
 				frame.dispose(); // Close the window if "No" is chosen
 				
 				
