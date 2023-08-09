@@ -32,11 +32,11 @@
 #endif
 
 // #define INPUT6_PIN (GPIO_NUM_10)
-// #define OUTPUT3_PIN (GPIO_NUM_8)
+#define OUTPUT3_PIN (GPIO_NUM_8)
 
 #define OUTPUT1_PIN (GPIO_NUM_6)
 #define OUTPUT2_PIN (GPIO_NUM_7)
-// #define OUTPUT4_PIN (GPIO_NUM_2)
+#define OUTPUT4_PIN (GPIO_NUM_2)
 // #define OUTPUT5_PIN (GPIO_NUM_)
 // #define OUTPUT6_PIN
 
