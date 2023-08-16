@@ -70,7 +70,7 @@ public class BuildRunEvent implements Observer {
 	}
 
 	private void yesNoDialog() {
-		// TODO confirm dialog box
+		// confirmation compiling dialog box
 		JFrame frame = new JFrame("Compiling...");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -88,7 +88,7 @@ public class BuildRunEvent implements Observer {
 			frame.pack();
 			frame.setVisible(true);
 			
-			for (int i = 0; i <= 100; i++) {
+			for (int i = 0; i <= 99; i++) {
 				progressBar.setValue(i);
 				try {
 					if (!sharedResource.getData()) {
@@ -106,6 +106,14 @@ public class BuildRunEvent implements Observer {
 					e.printStackTrace();
 				}
 			}
+			
+			// while loop if 99% but compiling still working
+			while(!sharedResource.getData()) {
+				progressBar.setValue(99);
+			}
+				progressBar.setValue(100);
+			
+			
 			frame.getContentPane().remove(progressBar);
 			SwingUtilities.invokeLater(() -> {
 				JOptionPane.showMessageDialog(frame, "Operation completed!", "Information",
