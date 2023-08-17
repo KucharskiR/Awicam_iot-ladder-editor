@@ -72,7 +72,7 @@ public class Compiler{
 		consoleOutput(date);
 	}
 
-	public static void compile() {
+	public static int compile() {
 		// command cmd compile function
 
 		// Info string
@@ -97,7 +97,7 @@ public class Compiler{
 			
 			// Command to run
 //			String command = "cmd /c start cmd /k arduino-cli compile --fqbn esp32:esp32:esp32s2 plc.ino"; // Replace "dir" with your desired command
-			String command = "cmd /c arduino-cli compile --fqbn esp32:esp32:esp32s2 plc.ino"; // Replace "dir" with your desired command
+			String command = "cmd /c arduino-cli compile --fqbn esp32:esp32:esp32c3 plc.ino"; // Replace "dir" with your desired command
 
 			String currentWorkingDirectory = System.getProperty("user.dir");
 //			System.out.println("Current Working Directory: " + currentWorkingDirectory);
@@ -141,14 +141,98 @@ public class Compiler{
 			// Wait for the process to complete
 			int exitCode = process.waitFor();
 			consoleOutput("Process exited with code: " + exitCode);
+			
+			return exitCode;
 
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
 			consoleOutput(e.getMessage());
+			return 1;
 		}
 	}
 
 	private static void consoleOutput(String msg) {
 		Mediator.getInstance().outputConsoleMessage(msg);
+	}
+
+	public static int upload(String port) {
+		// TODO Auto-generated method stub
+
+		// command cmd compile function
+
+		// Info string
+		String info = Strings.uploadingInfo();
+
+		// Output to the console
+		consoleOutput(info);
+		
+		// Create waiting window
+//		createAndShowWaitingWindow();
+
+		try {
+			/*
+			 * 
+			 * Replace "your-command-here" with the actual command you want to 
+			 * run in the separate cmd window. The "/c" flag is used to indicate 
+			 * that the command should be executed and then the cmd window should be closed.
+			 *  The "start" command is used to open a new cmd window, and the "/k" flag 
+			 *  is used to keep the cmd window open after the command execution.
+			 * 
+			 */
+			
+			// Command to run
+			String command = "cmd /c arduino-cli upload -p " + port + " --fqbn esp32:esp32:esp32c3 plc.ino"; // Replace "dir" with your desired command
+
+			String currentWorkingDirectory = System.getProperty("user.dir");
+//			System.out.println("Current Working Directory: " + currentWorkingDirectory);
+
+			// Working directory
+			String workingDirectory = currentWorkingDirectory + "/out/plc"; // Replace with your desired directory path
+			/*
+			 * //
+			 * C:\Users\Dell\Documents\KucharskiR_projects\20230803_Ladder_Editor\Awicam_iot
+			 * -ladder-editor\out\plc
+			 * 
+			 * // String workingDirectory = "C:/Users/Dell/Documents/KucharskiR_projects/"
+			 * // + "20230803_Ladder_Editor/Awicam_iot-ladder-editor/out/plc"; // Replace
+			 * with your desired directory path
+			 * 
+			 * // String workingDirectory = "C:/path/to/your/directory"; // Replace with
+			 * your desired directory path
+			 * 
+			 */
+
+			// Create the process builder
+			ProcessBuilder processBuilder = new ProcessBuilder(command.split(" "));
+
+			// Set the working directory
+			processBuilder.directory(new File(workingDirectory));
+
+			// Redirect error stream to output stream
+			processBuilder.redirectErrorStream(true);
+
+			// Start the process
+			Process process = processBuilder.start();
+
+			// Get the process output
+			BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+			String line;
+			while ((line = reader.readLine()) != null) {
+				System.out.println(line);
+				consoleOutput(line);
+			}
+
+			// Wait for the process to complete
+			int exitCode = process.waitFor();
+			consoleOutput("Process exited with code: " + exitCode);
+			
+			return exitCode;
+
+		} catch (IOException | InterruptedException e) {
+			e.printStackTrace();
+			consoleOutput(e.getMessage());
+			return 1;
+		}
+	
 	}
 }

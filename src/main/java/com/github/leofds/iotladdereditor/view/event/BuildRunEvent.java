@@ -95,9 +95,9 @@ public class BuildRunEvent implements Observer {
 						if (i > 80) {
 							Thread.sleep(1500); // Simulating progress updates
 						} else if (i > 50) {
-							Thread.sleep(800); // Simulating progress updates
+							Thread.sleep(900); // Simulating progress updates
 						} else {
-							Thread.sleep(400); // Simulating progress updates
+							Thread.sleep(500); // Simulating progress updates
 						}
 					} else if (sharedResource.getData()) {
 						Thread.sleep(50); // Simulating progress updates
@@ -123,12 +123,16 @@ public class BuildRunEvent implements Observer {
 		});
 		
 		// compile Thread2
-	    Thread compileThread = new Thread(() -> {
-            // Operation 2 code here
-	    			sharedResource.setData(false);
-                    Compiler.compile();
-                    sharedResource.setData(true);
-        });
+		Thread compileThread = new Thread(() -> {
+			// Operation 2 code here
+			sharedResource.setData(false);
+			if (Compiler.compile() == 0)
+				sharedResource.setCompilationStatus(0);
+			else
+				sharedResource.setCompilationStatus(1);
+
+			sharedResource.setData(true);
+		});
 		
 		int choice = JOptionPane.showConfirmDialog(frame, "Do you want to proceed compilation?", "Confirmation",
 				JOptionPane.YES_NO_OPTION);
@@ -136,13 +140,17 @@ public class BuildRunEvent implements Observer {
 		if (choice == JOptionPane.YES_OPTION) {
 //			System.out.println("Yes");
 			try {
-				Thread.sleep(10); // Wait for 2 seconds
+				Thread.sleep(1); // Wait for 2 seconds
 				frame.dispose(); // Close the window if "No" is chosen
-				
 				
 				// start threads
 				progressThread.start();
 				compileThread.start();
+				
+				if(sharedResource.getCompilationStatus() == 0) {
+					
+				}
+				
 				
 			} catch (InterruptedException e) {
 				e.printStackTrace();
@@ -178,8 +186,17 @@ public class BuildRunEvent implements Observer {
 	
 	class SharedResource {
 	    private boolean isFinished;
+	    private int compilationStatus; // 0 - success, 1 - error
 
-	    synchronized void setData(boolean isFinished) {
+	    public int getCompilationStatus() {
+			return compilationStatus;
+		}
+
+		public void setCompilationStatus(int compilationStatus) {
+			this.compilationStatus = compilationStatus;
+		}
+
+		synchronized void setData(boolean isFinished) {
 	        this.isFinished = isFinished;
 	    }
 

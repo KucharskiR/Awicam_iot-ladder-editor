@@ -181,5 +181,6 @@ public class Strings {
 	public static String propertiesBB() { return bundle.getString("propertiesBB"); }
 	public static String tooMuchDevices() { return bundle.getString("tooMuchDevices"); }
 	public static String compilationStartInfo() { return bundle.getString("compilationStartInfo"); }
+	public static String uploadingInfo() { return bundle.getString("uploadingInfo"); }
 	
 }
