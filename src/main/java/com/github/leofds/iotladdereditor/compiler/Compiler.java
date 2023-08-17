@@ -34,6 +34,24 @@ import com.github.leofds.iotladdereditor.i18n.Strings;
 import com.github.leofds.iotladdereditor.util.FileUtils;
 
 public class Compiler{
+	
+	private int compilationStatus;
+
+	public int getCompilationStatus() {
+		return compilationStatus;
+	}
+
+	public void setCompilationStatus(int compilationStatus) {
+		this.compilationStatus = compilationStatus;
+	}
+
+	public Compiler(int compilationStatus) {
+		super();
+		this.compilationStatus = compilationStatus;
+	}
+
+	public Compiler() {
+	}
 
 	public static boolean build(ProjectContainer project){
 
@@ -72,7 +90,7 @@ public class Compiler{
 		consoleOutput(date);
 	}
 
-	public static int compile() {
+	public void compile() {
 		// command cmd compile function
 
 		// Info string
@@ -140,14 +158,13 @@ public class Compiler{
 
 			// Wait for the process to complete
 			int exitCode = process.waitFor();
+			this.compilationStatus = exitCode == 0 ? 0 : 1;
 			consoleOutput("Process exited with code: " + exitCode);
 			
-			return exitCode;
-
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
 			consoleOutput(e.getMessage());
-			return 1;
+			this.compilationStatus = 1;
 		}
 	}
 

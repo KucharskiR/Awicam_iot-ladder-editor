@@ -35,16 +35,19 @@ import com.github.leofds.iotladdereditor.view.event.Subject.SubMsg;
 public class BuildRunEvent implements Observer {
 
 	private Subject subject;
+	private Compiler compilation;
 
 	public BuildRunEvent(Subject subject) {
 		subject.addObserver(this);
 		this.subject = subject;
+		this.compilation = new Compiler();
 	}
 
 	private void build() {
 		Mediator me = Mediator.getInstance();
 		me.clearConsole();
 		Compiler.build(me.getProject());
+		
 	}
 	
 	private void buildRun() {
@@ -54,11 +57,11 @@ public class BuildRunEvent implements Observer {
 			switch(me.getProject().getLadderProgram().getProperties().getCodeOption()) {
 			case ESP32_ARDUINO_FREERTOS:
 				Desktop.getDesktop().open(new File("out/plc/plc.ino"));
-				yesNoDialog();
+				compilationConfirm();
 				break;
 			case W1VC_ESP32_FREERTOS:
 				Desktop.getDesktop().open(new File("out/plc/plc.ino"));
-				yesNoDialog();
+				compilationConfirm();
 				break;
 			default:
 				break;
@@ -69,7 +72,7 @@ public class BuildRunEvent implements Observer {
 		}
 	}
 
-	private void yesNoDialog() {
+	private void compilationConfirm() {
 		// confirmation compiling dialog box
 		JFrame frame = new JFrame("Compiling...");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -122,17 +125,37 @@ public class BuildRunEvent implements Observer {
 			frame.dispose();
 		});
 		
+		compilation.setCompilationStatus(5);
 		// compile Thread2
 		Thread compileThread = new Thread(() -> {
 			// Operation 2 code here
 			sharedResource.setData(false);
-			if (Compiler.compile() == 0)
-				sharedResource.setCompilationStatus(0);
-			else
-				sharedResource.setCompilationStatus(1);
 
+			compilation.compile();
+			
+			sharedResource.setCompilationStatus(compilation.getCompilationStatus());
 			sharedResource.setData(true);
 		});
+		
+//		// Thread 3 upload
+//		Thread uploadThread = new Thread(() -> {
+//			// Operation 3 code here
+//			while (!sharedResource.getData()) {
+//
+//				if (sharedResource.getCompilationStatus() == 0) {
+//
+//					int choiceUpload = JOptionPane.showConfirmDialog(frame, "Do you want to upload?", "Confirmation",
+//							JOptionPane.YES_NO_OPTION);
+//					
+//					if (choiceUpload == JOptionPane.YES_OPTION) {
+//
+//					} else if (choiceUpload == JOptionPane.NO_OPTION) {
+//						System.out.println("No");
+//					}
+//
+//				}
+//			}
+//		});
 		
 		int choice = JOptionPane.showConfirmDialog(frame, "Do you want to proceed compilation?", "Confirmation",
 				JOptionPane.YES_NO_OPTION);
@@ -140,16 +163,13 @@ public class BuildRunEvent implements Observer {
 		if (choice == JOptionPane.YES_OPTION) {
 //			System.out.println("Yes");
 			try {
-				Thread.sleep(1); // Wait for 2 seconds
+				Thread.sleep(1); // Wait 
 				frame.dispose(); // Close the window if "No" is chosen
 				
 				// start threads
 				progressThread.start();
 				compileThread.start();
-				
-				if(sharedResource.getCompilationStatus() == 0) {
-					
-				}
+//				uploadThread.start();
 				
 				
 			} catch (InterruptedException e) {
