@@ -43,15 +43,6 @@ union {
 uint64_t getTime(){
   return LD_TIME.v;
 }
-gpio_set_direction((gpio_num_t)LD_Q1, GPIO_MODE_OUTPUT);
-gpio_set_direction((gpio_num_t)LD_Q2, GPIO_MODE_OUTPUT);
-gpio_set_direction((gpio_num_t)LD_Q3, GPIO_MODE_OUTPUT);
-gpio_set_direction((gpio_num_t)LD_Q4, GPIO_MODE_OUTPUT);
-gpio_set_direction((gpio_num_t)LD_I1, GPIO_MODE_INPUT);
-gpio_set_direction((gpio_num_t)LD_I2, GPIO_MODE_INPUT);
-gpio_set_direction((gpio_num_t)LD_I3, GPIO_MODE_INPUT);
-gpio_set_direction((gpio_num_t)LD_I4, GPIO_MODE_INPUT);
-gpio_set_direction((gpio_num_t)LD_I5, GPIO_MODE_INPUT);
 
 uint8_t LD_I0_8 = 0;
 uint8_t LD_Q0_3 = 0;
@@ -74,11 +65,11 @@ void refreshTime64bit(){
 }
 
 void readInputs(){
- inputs[0].digitalInputStates = gpio_get_level((gpio_num_t)LD_I0_1) |
-							(gpio_get_level((gpio_num_t)LD_I0_2) << 1) | 
-							(gpio_get_level((gpio_num_t)LD_I0_3) << 2) | 
-							(gpio_get_level((gpio_num_t)LD_I0_4) << 3) | 
-							(gpio_get_level((gpio_num_t)LD_I0_5) << 4);
+ inputs[0].digitalInputStates = gpio_get_level(INPUT1_PIN) |
+							(gpio_get_level(INPUT2_PIN) << 1) | 
+							(gpio_get_level(INPUT3_PIN) << 2) | 
+							(gpio_get_level(INPUT4_PIN) << 3) | 
+							(gpio_get_level(INPUT5_PIN) << 4);
 while(recivedAll == false) {}
 }
 
@@ -86,9 +77,11 @@ void writeOutputs(){
   for (uint8_t i = 1; i < boardsNumber + 1; i++)
     SendDigitalOutputs(i, inputs[i].digitalOutputStates);
 
-  gpio_set_level((gpio_num_t)LD_Q0_1, inputs[0].digitalOutputStates & 0x0001);
-  gpio_set_level((gpio_num_t)LD_Q0_2, inputs[0].digitalOutputStates & 0x0002);
+  gpio_set_level(OUTPUT1_PIN, inputs[0].digitalOutputStates & 0x0001);
+  gpio_set_level(OUTPUT2_PIN, inputs[0].digitalOutputStates & 0x0002);
 
+// outputs from ladder program
+  digitalWrite(PIN_Q0_3, LD_Q0_3);
 }
 
 void rung001(void){
@@ -108,8 +101,19 @@ void init(){
   refreshTime64bit();
   pinMode(PIN_I0_8, INPUT);
   pinMode(PIN_Q0_3, OUTPUT);
+
+gpio_set_direction(OUTPUT1_PIN, GPIO_MODE_OUTPUT);
+gpio_set_direction(OUTPUT2_PIN, GPIO_MODE_OUTPUT);
+gpio_set_direction(OUTPUT3_PIN, GPIO_MODE_OUTPUT);
+gpio_set_direction(OUTPUT4_PIN, GPIO_MODE_OUTPUT);
+gpio_set_direction(INPUT1_PIN, GPIO_MODE_INPUT);
+gpio_set_direction(INPUT2_PIN, GPIO_MODE_INPUT);
+gpio_set_direction(INPUT3_PIN, GPIO_MODE_INPUT);
+gpio_set_direction(INPUT4_PIN, GPIO_MODE_INPUT);
+gpio_set_direction(INPUT5_PIN, GPIO_MODE_INPUT);
 }
 
+/* zamiast TaskScan pętla while(1) w setup()
 void TaskScan(void *pvParameters){
   for(;;){
     vTaskDelay(1);
@@ -119,6 +123,7 @@ void TaskScan(void *pvParameters){
     writeOutputs();
   }
 }
+*/
 void setup()
 {
   // czasem czeka na otwarcie portu
