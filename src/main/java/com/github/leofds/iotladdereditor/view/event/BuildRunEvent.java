@@ -63,13 +63,14 @@ public class BuildRunEvent implements Observer {
 				Desktop.getDesktop().open(new File("out/plc/plc.ino"));
 				compilationConfirm();
 				
-				while (compilation.getCompilationStatus() == 5) {
-					if (compilation.getCompilationStatus() == 0)
-						uploading();
-					else if (compilation.getCompilationStatus() == 1) {
-						consoleOutput("Compilation error");
-					}
-				}
+				uploading();
+				
+//				while (compilation.getCompilationStatus() == 5) {
+//					if (compilation.getCompilationStatus() == 0)
+//					else if (compilation.getCompilationStatus() == 1) {
+//						consoleOutput("Compilation error");
+//					}
+//				}
 				break;
 			default:
 				break;
@@ -82,6 +83,7 @@ public class BuildRunEvent implements Observer {
 
 	private void uploading() {
 		// TODO Auto-generated method stub
+		Thread uploadingThread = new Thread(() -> {
 		JFrame frame = new JFrame("Uploading...");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -97,6 +99,9 @@ public class BuildRunEvent implements Observer {
 
 		frame.pack();
 		frame.setVisible(false);
+		});
+		
+		uploadingThread.start();
 	}
 
 	private void compilationConfirm() {
