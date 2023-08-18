@@ -62,6 +62,14 @@ public class BuildRunEvent implements Observer {
 			case W1VC_ESP32_FREERTOS:
 				Desktop.getDesktop().open(new File("out/plc/plc.ino"));
 				compilationConfirm();
+				
+				while (compilation.getCompilationStatus() == 5) {
+					if (compilation.getCompilationStatus() == 0)
+						uploading();
+					else if (compilation.getCompilationStatus() == 1) {
+						consoleOutput("Compilation error");
+					}
+				}
 				break;
 			default:
 				break;
@@ -70,6 +78,25 @@ public class BuildRunEvent implements Observer {
 			e.printStackTrace();
 			me.outputConsoleMessage(e.getMessage());
 		}
+	}
+
+	private void uploading() {
+		// TODO Auto-generated method stub
+		JFrame frame = new JFrame("Uploading...");
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		int choice = JOptionPane.showConfirmDialog(frame, "Do you want to upload?", "Confirmation",
+				JOptionPane.YES_NO_OPTION);
+
+		if (choice == JOptionPane.YES_OPTION) {
+			System.out.println("Yes");
+
+		} else if (choice == JOptionPane.NO_OPTION) {
+			System.out.println("No");
+		}
+
+		frame.pack();
+		frame.setVisible(false);
 	}
 
 	private void compilationConfirm() {
