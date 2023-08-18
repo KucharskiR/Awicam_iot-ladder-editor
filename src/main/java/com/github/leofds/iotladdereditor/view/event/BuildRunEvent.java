@@ -62,15 +62,6 @@ public class BuildRunEvent implements Observer {
 			case W1VC_ESP32_FREERTOS:
 				Desktop.getDesktop().open(new File("out/plc/plc.ino"));
 				compilationConfirm();
-				
-				uploading();
-				
-//				while (compilation.getCompilationStatus() == 5) {
-//					if (compilation.getCompilationStatus() == 0)
-//					else if (compilation.getCompilationStatus() == 1) {
-//						consoleOutput("Compilation error");
-//					}
-//				}
 				break;
 			default:
 				break;
@@ -86,16 +77,24 @@ public class BuildRunEvent implements Observer {
 		Thread uploadingThread = new Thread(() -> {
 		JFrame frame = new JFrame("Uploading...");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+//			while (compilation.getCompilationStatus() == 5) {
+//				
+//			}
+//				if (compilation.getCompilationStatus() == 0) {
+//					
+					int choice = JOptionPane.showConfirmDialog(frame, "Do you want to upload?", "Confirmation",
+							JOptionPane.YES_NO_OPTION);
 
-		int choice = JOptionPane.showConfirmDialog(frame, "Do you want to upload?", "Confirmation",
-				JOptionPane.YES_NO_OPTION);
+					if (choice == JOptionPane.YES_OPTION) {
+						System.out.println("Yes");
 
-		if (choice == JOptionPane.YES_OPTION) {
-			System.out.println("Yes");
-
-		} else if (choice == JOptionPane.NO_OPTION) {
-			System.out.println("No");
-		}
+					} else if (choice == JOptionPane.NO_OPTION) {
+						System.out.println("No");
+					}
+//				} else if (compilation.getCompilationStatus() == 1) {
+//					consoleOutput("Compilation error");
+//				}
 
 		frame.pack();
 		frame.setVisible(false);
@@ -167,48 +166,25 @@ public class BuildRunEvent implements Observer {
 			
 			sharedResource.setCompilationStatus(compilation.getCompilationStatus());
 			sharedResource.setData(true);
+			uploading(); // uploading method invoke
 		});
-		
-//		// Thread 3 upload
-//		Thread uploadThread = new Thread(() -> {
-//			// Operation 3 code here
-//			while (!sharedResource.getData()) {
-//
-//				if (sharedResource.getCompilationStatus() == 0) {
-//
-//					int choiceUpload = JOptionPane.showConfirmDialog(frame, "Do you want to upload?", "Confirmation",
-//							JOptionPane.YES_NO_OPTION);
-//					
-//					if (choiceUpload == JOptionPane.YES_OPTION) {
-//
-//					} else if (choiceUpload == JOptionPane.NO_OPTION) {
-//						System.out.println("No");
-//					}
-//
-//				}
-//			}
-//		});
 		
 		int choice = JOptionPane.showConfirmDialog(frame, "Do you want to proceed compilation?", "Confirmation",
 				JOptionPane.YES_NO_OPTION);
 
 		if (choice == JOptionPane.YES_OPTION) {
 //			System.out.println("Yes");
-			try {
-				Thread.sleep(1); // Wait 
-				frame.dispose(); // Close the window if "No" is chosen
-				
-				// start threads
-				progressThread.start();
-				compileThread.start();
-//				uploadThread.start();
-				
-				
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+//				frame.dispose(); // Close the window if "No" is chosen
 
-			
+			// start threads
+			progressThread.start();
+			compileThread.start();
+//					try {
+//						progressThread.join(); // Wait for compileThread to finish
+//					} catch (InterruptedException e) {
+//						e.printStackTrace();
+//					}
+
 		} else if (choice == JOptionPane.NO_OPTION) {
 			System.out.println("No");
 		}
