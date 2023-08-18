@@ -25,6 +25,8 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.swing.Icon;
+
 public class Strings {
 	
 	private static String baseName = "strings.StringsBundle";
@@ -182,5 +184,7 @@ public class Strings {
 	public static String tooMuchDevices() { return bundle.getString("tooMuchDevices"); }
 	public static String compilationStartInfo() { return bundle.getString("compilationStartInfo"); }
 	public static String uploadingInfo() { return bundle.getString("uploadingInfo"); }
+	public static String upload() { return bundle.getString("upload"); }
+
 	
 }

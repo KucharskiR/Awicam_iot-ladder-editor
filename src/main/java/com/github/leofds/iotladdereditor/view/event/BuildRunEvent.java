@@ -75,32 +75,35 @@ public class BuildRunEvent implements Observer {
 	private void uploading() {
 		// TODO Auto-generated method stub
 		Thread uploadingThread = new Thread(() -> {
-		JFrame frame = new JFrame("Uploading...");
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
-//			while (compilation.getCompilationStatus() == 5) {
-//				
-//			}
-//				if (compilation.getCompilationStatus() == 0) {
-//					
-					int choice = JOptionPane.showConfirmDialog(frame, "Do you want to upload?", "Confirmation",
-							JOptionPane.YES_NO_OPTION);
+			JFrame frame = new JFrame("Uploading...");
+			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-					if (choice == JOptionPane.YES_OPTION) {
-						System.out.println("Yes");
+			int choice = JOptionPane.showConfirmDialog(frame, "Do you want to upload?", "Confirmation",
+					JOptionPane.YES_NO_OPTION);
 
-					} else if (choice == JOptionPane.NO_OPTION) {
-						System.out.println("No");
-					}
-//				} else if (compilation.getCompilationStatus() == 1) {
-//					consoleOutput("Compilation error");
-//				}
+			if (choice == JOptionPane.YES_OPTION) {
+				System.out.println("Yes");
+				
+				comPortChooser();
 
-		frame.pack();
-		frame.setVisible(false);
+			} else if (choice == JOptionPane.NO_OPTION) {
+				System.out.println("No");
+			}
+
+			frame.pack();
+			frame.setVisible(false);
 		});
-		
+
 		uploadingThread.start();
+	}
+
+	private void comPortChooser() {
+
+		System.out.println("Ok");
+
+		ComPortChooser comPortChooser = new ComPortChooser(); // COM port chooser
+		comPortChooser.setVisible(true);
+
 	}
 
 	private void compilationConfirm() {
