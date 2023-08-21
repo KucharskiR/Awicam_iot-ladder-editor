@@ -1,6 +1,6 @@
 package com.github.leofds.iotladdereditor.view.event;
 
-import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Enumeration;
@@ -11,11 +11,9 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import com.github.leofds.iotladdereditor.compiler.Compiler;
 import com.github.leofds.iotladdereditor.i18n.Strings;
 
 import gnu.io.CommPortIdentifier;
-import java.awt.Font;
 
 
 public class ComPortChooser extends JFrame {

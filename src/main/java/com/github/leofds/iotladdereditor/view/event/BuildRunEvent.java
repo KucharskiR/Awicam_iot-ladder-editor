@@ -30,6 +30,7 @@ import javax.swing.SwingUtilities;
 
 import com.github.leofds.iotladdereditor.application.Mediator;
 import com.github.leofds.iotladdereditor.compiler.Compiler;
+import com.github.leofds.iotladdereditor.util.ProgressWaitingBar;
 import com.github.leofds.iotladdereditor.view.event.Subject.SubMsg;
 
 public class BuildRunEvent implements Observer {
@@ -76,7 +77,7 @@ public class BuildRunEvent implements Observer {
 		// TODO Auto-generated method stub
 		Thread uploadingThread = new Thread(() -> {
 			JFrame frame = new JFrame("Uploading...");
-			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
 			int choice = JOptionPane.showConfirmDialog(frame, "Do you want to upload?", "Confirmation",
 					JOptionPane.YES_NO_OPTION);
@@ -112,54 +113,59 @@ public class BuildRunEvent implements Observer {
 	private void compilationConfirm() {
 		// confirmation compiling dialog box
 		JFrame frame = new JFrame("Compiling...");
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
 		// sharing thread data
 		SharedResource sharedResource = new SharedResource();
 		
 		Thread progressThread = new Thread(() -> {
 			// progress bar Thread 1
-			JProgressBar progressBar = new JProgressBar(0,100);
-			progressBar.setStringPainted(true); // Display the percentage on the bar
-			progressBar.setPreferredSize(new Dimension(250, 30));
-			frame.setLayout(new FlowLayout(FlowLayout.CENTER));
-			frame.add(progressBar);
-			frame.setLocationRelativeTo(null);
-			frame.pack();
-			frame.setVisible(true);
+//			JProgressBar progressBar = new JProgressBar(0,100);
+//			progressBar.setStringPainted(true); // Display the percentage on the bar
+//			progressBar.setPreferredSize(new Dimension(250, 30));
+//			frame.setLayout(new FlowLayout(FlowLayout.CENTER));
+//			frame.add(progressBar);
+//			frame.setLocationRelativeTo(null);
+//			frame.pack();
+//			frame.setVisible(true);
+//			
+//			for (int i = 0; i <= 99; i++) {
+//				progressBar.setValue(i);
+//				try {
+//					if (!sharedResource.getData()) {
+//						if (i > 80) {
+//							Thread.sleep(1500); // Simulating progress updates
+//						} else if (i > 50) {
+//							Thread.sleep(900); // Simulating progress updates
+//						} else {
+//							Thread.sleep(500); // Simulating progress updates
+//						}
+//					} else if (sharedResource.getData()) {
+//						Thread.sleep(50); // Simulating progress updates
+//					}
+//				} catch (InterruptedException e) {
+//					e.printStackTrace();
+//				}
+//			}
+//			
+//			// while loop if 99% but compiling still working
+//			while(!sharedResource.getData()) {
+//				progressBar.setValue(99);
+//			}
+//				progressBar.setValue(100);
+//			
+//			
+//			frame.getContentPane().remove(progressBar);
+//			SwingUtilities.invokeLater(() -> {
+//				JOptionPane.showMessageDialog(frame, "Operation completed!", "Information",
+//						JOptionPane.INFORMATION_MESSAGE);
+//			});
+//			frame.dispose();
+			ProgressWaitingBar dotProgressBar = new ProgressWaitingBar();
 			
-			for (int i = 0; i <= 99; i++) {
-				progressBar.setValue(i);
-				try {
-					if (!sharedResource.getData()) {
-						if (i > 80) {
-							Thread.sleep(1500); // Simulating progress updates
-						} else if (i > 50) {
-							Thread.sleep(900); // Simulating progress updates
-						} else {
-							Thread.sleep(500); // Simulating progress updates
-						}
-					} else if (sharedResource.getData()) {
-						Thread.sleep(50); // Simulating progress updates
-					}
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
+			while(!sharedResource.getData());
 			
-			// while loop if 99% but compiling still working
-			while(!sharedResource.getData()) {
-				progressBar.setValue(99);
-			}
-				progressBar.setValue(100);
-			
-			
-			frame.getContentPane().remove(progressBar);
-			SwingUtilities.invokeLater(() -> {
-				JOptionPane.showMessageDialog(frame, "Operation completed!", "Information",
-						JOptionPane.INFORMATION_MESSAGE);
-			});
-			frame.dispose();
+			dotProgressBar.close();
 		});
 		
 		compilation.setCompilationStatus(5);
