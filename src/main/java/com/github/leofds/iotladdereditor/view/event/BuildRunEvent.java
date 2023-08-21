@@ -30,21 +30,26 @@ import javax.swing.SwingUtilities;
 
 import com.github.leofds.iotladdereditor.application.Mediator;
 import com.github.leofds.iotladdereditor.compiler.Compiler;
+import com.github.leofds.iotladdereditor.util.WaitingBar;
+import com.github.leofds.iotladdereditor.util.bars.CompileWaitingBar;
 import com.github.leofds.iotladdereditor.view.event.Subject.SubMsg;
 
 public class BuildRunEvent implements Observer {
 
 	private Subject subject;
+	private Compiler compilation;
 
 	public BuildRunEvent(Subject subject) {
 		subject.addObserver(this);
 		this.subject = subject;
+		this.compilation = new Compiler();
 	}
 
 	private void build() {
 		Mediator me = Mediator.getInstance();
 		me.clearConsole();
 		Compiler.build(me.getProject());
+		
 	}
 	
 	private void buildRun() {
@@ -54,11 +59,11 @@ public class BuildRunEvent implements Observer {
 			switch(me.getProject().getLadderProgram().getProperties().getCodeOption()) {
 			case ESP32_ARDUINO_FREERTOS:
 				Desktop.getDesktop().open(new File("out/plc/plc.ino"));
-				yesNoDialog();
+				compilationConfirm();
 				break;
 			case W1VC_ESP32_FREERTOS:
 				Desktop.getDesktop().open(new File("out/plc/plc.ino"));
-				yesNoDialog();
+				compilationConfirm();
 				break;
 			default:
 				break;
@@ -69,86 +74,136 @@ public class BuildRunEvent implements Observer {
 		}
 	}
 
-	private void yesNoDialog() {
+	private void uploading() {
+		// TODO Auto-generated method stub
+		Thread uploadingThread = new Thread(() -> {
+			JFrame frame = new JFrame("Uploading...");
+			frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+			int choice = JOptionPane.showConfirmDialog(frame, "Do you want to upload?", "Confirmation",
+					JOptionPane.YES_NO_OPTION);
+
+			if (choice == JOptionPane.YES_OPTION) {
+				System.out.println("Yes");
+				
+				comPortChooser();
+
+			} else if (choice == JOptionPane.NO_OPTION) {
+				System.out.println("No");
+			}
+
+			frame.pack();
+			frame.setVisible(false);
+		});
+
+		uploadingThread.start();
+	}
+
+	private void comPortChooser() {
+
+		System.out.println("Ok");
+
+		ComPortChooser comPortChooser = new ComPortChooser();
+
+		Thread uploadingTerminalThread = new Thread(() -> {
+			Compiler uploadingCompiler = new Compiler();
+			uploadingCompiler.upload(comPortChooser.getPortName());
+		});
+
+		if (comPortChooser.isUploadingStart() && comPortChooser.getPortName() != null) {
+			uploadingTerminalThread.start();
+		}
+		comPortChooser.setVisible(true);
+
+	}
+
+	private void compilationConfirm() {
 		// confirmation compiling dialog box
 		JFrame frame = new JFrame("Compiling...");
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
 		// sharing thread data
 		SharedResource sharedResource = new SharedResource();
 		
 		Thread progressThread = new Thread(() -> {
 			// progress bar Thread 1
-			JProgressBar progressBar = new JProgressBar(0,100);
-			progressBar.setStringPainted(true); // Display the percentage on the bar
-			progressBar.setPreferredSize(new Dimension(250, 30));
-			frame.setLayout(new FlowLayout(FlowLayout.CENTER));
-			frame.add(progressBar);
-			frame.setLocationRelativeTo(null);
-			frame.pack();
-			frame.setVisible(true);
+//			JProgressBar progressBar = new JProgressBar(0,100);
+//			progressBar.setStringPainted(true); // Display the percentage on the bar
+//			progressBar.setPreferredSize(new Dimension(250, 30));
+//			frame.setLayout(new FlowLayout(FlowLayout.CENTER));
+//			frame.add(progressBar);
+//			frame.setLocationRelativeTo(null);
+//			frame.pack();
+//			frame.setVisible(true);
+//			
+//			for (int i = 0; i <= 99; i++) {
+//				progressBar.setValue(i);
+//				try {
+//					if (!sharedResource.getData()) {
+//						if (i > 80) {
+//							Thread.sleep(1500); // Simulating progress updates
+//						} else if (i > 50) {
+//							Thread.sleep(900); // Simulating progress updates
+//						} else {
+//							Thread.sleep(500); // Simulating progress updates
+//						}
+//					} else if (sharedResource.getData()) {
+//						Thread.sleep(50); // Simulating progress updates
+//					}
+//				} catch (InterruptedException e) {
+//					e.printStackTrace();
+//				}
+//			}
+//			
+//			// while loop if 99% but compiling still working
+//			while(!sharedResource.getData()) {
+//				progressBar.setValue(99);
+//			}
+//				progressBar.setValue(100);
+//			
+//			
+//			frame.getContentPane().remove(progressBar);
+//			SwingUtilities.invokeLater(() -> {
+//				JOptionPane.showMessageDialog(frame, "Operation completed!", "Information",
+//						JOptionPane.INFORMATION_MESSAGE);
+//			});
+//			frame.dispose();
+			CompileWaitingBar compilingWaitingBar = new CompileWaitingBar();
 			
-			for (int i = 0; i <= 99; i++) {
-				progressBar.setValue(i);
-				try {
-					if (!sharedResource.getData()) {
-						if (i > 80) {
-							Thread.sleep(1500); // Simulating progress updates
-						} else if (i > 50) {
-							Thread.sleep(800); // Simulating progress updates
-						} else {
-							Thread.sleep(400); // Simulating progress updates
-						}
-					} else if (sharedResource.getData()) {
-						Thread.sleep(50); // Simulating progress updates
-					}
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
+			while(!sharedResource.getData());
 			
-			// while loop if 99% but compiling still working
-			while(!sharedResource.getData()) {
-				progressBar.setValue(99);
-			}
-				progressBar.setValue(100);
-			
-			
-			frame.getContentPane().remove(progressBar);
-			SwingUtilities.invokeLater(() -> {
-				JOptionPane.showMessageDialog(frame, "Operation completed!", "Information",
-						JOptionPane.INFORMATION_MESSAGE);
-			});
-			frame.dispose();
+			compilingWaitingBar.close();
 		});
 		
+		compilation.setCompilationStatus(5);
 		// compile Thread2
-	    Thread compileThread = new Thread(() -> {
-            // Operation 2 code here
-	    			sharedResource.setData(false);
-                    Compiler.compile();
-                    sharedResource.setData(true);
-        });
+		Thread compileThread = new Thread(() -> {
+			// Operation 2 code here
+			sharedResource.setData(false);
+
+			compilation.compile();
+			
+			sharedResource.setCompilationStatus(compilation.getCompilationStatus());
+			sharedResource.setData(true);
+			uploading(); // uploading method invoke
+		});
 		
 		int choice = JOptionPane.showConfirmDialog(frame, "Do you want to proceed compilation?", "Confirmation",
 				JOptionPane.YES_NO_OPTION);
 
 		if (choice == JOptionPane.YES_OPTION) {
 //			System.out.println("Yes");
-			try {
-				Thread.sleep(10); // Wait for 2 seconds
-				frame.dispose(); // Close the window if "No" is chosen
-				
-				
-				// start threads
-				progressThread.start();
-				compileThread.start();
-				
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+//				frame.dispose(); // Close the window if "No" is chosen
 
-			
+			// start threads
+			progressThread.start();
+			compileThread.start();
+//					try {
+//						progressThread.join(); // Wait for compileThread to finish
+//					} catch (InterruptedException e) {
+//						e.printStackTrace();
+//					}
+
 		} else if (choice == JOptionPane.NO_OPTION) {
 			System.out.println("No");
 		}
@@ -178,8 +233,17 @@ public class BuildRunEvent implements Observer {
 	
 	class SharedResource {
 	    private boolean isFinished;
+	    private int compilationStatus; // 0 - success, 1 - error
 
-	    synchronized void setData(boolean isFinished) {
+	    public int getCompilationStatus() {
+			return compilationStatus;
+		}
+
+		public void setCompilationStatus(int compilationStatus) {
+			this.compilationStatus = compilationStatus;
+		}
+
+		synchronized void setData(boolean isFinished) {
 	        this.isFinished = isFinished;
 	    }
 
