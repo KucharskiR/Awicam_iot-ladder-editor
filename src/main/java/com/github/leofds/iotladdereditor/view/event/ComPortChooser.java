@@ -5,14 +5,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Enumeration;
 
+
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 
 import com.github.leofds.iotladdereditor.i18n.Strings;
+import com.github.leofds.iotladdereditor.compiler.Compiler;
 
 import gnu.io.CommPortIdentifier;
 
@@ -37,6 +38,8 @@ public class ComPortChooser extends JFrame {
                 if (selectedPort != null) {
                     // Perform actions to connect using the selected COM port
                     // For example: Open and configure the serial port
+                	Compiler uploadCompiler = new Compiler();
+                	uploadCompiler.upload(selectedPort);
                     System.out.println("Connecting to " + selectedPort);
                 }
             }
@@ -60,13 +63,14 @@ public class ComPortChooser extends JFrame {
         }
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                ComPortChooser comPortChooser = new ComPortChooser();
-                comPortChooser.setVisible(true);
-            }
-        });
-    }
+//    ??????????????????????????
+//    public static void main(String[] args) {
+//        SwingUtilities.invokeLater(new Runnable() {
+//            @Override
+//            public void run() {
+//                ComPortChooser comPortChooser = new ComPortChooser();
+//                comPortChooser.setVisible(true);
+//            }
+//        });
+//    }
 }

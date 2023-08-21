@@ -172,7 +172,7 @@ public class Compiler{
 		Mediator.getInstance().outputConsoleMessage(msg);
 	}
 
-	public static int upload(String port) {
+	public int upload(String port) {
 		// TODO Auto-generated method stub
 
 		// command cmd compile function
