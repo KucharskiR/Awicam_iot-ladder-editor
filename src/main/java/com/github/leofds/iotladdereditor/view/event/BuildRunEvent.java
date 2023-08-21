@@ -31,6 +31,7 @@ import javax.swing.SwingUtilities;
 import com.github.leofds.iotladdereditor.application.Mediator;
 import com.github.leofds.iotladdereditor.compiler.Compiler;
 import com.github.leofds.iotladdereditor.util.WaitingBar;
+import com.github.leofds.iotladdereditor.util.bars.CompileWaitingBar;
 import com.github.leofds.iotladdereditor.view.event.Subject.SubMsg;
 
 public class BuildRunEvent implements Observer {
@@ -161,11 +162,11 @@ public class BuildRunEvent implements Observer {
 //						JOptionPane.INFORMATION_MESSAGE);
 //			});
 //			frame.dispose();
-			WaitingBar dotProgressBar = new WaitingBar();
+			CompileWaitingBar compilingWaitingBar = new CompileWaitingBar();
 			
 			while(!sharedResource.getData());
 			
-			dotProgressBar.close();
+			compilingWaitingBar.close();
 		});
 		
 		compilation.setCompilationStatus(5);

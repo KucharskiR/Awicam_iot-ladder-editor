@@ -185,6 +185,9 @@ public class Strings {
 	public static String compilationStartInfo() { return bundle.getString("compilationStartInfo"); }
 	public static String uploadingInfo() { return bundle.getString("uploadingInfo"); }
 	public static String upload() { return bundle.getString("upload"); }
+	public static String compilation() { return bundle.getString("compilation"); }
+	public static String pleaseWait() { return bundle.getString("pleaseWait"); }
+
 
 	
 }

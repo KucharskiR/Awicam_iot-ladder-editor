@@ -97,7 +97,7 @@ public class Compiler{
 		String info = Strings.compilationStartInfo();
 
 		// Output to the console
-		consoleOutput(info);
+		consoleOutput(info+"...");
 		
 		// Create waiting window
 //		createAndShowWaitingWindow();
