@@ -30,7 +30,7 @@ import javax.swing.SwingUtilities;
 
 import com.github.leofds.iotladdereditor.application.Mediator;
 import com.github.leofds.iotladdereditor.compiler.Compiler;
-import com.github.leofds.iotladdereditor.util.ProgressWaitingBar;
+import com.github.leofds.iotladdereditor.util.WaitingBar;
 import com.github.leofds.iotladdereditor.view.event.Subject.SubMsg;
 
 public class BuildRunEvent implements Observer {
@@ -161,7 +161,7 @@ public class BuildRunEvent implements Observer {
 //						JOptionPane.INFORMATION_MESSAGE);
 //			});
 //			frame.dispose();
-			ProgressWaitingBar dotProgressBar = new ProgressWaitingBar();
+			WaitingBar dotProgressBar = new WaitingBar();
 			
 			while(!sharedResource.getData());
 			
