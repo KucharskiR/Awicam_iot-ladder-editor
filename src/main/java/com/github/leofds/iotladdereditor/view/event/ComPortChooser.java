@@ -5,20 +5,23 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Enumeration;
 
-
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import com.github.leofds.iotladdereditor.i18n.Strings;
 import com.github.leofds.iotladdereditor.compiler.Compiler;
+import com.github.leofds.iotladdereditor.i18n.Strings;
 
 import gnu.io.CommPortIdentifier;
 
 
 public class ComPortChooser extends JFrame {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private JComboBox<String> comPortComboBox;
 
     public ComPortChooser() {
@@ -54,7 +57,8 @@ public class ComPortChooser extends JFrame {
     }
 
     private void populateComPortComboBox() {
-        Enumeration<CommPortIdentifier> portEnum = CommPortIdentifier.getPortIdentifiers();
+        @SuppressWarnings("unchecked")
+		Enumeration<CommPortIdentifier> portEnum = CommPortIdentifier.getPortIdentifiers();
         while (portEnum.hasMoreElements()) {
             CommPortIdentifier portIdentifier = portEnum.nextElement();
             if (portIdentifier.getPortType() == CommPortIdentifier.PORT_SERIAL) {
@@ -63,14 +67,4 @@ public class ComPortChooser extends JFrame {
         }
     }
 
-//    ??????????????????????????
-//    public static void main(String[] args) {
-//        SwingUtilities.invokeLater(new Runnable() {
-//            @Override
-//            public void run() {
-//                ComPortChooser comPortChooser = new ComPortChooser();
-//                comPortChooser.setVisible(true);
-//            }
-//        });
-//    }
 }
