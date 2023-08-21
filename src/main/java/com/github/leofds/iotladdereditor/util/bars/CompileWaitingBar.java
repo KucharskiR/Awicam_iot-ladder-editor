@@ -20,5 +20,4 @@ public class CompileWaitingBar extends WaitingBar {
 		return Strings.compilation();
 	}
 
-
 }

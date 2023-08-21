@@ -104,11 +104,17 @@ public class BuildRunEvent implements Observer {
 		System.out.println("Ok");
 
 		ComPortChooser comPortChooser = new ComPortChooser();
-		if(comPortChooser.isUploadingStart() && comPortChooser.getPortName() != null) {
+
+		Thread uploadingTerminalThread = new Thread(() -> {
 			Compiler uploadingCompiler = new Compiler();
 			uploadingCompiler.upload(comPortChooser.getPortName());
+		});
+
+		if (comPortChooser.isUploadingStart() && comPortChooser.getPortName() != null) {
+			uploadingTerminalThread.start();
 		}
 		comPortChooser.setVisible(true);
+
 	}
 
 	private void compilationConfirm() {
