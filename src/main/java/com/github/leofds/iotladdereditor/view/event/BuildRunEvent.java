@@ -32,6 +32,7 @@ import com.github.leofds.iotladdereditor.application.Mediator;
 import com.github.leofds.iotladdereditor.compiler.Compiler;
 import com.github.leofds.iotladdereditor.util.WaitingBar;
 import com.github.leofds.iotladdereditor.util.bars.CompileWaitingBar;
+import com.github.leofds.iotladdereditor.util.bars.UploadingWaitingBar;
 import com.github.leofds.iotladdereditor.view.event.Subject.SubMsg;
 
 public class BuildRunEvent implements Observer {
@@ -86,7 +87,7 @@ public class BuildRunEvent implements Observer {
 			if (choice == JOptionPane.YES_OPTION) {
 				System.out.println("Yes");
 				
-				comPortChooser();
+				comPortChooser(); 
 
 			} else if (choice == JOptionPane.NO_OPTION) {
 				System.out.println("No");
@@ -109,9 +110,14 @@ public class BuildRunEvent implements Observer {
 			Compiler uploadingCompiler = new Compiler();
 			uploadingCompiler.upload(comPortChooser.getPortName());
 		});
-
+		
+		Thread uploadingWaitingBar = new Thread(() -> {
+			UploadingWaitingBar uploadWaitingBar = new UploadingWaitingBar();
+		});
+		
 		if (comPortChooser.isUploadingStart() && comPortChooser.getPortName() != null) {
 			uploadingTerminalThread.start();
+			uploadingWaitingBar.start();
 		}
 		comPortChooser.setVisible(true);
 

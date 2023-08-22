@@ -6,9 +6,9 @@ import javax.swing.SwingUtilities;
 import com.github.leofds.iotladdereditor.i18n.Strings;
 import com.github.leofds.iotladdereditor.util.WaitingBar;
 
-public class CompileWaitingBar extends WaitingBar {
+public class UploadingWaitingBar extends WaitingBar {
 
-	public CompileWaitingBar() {
+	public UploadingWaitingBar() {
 		super();
 		
 	}
@@ -20,18 +20,17 @@ public class CompileWaitingBar extends WaitingBar {
 
 	@Override
 	public String title() {
-		return Strings.compilation();
+		return Strings.uploading();
 	}
-	
+
 	@Override
 	public void close() {
 		super.getFrame().getContentPane().removeAll();
 		
 		SwingUtilities.invokeLater(() -> {
-			 JOptionPane.showMessageDialog(super.getFrame(), Strings.compilationCompleted(), Strings.information(),
+			 JOptionPane.showMessageDialog(super.getFrame(), "Uploading completed!", Strings.information(),
 					JOptionPane.INFORMATION_MESSAGE);
 				super.getFrame().dispose();
 		});
 	}
-
 }

@@ -11,6 +11,9 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
+
+import com.github.leofds.iotladdereditor.i18n.Strings;
+
 import java.awt.BorderLayout;
 
 public class WaitingBar  {
@@ -42,6 +45,11 @@ public class WaitingBar  {
 
         frame.setVisible(true);
     }
+	
+
+	public JFrame getFrame() {
+		return frame;
+	}
 
     public String title() {
 		return "Process";
@@ -63,9 +71,10 @@ public class WaitingBar  {
 		frame.getContentPane().removeAll();
 		
 		SwingUtilities.invokeLater(() -> {
-			 JOptionPane.showMessageDialog(frame, "Compilation completed!", "Information",
+			 JOptionPane.showMessageDialog(frame, "Compilation completed!", Strings.information(),
 					JOptionPane.INFORMATION_MESSAGE);
 				frame.dispose();
 		});
 	}
+
 }

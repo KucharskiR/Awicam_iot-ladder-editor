@@ -187,6 +187,10 @@ public class Strings {
 	public static String upload() { return bundle.getString("upload"); }
 	public static String compilation() { return bundle.getString("compilation"); }
 	public static String pleaseWait() { return bundle.getString("pleaseWait"); }
+	public static String uploading() { return bundle.getString("uploading"); }
+	public static String information() { return bundle.getString("information"); }
+	public static String uploadingCompleted() { return bundle.getString("uploadingCompleted"); }
+	public static String compilationCompleted() { return bundle.getString("compilationCompleted"); }
 
 
 	
