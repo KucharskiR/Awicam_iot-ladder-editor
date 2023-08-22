@@ -17,20 +17,15 @@
 package com.github.leofds.iotladdereditor.view.event;
 
 import java.awt.Desktop;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.io.File;
 import java.util.Observable;
 import java.util.Observer;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JProgressBar;
-import javax.swing.SwingUtilities;
 
 import com.github.leofds.iotladdereditor.application.Mediator;
 import com.github.leofds.iotladdereditor.compiler.Compiler;
-import com.github.leofds.iotladdereditor.util.WaitingBar;
 import com.github.leofds.iotladdereditor.util.bars.CompileWaitingBar;
 import com.github.leofds.iotladdereditor.util.bars.UploadingWaitingBar;
 import com.github.leofds.iotladdereditor.view.event.Subject.SubMsg;
@@ -58,10 +53,10 @@ public class BuildRunEvent implements Observer {
 		build();
 		try {
 			switch(me.getProject().getLadderProgram().getProperties().getCodeOption()) {
-			case ESP32_ARDUINO_FREERTOS:
-				Desktop.getDesktop().open(new File("out/plc/plc.ino"));
-				compilationConfirm();
-				break;
+//			case ESP32_ARDUINO_FREERTOS:
+//				Desktop.getDesktop().open(new File("out/plc/plc.ino"));
+//				compilationConfirm();
+//				break;
 			case W1VC_ESP32_FREERTOS:
 				Desktop.getDesktop().open(new File("out/plc/plc.ino"));
 				compilationConfirm();
@@ -118,7 +113,7 @@ public class BuildRunEvent implements Observer {
 		if (comPortChooser.isUploadingStart() && comPortChooser.getPortName() != null) {
 			uploadingTerminalThread.start();
 			uploadingWaitingBar.start();
-		}
+		} 
 		comPortChooser.setVisible(true);
 
 	}
