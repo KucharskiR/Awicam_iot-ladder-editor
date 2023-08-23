@@ -81,7 +81,7 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 	private void createSourceFile(ProjectContainer p,SourceCode c){
 		IR ir = p.getIr();
 		
-		addPinsSymbolCommunication(ir);
+//		addPinsSymbolCommunication(ir);
 
 		c.createNewFile("plc/plc.ino");
 		addFileDescription(c);
@@ -90,7 +90,7 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 			addIoTIncludes(c);
 		}
 		addDefaultDefines(c);
-		addPinDefines(c);
+		//addPinDefines(c);
 		if(isConnectionConfigured()) {
 			addWifiConst(c);
 			addMqttConst(c);
@@ -104,9 +104,9 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 		addCountStruct(ir, c);
 		addGlobalSystemVariables(ir, c);
 		addTimerSystemFunction(c);
-		addGlobalVariables(ir, c);
+//		addGlobalVariables(ir, c);
 		
-		addGlobalStructs(ir, c);
+//		addGlobalStructs(ir, c);
 		if(isConnectionConfigured()) {
 			addTaskCom(c);
 			addSendMsg(c);
@@ -115,14 +115,14 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 		}
 		addUpdateSystem(c);
 
-		addInputSystemFunction(p, c);
-		addOutputSystemFunction(p, c);
+//		addInputSystemFunction(p, c);
+//		addOutputSystemFunction(p, c);
 		addScanTimeSystemFunction(ir, c);
 		addRungs(ir, c);
 		addInitSystemFunction(p, ir, c);
-		addTaskScan(ir, c);
+//		addTaskScan(ir, c);
 		
-		addSetup(c);
+		addSetup(ir, c);
 		addLoop(c);
 		for (Symbol symbol : ir.getSymbolTable()) {
 			System.out.println(symbol.toString());
@@ -157,7 +157,8 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 
 	private void addIncludes(SourceCode c) {
 		// TODO Auto-generated method stub
-		c.addl("#include \"include/main.h\"\r\n" + "");
+//		c.addl("#include \"include/main.h\"\r\n" + "");
+		c.addl("#include \"include/controller.h\"\r\n");
 	}
 	
 	/*
@@ -282,11 +283,13 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 	
 	private void addDefaultDefines(SourceCode c) {
 		c.newLine();
-		c.addl("#if CONFIG_FREERTOS_UNICORE\r\n" + 
-				"#define ARDUINO_RUNNING_CORE 0\r\n" + 
-				"#else\r\n" + 
-				"#define ARDUINO_RUNNING_CORE 1\r\n" + 
-				"#endif");
+//		c.addl("#if CONFIG_FREERTOS_UNICORE\r\n" + 
+//				"#define ARDUINO_RUNNING_CORE 0\r\n" + 
+//				"#else\r\n" + 
+//				"#define ARDUINO_RUNNING_CORE 1\r\n" + 
+//				"#endif");
+		c.addl("// Device \r\n"
+				+ "#define " + device.getName() +"_BOARD");
 	}
 	
 	private void addPinDefines(SourceCode c) {
@@ -549,21 +552,21 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 		Map<String, DeviceMemory> outputFiles = CodeGeneratorUtils.getOutput(project, c);
 		c.addl("  "+ProgramFunc.UPDATE.value+"();");
 
-		for(Entry<String, DeviceMemory> entry: inputFiles.entrySet()){
-			PeripheralIO peripheral = (PeripheralIO) entry.getValue();
-			c.addl("  pinMode("+peripheral.getPath()+", INPUT);");
-		}
-		for(Entry<String, DeviceMemory> entry: outputFiles.entrySet()){
-			PeripheralIO peripheral = (PeripheralIO) entry.getValue();
-			c.addl("  pinMode("+peripheral.getPath()+", OUTPUT);");
-		}
+//		for(Entry<String, DeviceMemory> entry: inputFiles.entrySet()){
+//			PeripheralIO peripheral = (PeripheralIO) entry.getValue();
+//			c.addl("  pinMode("+peripheral.getPath()+", INPUT);");
+//		}
+//		for(Entry<String, DeviceMemory> entry: outputFiles.entrySet()){
+//			PeripheralIO peripheral = (PeripheralIO) entry.getValue();
+//			c.addl("  pinMode("+peripheral.getPath()+", OUTPUT);");
+//		}
 		if(isConnectionConfigured()) {
 			if(properties.getEnableTelemetry()) {
 				c.addl("  telemetryTime = getTime();");
 			}
 		}
 		
-		addGpioDirection(c);
+//		addGpioDirection(c);
 		c.addl("}");
 	}
 	
@@ -750,17 +753,18 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 			Symbol argument2 = quadruple.getArgument2();
 			Symbol result = quadruple.getResult();
 
-			if(operator != null){
-
+			if(operator != null || true){
 				switch(operator){
 				case LABEL:
 					switch(result.getKind()){
 					case FUNCTION:
-						if(!result.getName().equals("main")){
+						if(!result.getName().equals("main")){   
+//							if(result.getName().equals("initContext")) // this line delete initContext() function from plc.ino
+//								return;
 							c.newLine();
 							c.add( getFunc(ir, result) );
 							c.addl("{");
-							addLocalVariables(ir, c, result.getName());
+							//addLocalVariables(ir, c, result.getName()); // this line removes local variables from initContext()
 						}else{
 							return;
 						}
@@ -1122,67 +1126,93 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 		 */
 	}
 	
-	private void addSetup(SourceCode c) {
+	private void addSetup( IR ir, SourceCode c) {
 		c.add("void setup()\r\n"
 				+ "{\r\n"
-				+ "  // czasem czeka na otwarcie portu\r\n"
-				+ "  Serial.setRxBufferSize(4096);\r\n"
-				+ "  Serial.begin(115200); \r\n"
-				+ "  \r\n"
-				+ "  vTaskDelay(1000 / portTICK_PERIOD_MS);\r\n"
-				+ "  #ifdef DEBUG\r\n"
-				+ "  Serial.setDebugOutput(true);\r\n"
-				+ "  static const char *TASK_TAG = \"MAIN_TASK\";\r\n"
-				+ "	ESP_LOGI(TASK_TAG, \"---------MAIN-------- \\n\");\r\n"
-				+ "	ESP_LOGI(TASK_TAG, \"portTick_PERIOD_MS %d\\n\", (int)portTICK_PERIOD_MS);\r\n"
-				+ "  #else\r\n"
-				+ "  Serial.setDebugOutput(false);\r\n"
-				+ "  #endif\r\n"
+				+ "  initController();\r\n"
 				+ "\r\n"
-				+ "	\r\n"
-				+ "  initController();  //init z controllera\r\n"
-				+ "  xTaskCreate(rx_task, \"uart_rx_task\", 1024*2, NULL, configMAX_PRIORITIES - 1, NULL);\r\n"
-				+ "  #ifdef DEBUG\r\n"
-				+ "  ESP_LOGI(TASK_TAG, \"uart_rx_task created!\");\r\n"
-				+ "  #endif\r\n"
-				+ "\r\n"
-				+ "  Update.onProgress(updateCallback);\r\n"
-				+ "  xTaskCreate(usbTask, \"usbTask\", 4096*2, NULL, configMAX_PRIORITIES - 5, NULL);\r\n"
-				+ "  #ifdef DEBUG\r\n"
-				+ "	ESP_LOGI(TASK_TAG, \"usbTask created!\");\r\n"
-				+ "  #endif\r\n"
-				+ "\r\n"
-				+ "	// initAP();\r\n"
-				+ "  initMemory();\r\n"
-				+ "  // initWebServer();\r\n"
-				+ "\r\n"
-				+ "/*-------- Progam FPGA ---------*/\r\n"
-				+ "  vTaskDelay(1000 / portTICK_PERIOD_MS);\r\n"
-				+ "  programFPGA();\r\n"
-				+ "  #ifdef DEBUG\r\n"
-				+ "	ESP_LOGI(TASK_TAG, \"Program FPGA done!\");\r\n"
-				+ "  #endif\r\n"
-				+ "\r\n"
-				+ "\r\n"
-				+ "  vTaskDelay(1000 / portTICK_PERIOD_MS);\r\n"
-				+ "\r\n"
-				+ "\r\n"
-				+ "\r\n"
+				+ "  init();\r\n"
+				+ "  initContext();\r\n"
 				+ "  while(1) \r\n"
 				+ "  {\r\n"
 				+ "    readInputs();\r\n"
-				+ "    vTaskDelay(1 / portTICK_PERIOD_MS);\r\n"
-				+ "    testLadderDiagramProgram();\r\n"
-				+ "    writeOutputs();\r\n"
-				+ "  \r\n"
-				+ "    // for(int i = 1; i < boardsNumber + 1; i++) {\r\n"
-				+ "    // SendDigitalOutputs(i, 0xFFFF);\r\n"
-				+ "    // vTaskDelay(500 / portTICK_PERIOD_MS);\r\n"
-				+ "    // SendDigitalOutputs(i, 0x0000);\r\n"
-				+ "    // vTaskDelay(500 / portTICK_PERIOD_MS);\r\n"
-				+ "    // }\r\n"
+				+ "    refreshTime64bit();\r\n"
+				+ "    vTaskDelay(1 / portTICK_PERIOD_MS);\r\n");
+		
+		// rung loop generator
+		for(Symbol symbol:ir.getSymbolTable()){
+			if( symbol != null && 
+				symbol.getKind() != null && 
+				symbol.getKind().equals(Kind.FUNCTION) && 
+				symbol.getName().contains(ProgramFunc.RUNG.value)){
+				c.addl("    "+symbol.getName()+"();");
+			}
+		}
+		//--------------------
+				c.add("    writeOutputs();\r\n"
 				+ "  }\r\n"
 				+ "}");
+				
+//		c.add("void setup()\r\n"
+//				+ "{\r\n"
+//				+ "  // czasem czeka na otwarcie portu\r\n"
+//				+ "  Serial.setRxBufferSize(4096);\r\n"
+//				+ "  Serial.begin(115200); \r\n"
+//				+ "  \r\n"
+//				+ "  vTaskDelay(1000 / portTICK_PERIOD_MS);\r\n"
+//				+ "  #ifdef DEBUG\r\n"
+//				+ "  Serial.setDebugOutput(true);\r\n"
+//				+ "  static const char *TASK_TAG = \"MAIN_TASK\";\r\n"
+//				+ "	ESP_LOGI(TASK_TAG, \"---------MAIN-------- \\n\");\r\n"
+//				+ "	ESP_LOGI(TASK_TAG, \"portTick_PERIOD_MS %d\\n\", (int)portTICK_PERIOD_MS);\r\n"
+//				+ "  #else\r\n"
+//				+ "  Serial.setDebugOutput(false);\r\n"
+//				+ "  #endif\r\n"
+//				+ "\r\n"
+//				+ "	\r\n"
+//				+ "  initController();  //init z controllera\r\n"
+//				+ "  xTaskCreate(rx_task, \"uart_rx_task\", 1024*2, NULL, configMAX_PRIORITIES - 1, NULL);\r\n"
+//				+ "  #ifdef DEBUG\r\n"
+//				+ "  ESP_LOGI(TASK_TAG, \"uart_rx_task created!\");\r\n"
+//				+ "  #endif\r\n"
+//				+ "\r\n"
+//				+ "  Update.onProgress(updateCallback);\r\n"
+//				+ "  xTaskCreate(usbTask, \"usbTask\", 4096*2, NULL, configMAX_PRIORITIES - 5, NULL);\r\n"
+//				+ "  #ifdef DEBUG\r\n"
+//				+ "	ESP_LOGI(TASK_TAG, \"usbTask created!\");\r\n"
+//				+ "  #endif\r\n"
+//				+ "\r\n"
+//				+ "	// initAP();\r\n"
+//				+ "  initMemory();\r\n"
+//				+ "  // initWebServer();\r\n"
+//				+ "\r\n"
+//				+ "/*-------- Progam FPGA ---------*/\r\n"
+//				+ "  vTaskDelay(1000 / portTICK_PERIOD_MS);\r\n"
+//				+ "  programFPGA();\r\n"
+//				+ "  #ifdef DEBUG\r\n"
+//				+ "	ESP_LOGI(TASK_TAG, \"Program FPGA done!\");\r\n"
+//				+ "  #endif\r\n"
+//				+ "\r\n"
+//				+ "\r\n"
+//				+ "  vTaskDelay(1000 / portTICK_PERIOD_MS);\r\n"
+//				+ "\r\n"
+//				+ "\r\n"
+//				+ "\r\n"
+//				+ "  while(1) \r\n"
+//				+ "  {\r\n"
+//				+ "    readInputs();\r\n"
+//				+ "    vTaskDelay(1 / portTICK_PERIOD_MS);\r\n"
+//				+ "    testLadderDiagramProgram();\r\n"
+//				+ "    writeOutputs();\r\n"
+//				+ "  \r\n"
+//				+ "    // for(int i = 1; i < boardsNumber + 1; i++) {\r\n"
+//				+ "    // SendDigitalOutputs(i, 0xFFFF);\r\n"
+//				+ "    // vTaskDelay(500 / portTICK_PERIOD_MS);\r\n"
+//				+ "    // SendDigitalOutputs(i, 0x0000);\r\n"
+//				+ "    // vTaskDelay(500 / portTICK_PERIOD_MS);\r\n"
+//				+ "    // }\r\n"
+//				+ "  }\r\n"
+//				+ "}");
 		
 	}
 	
