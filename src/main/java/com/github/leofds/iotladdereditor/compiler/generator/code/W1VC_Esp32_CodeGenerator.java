@@ -85,11 +85,12 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 
 		c.createNewFile("plc/plc.ino");
 		addFileDescription(c);
-		addIncludes(c);
+//		addIncludes(c);
 		if(isConnectionConfigured()) {
 			addIoTIncludes(c);
 		}
 		addDefaultDefines(c);
+		addStaticDefines(c);
 		//addPinDefines(c);
 		if(isConnectionConfigured()) {
 			addWifiConst(c);
@@ -129,6 +130,34 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 		}
 	}
 	
+	private void addStaticDefines(SourceCode c) {
+		c.addl("#define LD_Q0_1(value) ((inputs[0].digitalOutputStates = ((inputs[0].digitalOutputStates & ~(0x0001)) | ((value & 0x01)))))\r\n"
+				+ "#define LD_Q0_2(value) ((inputs[0].digitalOutputStates = ((inputs[0].digitalOutputStates & ~(0x0002)) | ((value & 0x01) << 1))))\r\n"
+				+ "#define LD_Q0_3(value) ((inputs[0].digitalOutputStates = ((inputs[0].digitalOutputStates & ~(0x0004)) | ((value & 0x01) << 2))))\r\n"
+				+ "#define LD_Q0_4(value) ((inputs[0].digitalOutputStates = ((inputs[0].digitalOutputStates & ~(0x0008)) | ((value & 0x01) << 3))))\r\n"
+				+ "#define LD_Q0_5(value) ((inputs[0].digitalOutputStates = ((inputs[0].digitalOutputStates & ~(0x0010)) | ((value & 0x01) << 4))))\r\n"
+				+ "#define LD_Q0_6(value) ((inputs[0].digitalOutputStates = ((inputs[0].digitalOutputStates & ~(0x0020)) | ((value & 0x01) << 5))))\r\n"
+				+ "#define LD_Q0_7(value) ((inputs[0].digitalOutputStates = ((inputs[0].digitalOutputStates & ~(0x0040)) | ((value & 0x01) << 6))))\r\n"
+				+ "#define LD_Q0_8(value) ((inputs[0].digitalOutputStates = ((inputs[0].digitalOutputStates & ~(0x0080)) | ((value & 0x01) << 7))))\r\n"
+				+ "#define LD_Q0_9(value) ((inputs[0].digitalOutputStates = ((inputs[0].digitalOutputStates & ~(0x0100)) | ((value & 0x01) << 8))))\r\n"
+				+ "#define LD_Q0_10(value) ((inputs[0].digitalOutputStates = ((inputs[0].digitalOutputStates & ~(0x0200)) | ((value & 0x01) << 9))))\r\n"
+				+ "#define LD_Q0_11(value) ((inputs[0].digitalOutputStates = ((inputs[0].digitalOutputStates & ~(0x0400)) | ((value & 0x01) << 10))))\r\n"
+				+ "#define LD_Q0_12(value) ((inputs[0].digitalOutputStates = ((inputs[0].digitalOutputStates & ~(0x0800)) | ((value & 0x01) << 11))))\r\n"
+				+ "\r\n"
+				+ "#define LD_I0_1 ((inputs[0].digitalInputStates & 0x0001))\r\n"
+				+ "#define LD_I0_2 (((inputs[0].digitalInputStates>>1) & 0x0001))\r\n"
+				+ "#define LD_I0_3 (((inputs[0].digitalInputStates>>2) & 0x0001))\r\n"
+				+ "#define LD_I0_4 (((inputs[0].digitalInputStates>>3) & 0x0001))\r\n"
+				+ "#define LD_I0_5 (((inputs[0].digitalInputStates>>4) & 0x0001))\r\n"
+				+ "#define LD_I0_6 (((inputs[0].digitalInputStates>>5) & 0x0001))\r\n"
+				+ "#define LD_I0_7 (((inputs[0].digitalInputStates>>6) & 0x0001))\r\n"
+				+ "#define LD_I0_8 (((inputs[0].digitalInputStates>>7) & 0x0001))\r\n"
+				+ "#define LD_I0_9 (((inputs[0].digitalInputStates>>8) & 0x0001))\r\n"
+				+ "#define LD_I0_10 (((inputs[0].digitalInputStates>>9) & 0x0001))\r\n"
+				+ "#define LD_I0_11 (((inputs[0].digitalInputStates>>10) & 0x0001))\r\n"
+				+ "#define LD_I0_12 (((inputs[0].digitalInputStates>>11) & 0x0001))");
+	}
+
 	private void addGpioDirection(SourceCode c) {
 		// TODO Auto-generated method stub
 //		 gpio_set_direction(INPUT1_PIN, GPIO_MODE_INPUT);
@@ -290,6 +319,7 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 //				"#endif");
 		c.addl("// Device \r\n"
 				+ "#define " + device.getName() +"_BOARD");
+		addIncludes(c);
 	}
 	
 	private void addPinDefines(SourceCode c) {
@@ -752,7 +782,7 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 			Symbol argument1 = quadruple.getArgument1();
 			Symbol argument2 = quadruple.getArgument2();
 			Symbol result = quadruple.getResult();
-
+			
 			if(operator != null || true){
 				switch(operator){
 				case LABEL:
@@ -764,7 +794,7 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 							c.newLine();
 							c.add( getFunc(ir, result) );
 							c.addl("{");
-							//addLocalVariables(ir, c, result.getName()); // this line removes local variables from initContext()
+							//addLocalVariables(ir, c, result.getName()); // this comment removes local variables from initContext()
 						}else{
 							return;
 						}
