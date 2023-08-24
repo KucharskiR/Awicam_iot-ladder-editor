@@ -107,7 +107,7 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 		addTimerSystemFunction(c);
 //		addGlobalVariables(ir, c);
 		
-//		addGlobalStructs(ir, c);
+		addGlobalStructs(ir, c);
 		if(isConnectionConfigured()) {
 			addTaskCom(c);
 			addSendMsg(c);
@@ -794,7 +794,7 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 							c.newLine();
 							c.add( getFunc(ir, result) );
 							c.addl("{");
-							//addLocalVariables(ir, c, result.getName()); // this comment removes local variables from initContext()
+							addLocalVariables(ir, c, result.getName()); // this comment removes local variables from initContext()
 						}else{
 							return;
 						}
@@ -826,7 +826,10 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 					for(int i=0;i<labels.size();i++) { 
 						c.add("  ");
 					}
-					c.addl("  "+cname(result.getName())+" = "+cname(argument1.getName())+";");
+					if (result.getName().contains("Q") || result.getName().contains("I"))
+						c.addl("  " + cname(result.getName()) + "(" + cname(argument1.getName()) + ");");
+					else
+						c.addl("  " + cname(result.getName())+" = "+cname(argument1.getName())+";");
 					break;
 				case NOT:
 					for(int i=0;i<labels.size();i++){ 
