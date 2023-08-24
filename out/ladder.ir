@@ -1,72 +1,15 @@
 rung001:
   _S0 = 1
 
-  ;****** TMR ON (T1) ******
-  T1:EN = _S0
-  if _S0 goto L1
-  T1:DN = 0
-  T1:AC = 0
-  T1:TT = call getTime,0
-  goto L2
+  ;****** | | (I0_8) ******
+  if I0_8 goto L1
+  _S0 = 0
 L1:
-  if T1:DN goto L2
-  _T1 = call getTime,0
-  _T2 = _T1 - T1:TT
-  if _T2 < T1:B goto L2
-  T1:TT = _T1
-  T1:AC = T1:AC + 1
-  if T1:AC < T1:PRE goto L2
-  T1:DN = 1
-L2:
-  _S0 = T1:DN
 
-  ;****** ( ) (Q0_8) ******
-  Q0_8 = _S0
-
-  ;****** TMR ON (T2) ******
-  T2:EN = _S0
-  if _S0 goto L3
-  T2:DN = 0
-  T2:AC = 0
-  T2:TT = call getTime,0
-  goto L4
-L3:
-  if T2:DN goto L4
-  _T3 = call getTime,0
-  _T4 = _T3 - T2:TT
-  if _T4 < T2:B goto L4
-  T2:TT = _T3
-  T2:AC = T2:AC + 1
-  if T2:AC < T2:PRE goto L4
-  T2:DN = 1
-L4:
-  _S0 = T2:DN
-
-  ;****** RESET (T1) ******
-  ifFalse _S0 goto L5
-  T1:DN = 0
-  T1:AC = 0
-  T1:EN = 0
-  T1:TT = call getTime,0
-L5:
+  ;****** ( ) (Q0_3) ******
+  Q0_3 = _S0
   return
 initContext:
-
-  ;****** TMR ON (T2) ******
-  T2:EN = 0
-  T2:AC = 0
-  T2:PRE = 1
-  T2:B = 200
-  T2:DN = 0
-  T2:TT = call getTime,0
-
-  ;****** TMR ON (T1) ******
-  T1:EN = 0
-  T1:AC = 0
-  T1:PRE = 1
-  T1:B = 200
-  T1:DN = 0
-  T1:TT = call getTime,0
   return
 main:
   call initContext,0

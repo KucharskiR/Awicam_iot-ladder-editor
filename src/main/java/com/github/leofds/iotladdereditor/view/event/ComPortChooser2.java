@@ -3,6 +3,7 @@ package com.github.leofds.iotladdereditor.view.event;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Enumeration;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -10,11 +11,12 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import com.fazecast.jSerialComm.SerialPort;
 import com.github.leofds.iotladdereditor.i18n.Strings;
 
+import gnu.io.CommPortIdentifier;
 
-public class ComPortChooser extends JFrame {
+
+public class ComPortChooser2 extends JFrame {
 	/**
 	 * 
 	 */
@@ -31,7 +33,7 @@ public class ComPortChooser extends JFrame {
 		return portName;
 	}
 
-	public ComPortChooser() {
+	public ComPortChooser2() {
     	this.uploadingStart = false;
     	this.portName = null;
     	
@@ -76,19 +78,13 @@ public class ComPortChooser extends JFrame {
     }
 
     private void populateComPortComboBox() {
-//        @SuppressWarnings("unchecked")
-//		Enumeration<CommPortIdentifier> portEnum = CommPortIdentifier.getPortIdentifiers();
-//        while (portEnum.hasMoreElements()) {
-//            CommPortIdentifier portIdentifier = portEnum.nextElement();
-//            if (portIdentifier.getPortType() == CommPortIdentifier.PORT_SERIAL) {
-//                comPortComboBox.addItem(portIdentifier.getName());
-//            }
-//        }
-        SerialPort[] ports = SerialPort.getCommPorts();
-        for (SerialPort port : ports) {
-            String portName = port.getSystemPortName();
-            System.out.println("COM Port: " + portName);
-            comPortComboBox.addItem(portName);
+        @SuppressWarnings("unchecked")
+		Enumeration<CommPortIdentifier> portEnum = CommPortIdentifier.getPortIdentifiers();
+        while (portEnum.hasMoreElements()) {
+            CommPortIdentifier portIdentifier = portEnum.nextElement();
+            if (portIdentifier.getPortType() == CommPortIdentifier.PORT_SERIAL) {
+                comPortComboBox.addItem(portIdentifier.getName());
+            }
         }
     }
 
