@@ -11,11 +11,12 @@
 // #define W1VC1616R_BOARD
 #endif
 
+
 #define DEBUG
 #define NO_DEBUG_UART
 #define NO_DEBUG_SPI
 
-//Disable this to eg revers CS polarity 
+//Disable this to revers CS polarity 
 #define TEST_SPI
 
 /*---------------------------------------------*/
@@ -36,7 +37,8 @@
 /*-------------UART CONFIGURATION--------------*/
 /*---------------------------------------------*/
 // UART -> BB
-#define UART_BB UART_NUM_0
+//Póki co uart1 zamiast uart0 bo na arduino cli nie dziala (coś jeszcze jakieś smieci wysyła)
+#define UART_BB UART_NUM_1
 #define TXD_PIN (GPIO_NUM_21)
 #define RXD_PIN (GPIO_NUM_20)
 #define MULTI_IO (GPIO_NUM_9)
@@ -84,6 +86,7 @@
 
 #define OUTPUT1_PIN (GPIO_NUM_6)
 #define OUTPUT2_PIN (GPIO_NUM_7)
+// Trzeba zrobić by pin GPIO 2 i 8 działało jako output i w spi
 #define OUTPUT3_PIN (GPIO_NUM_8)
 #define OUTPUT4_PIN (GPIO_NUM_2)
 
