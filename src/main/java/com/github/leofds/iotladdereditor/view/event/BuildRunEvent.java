@@ -58,7 +58,7 @@ public class BuildRunEvent implements Observer {
 //				compilationConfirm();
 //				break;
 			case W1VC_ESP32_FREERTOS:
-				Desktop.getDesktop().open(new File("out/plc/plc.ino"));
+//				Desktop.getDesktop().open(new File("out/plc/plc.ino"));
 				compilationConfirm();
 				break;
 			default:
@@ -182,9 +182,11 @@ public class BuildRunEvent implements Observer {
 
 			compilation.compile();
 			
+			if (compilation.getCompilationStatus() == 0) {
+				sharedResource.setData(true);
+				uploading(); // uploading method invoke
+			}
 			sharedResource.setCompilationStatus(compilation.getCompilationStatus());
-			sharedResource.setData(true);
-			uploading(); // uploading method invoke
 		});
 		
 		int choice = JOptionPane.showConfirmDialog(frame, "Do you want to proceed compilation?", "Confirmation",

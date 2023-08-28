@@ -14,6 +14,10 @@ import com.fazecast.jSerialComm.SerialPort;
 import com.github.leofds.iotladdereditor.compiler.Compiler;
 import com.github.leofds.iotladdereditor.i18n.Strings;
 import com.github.leofds.iotladdereditor.util.bars.UploadingWaitingBar;
+import com.github.leofds.iotladdereditor.view.event.BuildRunEvent.SharedResource;
+import java.awt.BorderLayout;
+import javax.swing.BoxLayout;
+import java.awt.FlowLayout;
 
 
 public class ComPortChooser extends JFrame {
@@ -34,74 +38,102 @@ public class ComPortChooser extends JFrame {
 	}
 
 	public ComPortChooser() {
-    	this.uploadingStart = false;
-    	this.portName = null;
-    	
-        setTitle("ESP Upload");
-        setSize(350, 100);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
+		this.uploadingStart = false;
+		this.portName = null;
 
-        comPortComboBox = new JComboBox<>();
-        comPortComboBox.setBounds(128, 11, 55, 21);
-        populateComPortComboBox();
-        JButton connectButton = new JButton(Strings.upload());
-        connectButton.setBounds(193, 10, 67, 23);
-        connectButton.setFont(new Font("Tahoma", Font.PLAIN, 12));
+		setTitle("ESP Upload");
+		setSize(350, 100);
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		setLocationRelativeTo(null);
 
-        connectButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String selectedPort = (String) comPortComboBox.getSelectedItem();
-                if (selectedPort != null) {
-                    // Perform actions to connect using the selected COM port
-                    // For example: Open and configure the serial port
+		comPortComboBox = new JComboBox<>();
+		comPortComboBox.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		populateComPortComboBox();
+		JButton connectButton = new JButton(Strings.upload());
+		connectButton.setFont(new Font("Tahoma", Font.PLAIN, 13));
+
+		// sharing thread data
+		SharedResource sharedResource = new SharedResource();
+		
+		Thread uploadingTerminalThread = new Thread(() -> {
+			sharedResource.setData(false);
+			
+			Compiler uploadingCompiler = new Compiler();
+			
+			uploadingCompiler.upload(portName);
+			
+			sharedResource.setData(true);
+			
+		});
+		
+		Thread uploadingWaitingBar = new Thread(() -> {
+			UploadingWaitingBar uploadWaitingBar = new UploadingWaitingBar();
+			
+			while (!sharedResource.getData())
+				;
+			uploadWaitingBar.close();
+			
+		});
+
+		connectButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String selectedPort = (String) comPortComboBox.getSelectedItem();
+				if (selectedPort != null) {
+					// Perform actions to connect using the selected COM port
+					// For example: Open and configure the serial port
 //                	Compiler uploadCompiler = new Compiler();
 //                	uploadCompiler.upload(selectedPort);
-                	uploadingStart = true;
-                    portName = selectedPort;
-                    System.out.println("Connecting to " + selectedPort);
-                	Thread uploadingTerminalThread = new Thread(() -> {
-            			Compiler uploadingCompiler = new Compiler();
-            			uploadingCompiler.upload(portName);
-            		});
+					uploadingStart = true;
+					portName = selectedPort;
 
-            		Thread uploadingWaitingBar = new Thread(() -> {
-            			UploadingWaitingBar uploadWaitingBar = new UploadingWaitingBar();
-            		});
-            		
-        			uploadingTerminalThread.start();
-        			uploadingWaitingBar.start();
-                }
-            }
-        });
+					System.out.println("Connecting to " + selectedPort);
 
-        JPanel panel = new JPanel();
-        panel.setLayout(null);
-        JLabel label = new JLabel("Select COM Port:");
-        label.setBounds(29, 13, 89, 15);
-        label.setFont(new Font("Tahoma", Font.PLAIN, 12));
-        panel.add(label);
-        panel.add(comPortComboBox);
-        panel.add(connectButton);
+					uploadingTerminalThread.start();
+					uploadingWaitingBar.start();
+				}
+			}
+		});
 
-        getContentPane().add(panel);
-    }
+		JPanel panel = new JPanel();
+		panel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+		JLabel label = new JLabel("Select COM Port:");
+		label.setFont(new Font("Tahoma", Font.PLAIN, 13));
+		panel.add(label);
+		panel.add(comPortComboBox);
+		panel.add(connectButton);
+
+		getContentPane().add(panel);
+	}
 
 	private void populateComPortComboBox() {
-//        @SuppressWarnings("unchecked")
-//		Enumeration<CommPortIdentifier> portEnum = CommPortIdentifier.getPortIdentifiers();
-//        while (portEnum.hasMoreElements()) {
-//            CommPortIdentifier portIdentifier = portEnum.nextElement();
-//            if (portIdentifier.getPortType() == CommPortIdentifier.PORT_SERIAL) {
-//                comPortComboBox.addItem(portIdentifier.getName());
-//            }
-//        }
+		
 		SerialPort[] ports = SerialPort.getCommPorts();
 		for (SerialPort port : ports) {
 			String portName = port.getSystemPortName();
 			comPortComboBox.addItem(portName);
 		}
+	}
+	
+	class SharedResource {
+	    private boolean isFinished;
+	    private int compilationStatus; // 0 - success, 1 - error
+
+	    public int getCompilationStatus() {
+			return compilationStatus;
+		}
+
+		public void setCompilationStatus(int compilationStatus) {
+			this.compilationStatus = compilationStatus;
+		}
+
+		synchronized void setData(boolean isFinished) {
+	        this.isFinished = isFinished;
+	    }
+
+	    synchronized boolean getData() {
+	        return isFinished;
+	    }
 	}
 
 }
