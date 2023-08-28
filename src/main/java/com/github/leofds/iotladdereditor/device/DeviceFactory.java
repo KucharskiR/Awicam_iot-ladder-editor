@@ -196,17 +196,17 @@ public class DeviceFactory {
 
 			device.setName(mainDevice);
 
-			PeripheralIO pc1out = new PeripheralIO("Q0_1", Boolean.class, "2", "PIN_Q0_1", IO.OUTPUT);
-			PeripheralIO pc2out = new PeripheralIO("Q0_2", Boolean.class, "4", "PIN_Q0_2", IO.OUTPUT);
-			PeripheralIO pc3out = new PeripheralIO("Q0_3", Boolean.class, "12", "PIN_Q0_3", IO.OUTPUT);
-			PeripheralIO pc4out = new PeripheralIO("Q0_4", Boolean.class, "13", "PIN_Q0_4", IO.OUTPUT);
+			PeripheralIO pc1out = new PeripheralIO("Q0_1", Boolean.class, "1", "PIN_Q0_1", IO.OUTPUT);
+			PeripheralIO pc2out = new PeripheralIO("Q0_2", Boolean.class, "2", "PIN_Q0_2", IO.OUTPUT);
+			PeripheralIO pc3out = new PeripheralIO("Q0_3", Boolean.class, "3", "PIN_Q0_3", IO.OUTPUT);
+			PeripheralIO pc4out = new PeripheralIO("Q0_4", Boolean.class, "4", "PIN_Q0_4", IO.OUTPUT);
 
-			PeripheralIO pc1in = new PeripheralIO("I0_1", Boolean.class, "14", "PIN_I0_1", IO.INPUT);
-			PeripheralIO pc2in = new PeripheralIO("I0_2", Boolean.class, "16", "PIN_I0_2", IO.INPUT);
-			PeripheralIO pc3in = new PeripheralIO("I0_3", Boolean.class, "17", "PIN_I0_3", IO.INPUT);
-			PeripheralIO pc4in = new PeripheralIO("I0_4", Boolean.class, "18", "PIN_I0_4", IO.INPUT);
-			PeripheralIO pc5in = new PeripheralIO("I0_5", Boolean.class, "19", "PIN_I0_5", IO.INPUT);
-			PeripheralIO pc6in = new PeripheralIO("I0_6", Boolean.class, "21", "PIN_I0_6", IO.INPUT);
+			PeripheralIO pc1in = new PeripheralIO("I0_1", Boolean.class, "1", "PIN_I0_1", IO.INPUT);
+			PeripheralIO pc2in = new PeripheralIO("I0_2", Boolean.class, "2", "PIN_I0_2", IO.INPUT);
+			PeripheralIO pc3in = new PeripheralIO("I0_3", Boolean.class, "3", "PIN_I0_3", IO.INPUT);
+			PeripheralIO pc4in = new PeripheralIO("I0_4", Boolean.class, "4", "PIN_I0_4", IO.INPUT);
+			PeripheralIO pc5in = new PeripheralIO("I0_5", Boolean.class, "5", "PIN_I0_5", IO.INPUT);
+			PeripheralIO pc6in = new PeripheralIO("I0_6", Boolean.class, "6", "PIN_I0_6", IO.INPUT);
 
 			output.addPeripheralItem(pc1out);
 			output.addPeripheralItem(pc2out);
@@ -223,27 +223,27 @@ public class DeviceFactory {
 
 				device.setName(mainDevice);
 
-				PeripheralIO pc1out = new PeripheralIO("Q0_1", Boolean.class, "2", "PIN_Q0_1", IO.OUTPUT);
-				PeripheralIO pc2out = new PeripheralIO("Q0_2", Boolean.class, "4", "PIN_Q0_2", IO.OUTPUT);
-				PeripheralIO pc3out = new PeripheralIO("Q0_3", Boolean.class, "12", "PIN_Q0_3", IO.OUTPUT);
-				PeripheralIO pc4out = new PeripheralIO("Q0_4", Boolean.class, "13", "PIN_Q0_4", IO.OUTPUT);
-				PeripheralIO pc5out = new PeripheralIO("Q0_5", Boolean.class, "33", "PIN_Q0_5", IO.OUTPUT);
-				PeripheralIO pc6out = new PeripheralIO("Q0_6", Boolean.class, "25", "PIN_Q0_6", IO.OUTPUT);
-				PeripheralIO pc7out = new PeripheralIO("Q0_7", Boolean.class, "26", "PIN_Q0_7", IO.OUTPUT);
-				PeripheralIO pc8out = new PeripheralIO("Q0_8", Boolean.class, "27", "PIN_Q0_8", IO.OUTPUT);
+				PeripheralIO pc1out = new PeripheralIO("Q0_1", Boolean.class, "1", "PIN_Q0_1", IO.OUTPUT);
+				PeripheralIO pc2out = new PeripheralIO("Q0_2", Boolean.class, "2", "PIN_Q0_2", IO.OUTPUT);
+				PeripheralIO pc3out = new PeripheralIO("Q0_3", Boolean.class, "3", "PIN_Q0_3", IO.OUTPUT);
+				PeripheralIO pc4out = new PeripheralIO("Q0_4", Boolean.class, "4", "PIN_Q0_4", IO.OUTPUT);
+				PeripheralIO pc5out = new PeripheralIO("Q0_5", Boolean.class, "5", "PIN_Q0_5", IO.OUTPUT);
+				PeripheralIO pc6out = new PeripheralIO("Q0_6", Boolean.class, "6", "PIN_Q0_6", IO.OUTPUT);
+				PeripheralIO pc7out = new PeripheralIO("Q0_7", Boolean.class, "7", "PIN_Q0_7", IO.OUTPUT);
+				PeripheralIO pc8out = new PeripheralIO("Q0_8", Boolean.class, "8", "PIN_Q0_8", IO.OUTPUT);
 
-				PeripheralIO pc1in = new PeripheralIO("I0_1", Boolean.class, "14", "PIN_I0_1", IO.INPUT);
-				PeripheralIO pc2in = new PeripheralIO("I0_2", Boolean.class, "16", "PIN_I0_2", IO.INPUT);
-				PeripheralIO pc3in = new PeripheralIO("I0_3", Boolean.class, "17", "PIN_I0_3", IO.INPUT);
-				PeripheralIO pc4in = new PeripheralIO("I0_4", Boolean.class, "18", "PIN_I0_4", IO.INPUT);
-				PeripheralIO pc5in = new PeripheralIO("I0_5", Boolean.class, "19", "PIN_I0_5", IO.INPUT);
-				PeripheralIO pc6in = new PeripheralIO("I0_6", Boolean.class, "21", "PIN_I0_6", IO.INPUT);
-				PeripheralIO pc7in = new PeripheralIO("I0_7", Boolean.class, "22", "PIN_I0_7", IO.INPUT);
-				PeripheralIO pc8in = new PeripheralIO("I0_8", Boolean.class, "23", "PIN_I0_8", IO.INPUT);
-				PeripheralIO pc9in = new PeripheralIO("I0_9", Boolean.class, "25", "PIN_I0_9", IO.INPUT);
-				PeripheralIO pc10in = new PeripheralIO("I0_10", Boolean.class, "26", "PIN_I0_10", IO.INPUT);
-				PeripheralIO pc11in = new PeripheralIO("I0_11", Boolean.class, "27", "PIN_I0_11", IO.INPUT);
-				PeripheralIO pc12in = new PeripheralIO("I0_12", Boolean.class, "28", "PIN_I0_12", IO.INPUT);
+				PeripheralIO pc1in = new PeripheralIO("I0_1", Boolean.class, "1", "PIN_I0_1", IO.INPUT);
+				PeripheralIO pc2in = new PeripheralIO("I0_2", Boolean.class, "2", "PIN_I0_2", IO.INPUT);
+				PeripheralIO pc3in = new PeripheralIO("I0_3", Boolean.class, "3", "PIN_I0_3", IO.INPUT);
+				PeripheralIO pc4in = new PeripheralIO("I0_4", Boolean.class, "4", "PIN_I0_4", IO.INPUT);
+				PeripheralIO pc5in = new PeripheralIO("I0_5", Boolean.class, "5", "PIN_I0_5", IO.INPUT);
+				PeripheralIO pc6in = new PeripheralIO("I0_6", Boolean.class, "6", "PIN_I0_6", IO.INPUT);
+				PeripheralIO pc7in = new PeripheralIO("I0_7", Boolean.class, "7", "PIN_I0_7", IO.INPUT);
+				PeripheralIO pc8in = new PeripheralIO("I0_8", Boolean.class, "8", "PIN_I0_8", IO.INPUT);
+				PeripheralIO pc9in = new PeripheralIO("I0_9", Boolean.class, "9", "PIN_I0_9", IO.INPUT);
+				PeripheralIO pc10in = new PeripheralIO("I0_10", Boolean.class, "10", "PIN_I0_10", IO.INPUT);
+				PeripheralIO pc11in = new PeripheralIO("I0_11", Boolean.class, "11", "PIN_I0_11", IO.INPUT);
+				PeripheralIO pc12in = new PeripheralIO("I0_12", Boolean.class, "12", "PIN_I0_12", IO.INPUT);
 
 				output.addPeripheralItem(pc1out);
 				output.addPeripheralItem(pc2out);
@@ -269,39 +269,39 @@ public class DeviceFactory {
 
 				device.setName(mainDevice);
 
-				PeripheralIO pc1out = new PeripheralIO("Q0_1", Boolean.class, "2", "PIN_Q0_1", IO.OUTPUT);
-				PeripheralIO pc2out = new PeripheralIO("Q0_2", Boolean.class, "4", "PIN_Q0_2", IO.OUTPUT);
-				PeripheralIO pc3out = new PeripheralIO("Q0_3", Boolean.class, "12", "PIN_Q0_3", IO.OUTPUT);
-				PeripheralIO pc4out = new PeripheralIO("Q0_4", Boolean.class, "13", "PIN_Q0_4", IO.OUTPUT);
-				PeripheralIO pc5out = new PeripheralIO("Q0_5", Boolean.class, "33", "PIN_Q0_5", IO.OUTPUT);
-				PeripheralIO pc6out = new PeripheralIO("Q0_6", Boolean.class, "25", "PIN_Q0_6", IO.OUTPUT);
-				PeripheralIO pc7out = new PeripheralIO("Q0_7", Boolean.class, "26", "PIN_Q0_7", IO.OUTPUT);
-				PeripheralIO pc8out = new PeripheralIO("Q0_8", Boolean.class, "27", "PIN_Q0_8", IO.OUTPUT);
-				PeripheralIO pc9out = new PeripheralIO("Q0_9", Boolean.class, "27", "PIN_Q0_9", IO.OUTPUT);
-				PeripheralIO pc10out = new PeripheralIO("Q0_10", Boolean.class, "27", "PIN_Q0_10", IO.OUTPUT);
-				PeripheralIO pc11out = new PeripheralIO("Q0_11", Boolean.class, "27", "PIN_Q0_11", IO.OUTPUT);
-				PeripheralIO pc12out = new PeripheralIO("Q0_12", Boolean.class, "27", "PIN_Q0_12", IO.OUTPUT);
-				PeripheralIO pc13out = new PeripheralIO("Q0_13", Boolean.class, "27", "PIN_Q0_13", IO.OUTPUT);
-				PeripheralIO pc14out = new PeripheralIO("Q0_14", Boolean.class, "27", "PIN_Q0_14", IO.OUTPUT);
-				PeripheralIO pc15out = new PeripheralIO("Q0_15", Boolean.class, "27", "PIN_Q0_15", IO.OUTPUT);
-				PeripheralIO pc16out = new PeripheralIO("Q0_16", Boolean.class, "27", "PIN_Q0_16", IO.OUTPUT);
+				PeripheralIO pc1out = new PeripheralIO("Q0_1", Boolean.class, "1", "PIN_Q0_1", IO.OUTPUT);
+				PeripheralIO pc2out = new PeripheralIO("Q0_2", Boolean.class, "2", "PIN_Q0_2", IO.OUTPUT);
+				PeripheralIO pc3out = new PeripheralIO("Q0_3", Boolean.class, "3", "PIN_Q0_3", IO.OUTPUT);
+				PeripheralIO pc4out = new PeripheralIO("Q0_4", Boolean.class, "4", "PIN_Q0_4", IO.OUTPUT);
+				PeripheralIO pc5out = new PeripheralIO("Q0_5", Boolean.class, "5", "PIN_Q0_5", IO.OUTPUT);
+				PeripheralIO pc6out = new PeripheralIO("Q0_6", Boolean.class, "6", "PIN_Q0_6", IO.OUTPUT);
+				PeripheralIO pc7out = new PeripheralIO("Q0_7", Boolean.class, "7", "PIN_Q0_7", IO.OUTPUT);
+				PeripheralIO pc8out = new PeripheralIO("Q0_8", Boolean.class, "8", "PIN_Q0_8", IO.OUTPUT);
+				PeripheralIO pc9out = new PeripheralIO("Q0_9", Boolean.class, "9", "PIN_Q0_9", IO.OUTPUT);
+				PeripheralIO pc10out = new PeripheralIO("Q0_10", Boolean.class, "10", "PIN_Q0_10", IO.OUTPUT);
+				PeripheralIO pc11out = new PeripheralIO("Q0_11", Boolean.class, "11", "PIN_Q0_11", IO.OUTPUT);
+				PeripheralIO pc12out = new PeripheralIO("Q0_12", Boolean.class, "12", "PIN_Q0_12", IO.OUTPUT);
+				PeripheralIO pc13out = new PeripheralIO("Q0_13", Boolean.class, "13", "PIN_Q0_13", IO.OUTPUT);
+				PeripheralIO pc14out = new PeripheralIO("Q0_14", Boolean.class, "14", "PIN_Q0_14", IO.OUTPUT);
+				PeripheralIO pc15out = new PeripheralIO("Q0_15", Boolean.class, "15", "PIN_Q0_15", IO.OUTPUT);
+				PeripheralIO pc16out = new PeripheralIO("Q0_16", Boolean.class, "16", "PIN_Q0_16", IO.OUTPUT);
 
-				PeripheralIO pc1in = new PeripheralIO("I0_1", Boolean.class, "14", "PIN_I0_1", IO.INPUT);
-				PeripheralIO pc2in = new PeripheralIO("I0_2", Boolean.class, "16", "PIN_I0_2", IO.INPUT);
-				PeripheralIO pc3in = new PeripheralIO("I0_3", Boolean.class, "17", "PIN_I0_3", IO.INPUT);
-				PeripheralIO pc4in = new PeripheralIO("I0_4", Boolean.class, "18", "PIN_I0_4", IO.INPUT);
-				PeripheralIO pc5in = new PeripheralIO("I0_5", Boolean.class, "19", "PIN_I0_5", IO.INPUT);
-				PeripheralIO pc6in = new PeripheralIO("I0_6", Boolean.class, "21", "PIN_I0_6", IO.INPUT);
-				PeripheralIO pc7in = new PeripheralIO("I0_7", Boolean.class, "22", "PIN_I0_7", IO.INPUT);
-				PeripheralIO pc8in = new PeripheralIO("I0_8", Boolean.class, "23", "PIN_I0_8", IO.INPUT);
-				PeripheralIO pc9in = new PeripheralIO("I0_9", Boolean.class, "25", "PIN_I0_9", IO.INPUT);
-				PeripheralIO pc10in = new PeripheralIO("I0_10", Boolean.class, "26", "PIN_I0_10", IO.INPUT);
-				PeripheralIO pc11in = new PeripheralIO("I0_11", Boolean.class, "27", "PIN_I0_11", IO.INPUT);
-				PeripheralIO pc12in = new PeripheralIO("I0_12", Boolean.class, "28", "PIN_I0_12", IO.INPUT);
-				PeripheralIO pc13in = new PeripheralIO("I0_13", Boolean.class, "28", "PIN_I0_13", IO.INPUT);
-				PeripheralIO pc14in = new PeripheralIO("I0_14", Boolean.class, "28", "PIN_I0_14", IO.INPUT);
-				PeripheralIO pc15in = new PeripheralIO("I0_15", Boolean.class, "28", "PIN_I0_15", IO.INPUT);
-				PeripheralIO pc16in = new PeripheralIO("I0_16", Boolean.class, "28", "PIN_I0_16", IO.INPUT);
+				PeripheralIO pc1in = new PeripheralIO("I0_1", Boolean.class, "1", "PIN_I0_1", IO.INPUT);
+				PeripheralIO pc2in = new PeripheralIO("I0_2", Boolean.class, "2", "PIN_I0_2", IO.INPUT);
+				PeripheralIO pc3in = new PeripheralIO("I0_3", Boolean.class, "3", "PIN_I0_3", IO.INPUT);
+				PeripheralIO pc4in = new PeripheralIO("I0_4", Boolean.class, "4", "PIN_I0_4", IO.INPUT);
+				PeripheralIO pc5in = new PeripheralIO("I0_5", Boolean.class, "5", "PIN_I0_5", IO.INPUT);
+				PeripheralIO pc6in = new PeripheralIO("I0_6", Boolean.class, "6", "PIN_I0_6", IO.INPUT);
+				PeripheralIO pc7in = new PeripheralIO("I0_7", Boolean.class, "7", "PIN_I0_7", IO.INPUT);
+				PeripheralIO pc8in = new PeripheralIO("I0_8", Boolean.class, "8", "PIN_I0_8", IO.INPUT);
+				PeripheralIO pc9in = new PeripheralIO("I0_9", Boolean.class, "9", "PIN_I0_9", IO.INPUT);
+				PeripheralIO pc10in = new PeripheralIO("I0_10", Boolean.class, "10", "PIN_I0_10", IO.INPUT);
+				PeripheralIO pc11in = new PeripheralIO("I0_11", Boolean.class, "11", "PIN_I0_11", IO.INPUT);
+				PeripheralIO pc12in = new PeripheralIO("I0_12", Boolean.class, "12", "PIN_I0_12", IO.INPUT);
+				PeripheralIO pc13in = new PeripheralIO("I0_13", Boolean.class, "13", "PIN_I0_13", IO.INPUT);
+				PeripheralIO pc14in = new PeripheralIO("I0_14", Boolean.class, "14", "PIN_I0_14", IO.INPUT);
+				PeripheralIO pc15in = new PeripheralIO("I0_15", Boolean.class, "15", "PIN_I0_15", IO.INPUT);
+				PeripheralIO pc16in = new PeripheralIO("I0_16", Boolean.class, "16", "PIN_I0_16", IO.INPUT);
 
 				output.addPeripheralItem(pc1out);
 				output.addPeripheralItem(pc2out);
@@ -351,25 +351,25 @@ public class DeviceFactory {
 
 		if (deviceFromList.equals(CodeOptionsDevice2.BB20.name())) {
 
-			PeripheralIO pc1in = new PeripheralIO("I"+id+"_1", Boolean.class, "14", "PIN_I"+id+"_1", IO.INPUT);
-			PeripheralIO pc2in = new PeripheralIO("I"+id+"_2", Boolean.class, "16", "PIN_I"+id+"_2", IO.INPUT);
+			PeripheralIO pc1in = new PeripheralIO("I"+id+"_1", Boolean.class, "1", "PIN_I"+id+"_1", IO.INPUT);
+			PeripheralIO pc2in = new PeripheralIO("I"+id+"_2", Boolean.class, "2", "PIN_I"+id+"_2", IO.INPUT);
 
 			input.addPeripheralItem(pc1in);
 			input.addPeripheralItem(pc2in);
 		} 
 			if (deviceFromList.equals(CodeOptionsDevice2.BB28.name())) {
 
-				PeripheralIO pc1out = new PeripheralIO("Q"+id+"_1", Boolean.class, "2", "PIN_Q"+id+"_1", IO.OUTPUT);
-				PeripheralIO pc2out = new PeripheralIO("Q"+id+"_2", Boolean.class, "4", "PIN_Q"+id+"_2", IO.OUTPUT);
-				PeripheralIO pc3out = new PeripheralIO("Q"+id+"_3", Boolean.class, "12", "PIN_Q"+id+"_3", IO.OUTPUT);
-				PeripheralIO pc4out = new PeripheralIO("Q"+id+"_4", Boolean.class, "13", "PIN_Q"+id+"_4", IO.OUTPUT);
-				PeripheralIO pc5out = new PeripheralIO("Q"+id+"_5", Boolean.class, "33", "PIN_Q"+id+"_5", IO.OUTPUT);
-				PeripheralIO pc6out = new PeripheralIO("Q"+id+"_6", Boolean.class, "25", "PIN_Q"+id+"_6", IO.OUTPUT);
-				PeripheralIO pc7out = new PeripheralIO("Q"+id+"_7", Boolean.class, "26", "PIN_Q"+id+"_7", IO.OUTPUT);
-				PeripheralIO pc8out = new PeripheralIO("Q"+id+"_8", Boolean.class, "27", "PIN_Q"+id+"_8", IO.OUTPUT);
+				PeripheralIO pc1out = new PeripheralIO("Q"+id+"_1", Boolean.class, "1", "PIN_Q"+id+"_1", IO.OUTPUT);
+				PeripheralIO pc2out = new PeripheralIO("Q"+id+"_2", Boolean.class, "2", "PIN_Q"+id+"_2", IO.OUTPUT);
+				PeripheralIO pc3out = new PeripheralIO("Q"+id+"_3", Boolean.class, "3", "PIN_Q"+id+"_3", IO.OUTPUT);
+				PeripheralIO pc4out = new PeripheralIO("Q"+id+"_4", Boolean.class, "4", "PIN_Q"+id+"_4", IO.OUTPUT);
+				PeripheralIO pc5out = new PeripheralIO("Q"+id+"_5", Boolean.class, "5", "PIN_Q"+id+"_5", IO.OUTPUT);
+				PeripheralIO pc6out = new PeripheralIO("Q"+id+"_6", Boolean.class, "6", "PIN_Q"+id+"_6", IO.OUTPUT);
+				PeripheralIO pc7out = new PeripheralIO("Q"+id+"_7", Boolean.class, "7", "PIN_Q"+id+"_7", IO.OUTPUT);
+				PeripheralIO pc8out = new PeripheralIO("Q"+id+"_8", Boolean.class, "8", "PIN_Q"+id+"_8", IO.OUTPUT);
 
-				PeripheralIO pc1in = new PeripheralIO("I"+id+"_1", Boolean.class, "14", "PIN_I"+id+"_1", IO.INPUT);
-				PeripheralIO pc2in = new PeripheralIO("I"+id+"_2", Boolean.class, "16", "PIN_I"+id+"_2", IO.INPUT);
+				PeripheralIO pc1in = new PeripheralIO("I"+id+"_1", Boolean.class, "1", "PIN_I"+id+"_1", IO.INPUT);
+				PeripheralIO pc2in = new PeripheralIO("I"+id+"_2", Boolean.class, "2", "PIN_I"+id+"_2", IO.INPUT);
 
 				output.addPeripheralItem(pc1out);
 				output.addPeripheralItem(pc2out);
@@ -384,12 +384,12 @@ public class DeviceFactory {
 			}
 			if (deviceFromList.equals(CodeOptionsDevice2.BB32.name())) {
 				
-				PeripheralIO pc1out = new PeripheralIO("Q"+id+"_1", Boolean.class, "2", "PIN_Q"+id+"_1", IO.OUTPUT);
-				PeripheralIO pc2out = new PeripheralIO("Q"+id+"_2", Boolean.class, "4", "PIN_Q"+id+"_2", IO.OUTPUT);
+				PeripheralIO pc1out = new PeripheralIO("Q"+id+"_1", Boolean.class, "1", "PIN_Q"+id+"_1", IO.OUTPUT);
+				PeripheralIO pc2out = new PeripheralIO("Q"+id+"_2", Boolean.class, "2", "PIN_Q"+id+"_2", IO.OUTPUT);
 				
-				PeripheralIO pc1in = new PeripheralIO("I"+id+"_1", Boolean.class, "14", "PIN_I"+id+"_1", IO.INPUT);
-				PeripheralIO pc2in = new PeripheralIO("I"+id+"_2", Boolean.class, "16", "PIN_I"+id+"_2", IO.INPUT);
-				PeripheralIO pc3in = new PeripheralIO("I"+id+"_3", Boolean.class, "17", "PIN_I"+id+"_3", IO.INPUT);
+				PeripheralIO pc1in = new PeripheralIO("I"+id+"_1", Boolean.class, "1", "PIN_I"+id+"_1", IO.INPUT);
+				PeripheralIO pc2in = new PeripheralIO("I"+id+"_2", Boolean.class, "2", "PIN_I"+id+"_2", IO.INPUT);
+				PeripheralIO pc3in = new PeripheralIO("I"+id+"_3", Boolean.class, "3", "PIN_I"+id+"_3", IO.INPUT);
 				
 				output.addPeripheralItem(pc1out);
 				output.addPeripheralItem(pc2out);
@@ -399,19 +399,19 @@ public class DeviceFactory {
 			}
 			if (deviceFromList.equals(CodeOptionsDevice2.BB84.name())) {
 				
-				PeripheralIO pc1out = new PeripheralIO("Q"+id+"_1", Boolean.class, "2", "PIN_Q"+id+"_1", IO.OUTPUT);
-				PeripheralIO pc2out = new PeripheralIO("Q"+id+"_2", Boolean.class, "4", "PIN_Q"+id+"_2", IO.OUTPUT);
-				PeripheralIO pc3out = new PeripheralIO("Q"+id+"_3", Boolean.class, "12", "PIN_Q"+id+"_3", IO.OUTPUT);
-				PeripheralIO pc4out = new PeripheralIO("Q"+id+"_4", Boolean.class, "13", "PIN_Q"+id+"_4", IO.OUTPUT);
+				PeripheralIO pc1out = new PeripheralIO("Q"+id+"_1", Boolean.class, "1", "PIN_Q"+id+"_1", IO.OUTPUT);
+				PeripheralIO pc2out = new PeripheralIO("Q"+id+"_2", Boolean.class, "2", "PIN_Q"+id+"_2", IO.OUTPUT);
+				PeripheralIO pc3out = new PeripheralIO("Q"+id+"_3", Boolean.class, "3", "PIN_Q"+id+"_3", IO.OUTPUT);
+				PeripheralIO pc4out = new PeripheralIO("Q"+id+"_4", Boolean.class, "4", "PIN_Q"+id+"_4", IO.OUTPUT);
 				
-				PeripheralIO pc1in = new PeripheralIO("I"+id+"_1", Boolean.class, "14", "PIN_I"+id+"_1", IO.INPUT);
-				PeripheralIO pc2in = new PeripheralIO("I"+id+"_2", Boolean.class, "16", "PIN_I"+id+"_2", IO.INPUT);
-				PeripheralIO pc3in = new PeripheralIO("I"+id+"_3", Boolean.class, "17", "PIN_I"+id+"_3", IO.INPUT);
-				PeripheralIO pc4in = new PeripheralIO("I"+id+"_4", Boolean.class, "18", "PIN_I"+id+"_4", IO.INPUT);
-				PeripheralIO pc5in = new PeripheralIO("I"+id+"_5", Boolean.class, "19", "PIN_I"+id+"_5", IO.INPUT);
-				PeripheralIO pc6in = new PeripheralIO("I"+id+"_6", Boolean.class, "21", "PIN_I"+id+"_6", IO.INPUT);
-				PeripheralIO pc7in = new PeripheralIO("I"+id+"_7", Boolean.class, "22", "PIN_I"+id+"_7", IO.INPUT);
-				PeripheralIO pc8in = new PeripheralIO("I"+id+"_8", Boolean.class, "23", "PIN_I"+id+"_8", IO.INPUT);
+				PeripheralIO pc1in = new PeripheralIO("I"+id+"_1", Boolean.class, "1", "PIN_I"+id+"_1", IO.INPUT);
+				PeripheralIO pc2in = new PeripheralIO("I"+id+"_2", Boolean.class, "2", "PIN_I"+id+"_2", IO.INPUT);
+				PeripheralIO pc3in = new PeripheralIO("I"+id+"_3", Boolean.class, "3", "PIN_I"+id+"_3", IO.INPUT);
+				PeripheralIO pc4in = new PeripheralIO("I"+id+"_4", Boolean.class, "4", "PIN_I"+id+"_4", IO.INPUT);
+				PeripheralIO pc5in = new PeripheralIO("I"+id+"_5", Boolean.class, "5", "PIN_I"+id+"_5", IO.INPUT);
+				PeripheralIO pc6in = new PeripheralIO("I"+id+"_6", Boolean.class, "6", "PIN_I"+id+"_6", IO.INPUT);
+				PeripheralIO pc7in = new PeripheralIO("I"+id+"_7", Boolean.class, "7", "PIN_I"+id+"_7", IO.INPUT);
+				PeripheralIO pc8in = new PeripheralIO("I"+id+"_8", Boolean.class, "8", "PIN_I"+id+"_8", IO.INPUT);
 				
 				output.addPeripheralItem(pc1out);
 				output.addPeripheralItem(pc2out);
@@ -428,27 +428,27 @@ public class DeviceFactory {
 			}
 			if (deviceFromList.equals(CodeOptionsDevice2.BB128.name())) {
 				
-				PeripheralIO pc1out = new PeripheralIO("Q"+id+"_1", Boolean.class, "2", "PIN_Q"+id+"_1", IO.OUTPUT);
-				PeripheralIO pc2out = new PeripheralIO("Q"+id+"_2", Boolean.class, "4", "PIN_Q"+id+"_2", IO.OUTPUT);
-				PeripheralIO pc3out = new PeripheralIO("Q"+id+"_3", Boolean.class, "12", "PIN_Q"+id+"_3", IO.OUTPUT);
-				PeripheralIO pc4out = new PeripheralIO("Q"+id+"_4", Boolean.class, "13", "PIN_Q"+id+"_4", IO.OUTPUT);
-				PeripheralIO pc5out = new PeripheralIO("Q"+id+"_5", Boolean.class, "33", "PIN_Q"+id+"_5", IO.OUTPUT);
-				PeripheralIO pc6out = new PeripheralIO("Q"+id+"_6", Boolean.class, "25", "PIN_Q"+id+"_6", IO.OUTPUT);
-				PeripheralIO pc7out = new PeripheralIO("Q"+id+"_7", Boolean.class, "26", "PIN_Q"+id+"_7", IO.OUTPUT);
-				PeripheralIO pc8out = new PeripheralIO("Q"+id+"_8", Boolean.class, "27", "PIN_Q"+id+"_8", IO.OUTPUT);
+				PeripheralIO pc1out = new PeripheralIO("Q"+id+"_1", Boolean.class, "1", "PIN_Q"+id+"_1", IO.OUTPUT);
+				PeripheralIO pc2out = new PeripheralIO("Q"+id+"_2", Boolean.class, "2", "PIN_Q"+id+"_2", IO.OUTPUT);
+				PeripheralIO pc3out = new PeripheralIO("Q"+id+"_3", Boolean.class, "3", "PIN_Q"+id+"_3", IO.OUTPUT);
+				PeripheralIO pc4out = new PeripheralIO("Q"+id+"_4", Boolean.class, "4", "PIN_Q"+id+"_4", IO.OUTPUT);
+				PeripheralIO pc5out = new PeripheralIO("Q"+id+"_5", Boolean.class, "5", "PIN_Q"+id+"_5", IO.OUTPUT);
+				PeripheralIO pc6out = new PeripheralIO("Q"+id+"_6", Boolean.class, "6", "PIN_Q"+id+"_6", IO.OUTPUT);
+				PeripheralIO pc7out = new PeripheralIO("Q"+id+"_7", Boolean.class, "7", "PIN_Q"+id+"_7", IO.OUTPUT);
+				PeripheralIO pc8out = new PeripheralIO("Q"+id+"_8", Boolean.class, "8", "PIN_Q"+id+"_8", IO.OUTPUT);
 				
-				PeripheralIO pc1in = new PeripheralIO("I"+id+"_1", Boolean.class, "14", "PIN_I"+id+"_1", IO.INPUT);
-				PeripheralIO pc2in = new PeripheralIO("I"+id+"_2", Boolean.class, "16", "PIN_I"+id+"_2", IO.INPUT);
-				PeripheralIO pc3in = new PeripheralIO("I"+id+"_3", Boolean.class, "17", "PIN_I"+id+"_3", IO.INPUT);
-				PeripheralIO pc4in = new PeripheralIO("I"+id+"_4", Boolean.class, "18", "PIN_I"+id+"_4", IO.INPUT);
-				PeripheralIO pc5in = new PeripheralIO("I"+id+"_5", Boolean.class, "19", "PIN_I"+id+"_5", IO.INPUT);
-				PeripheralIO pc6in = new PeripheralIO("I"+id+"_6", Boolean.class, "21", "PIN_I"+id+"_6", IO.INPUT);
-				PeripheralIO pc7in = new PeripheralIO("I"+id+"_7", Boolean.class, "22", "PIN_I"+id+"_7", IO.INPUT);
-				PeripheralIO pc8in = new PeripheralIO("I"+id+"_8", Boolean.class, "23", "PIN_I"+id+"_8", IO.INPUT);
-				PeripheralIO pc9in = new PeripheralIO("I"+id+"_9", Boolean.class, "25", "PIN_I"+id+"_9", IO.INPUT);
-				PeripheralIO pc10in = new PeripheralIO("I"+id+"_10", Boolean.class, "26", "PIN_I"+id+"_10", IO.INPUT);
-				PeripheralIO pc11in = new PeripheralIO("I"+id+"_11", Boolean.class, "27", "PIN_I"+id+"_11", IO.INPUT);
-				PeripheralIO pc12in = new PeripheralIO("I"+id+"_12", Boolean.class, "28", "PIN_I"+id+"_12", IO.INPUT);
+				PeripheralIO pc1in = new PeripheralIO("I"+id+"_1", Boolean.class, "1", "PIN_I"+id+"_1", IO.INPUT);
+				PeripheralIO pc2in = new PeripheralIO("I"+id+"_2", Boolean.class, "2", "PIN_I"+id+"_2", IO.INPUT);
+				PeripheralIO pc3in = new PeripheralIO("I"+id+"_3", Boolean.class, "3", "PIN_I"+id+"_3", IO.INPUT);
+				PeripheralIO pc4in = new PeripheralIO("I"+id+"_4", Boolean.class, "4", "PIN_I"+id+"_4", IO.INPUT);
+				PeripheralIO pc5in = new PeripheralIO("I"+id+"_5", Boolean.class, "5", "PIN_I"+id+"_5", IO.INPUT);
+				PeripheralIO pc6in = new PeripheralIO("I"+id+"_6", Boolean.class, "6", "PIN_I"+id+"_6", IO.INPUT);
+				PeripheralIO pc7in = new PeripheralIO("I"+id+"_7", Boolean.class, "7", "PIN_I"+id+"_7", IO.INPUT);
+				PeripheralIO pc8in = new PeripheralIO("I"+id+"_8", Boolean.class, "8", "PIN_I"+id+"_8", IO.INPUT);
+				PeripheralIO pc9in = new PeripheralIO("I"+id+"_9", Boolean.class, "9", "PIN_I"+id+"_9", IO.INPUT);
+				PeripheralIO pc10in = new PeripheralIO("I"+id+"_10", Boolean.class, "10", "PIN_I"+id+"_10", IO.INPUT);
+				PeripheralIO pc11in = new PeripheralIO("I"+id+"_11", Boolean.class, "11", "PIN_I"+id+"_11", IO.INPUT);
+				PeripheralIO pc12in = new PeripheralIO("I"+id+"_12", Boolean.class, "12", "PIN_I"+id+"_12", IO.INPUT);
 				
 				output.addPeripheralItem(pc1out);
 				output.addPeripheralItem(pc2out);
@@ -473,39 +473,39 @@ public class DeviceFactory {
 			}
 			if (deviceFromList.equals(CodeOptionsDevice2.BB1616.name())) {
 				
-				PeripheralIO pc1out = new PeripheralIO("Q"+id+"_1", Boolean.class, "2", "PIN_Q"+id+"_1", IO.OUTPUT);
-				PeripheralIO pc2out = new PeripheralIO("Q"+id+"_2", Boolean.class, "4", "PIN_Q"+id+"_2", IO.OUTPUT);
-				PeripheralIO pc3out = new PeripheralIO("Q"+id+"_3", Boolean.class, "12", "PIN_Q"+id+"_3", IO.OUTPUT);
-				PeripheralIO pc4out = new PeripheralIO("Q"+id+"_4", Boolean.class, "13", "PIN_Q"+id+"_4", IO.OUTPUT);
-				PeripheralIO pc5out = new PeripheralIO("Q"+id+"_5", Boolean.class, "33", "PIN_Q"+id+"_5", IO.OUTPUT);
-				PeripheralIO pc6out = new PeripheralIO("Q"+id+"_6", Boolean.class, "25", "PIN_Q"+id+"_6", IO.OUTPUT);
-				PeripheralIO pc7out = new PeripheralIO("Q"+id+"_7", Boolean.class, "26", "PIN_Q"+id+"_7", IO.OUTPUT);
-				PeripheralIO pc8out = new PeripheralIO("Q"+id+"_8", Boolean.class, "27", "PIN_Q"+id+"_8", IO.OUTPUT);
-				PeripheralIO pc9out = new PeripheralIO("Q"+id+"_9", Boolean.class, "2", "PIN_Q"+id+"_9", IO.OUTPUT);
-				PeripheralIO pc10out = new PeripheralIO("Q"+id+"_10", Boolean.class, "4", "PIN_Q"+id+"_10", IO.OUTPUT);
-				PeripheralIO pc11out = new PeripheralIO("Q"+id+"_11", Boolean.class, "12", "PIN_Q"+id+"_11", IO.OUTPUT);
-				PeripheralIO pc12out = new PeripheralIO("Q"+id+"_12", Boolean.class, "13", "PIN_Q"+id+"_12", IO.OUTPUT);
-				PeripheralIO pc13out = new PeripheralIO("Q"+id+"_13", Boolean.class, "33", "PIN_Q"+id+"_13", IO.OUTPUT);
-				PeripheralIO pc14out = new PeripheralIO("Q"+id+"_14", Boolean.class, "25", "PIN_Q"+id+"_14", IO.OUTPUT);
-				PeripheralIO pc15out = new PeripheralIO("Q"+id+"_15", Boolean.class, "26", "PIN_Q"+id+"_15", IO.OUTPUT);
-				PeripheralIO pc16out = new PeripheralIO("Q"+id+"_16", Boolean.class, "27", "PIN_Q"+id+"_16", IO.OUTPUT);
+				PeripheralIO pc1out = new PeripheralIO("Q"+id+"_1", Boolean.class, "1", "PIN_Q"+id+"_1", IO.OUTPUT);
+				PeripheralIO pc2out = new PeripheralIO("Q"+id+"_2", Boolean.class, "2", "PIN_Q"+id+"_2", IO.OUTPUT);
+				PeripheralIO pc3out = new PeripheralIO("Q"+id+"_3", Boolean.class, "3", "PIN_Q"+id+"_3", IO.OUTPUT);
+				PeripheralIO pc4out = new PeripheralIO("Q"+id+"_4", Boolean.class, "4", "PIN_Q"+id+"_4", IO.OUTPUT);
+				PeripheralIO pc5out = new PeripheralIO("Q"+id+"_5", Boolean.class, "5", "PIN_Q"+id+"_5", IO.OUTPUT);
+				PeripheralIO pc6out = new PeripheralIO("Q"+id+"_6", Boolean.class, "6", "PIN_Q"+id+"_6", IO.OUTPUT);
+				PeripheralIO pc7out = new PeripheralIO("Q"+id+"_7", Boolean.class, "7", "PIN_Q"+id+"_7", IO.OUTPUT);
+				PeripheralIO pc8out = new PeripheralIO("Q"+id+"_8", Boolean.class, "8", "PIN_Q"+id+"_8", IO.OUTPUT);
+				PeripheralIO pc9out = new PeripheralIO("Q"+id+"_9", Boolean.class, "9", "PIN_Q"+id+"_9", IO.OUTPUT);
+				PeripheralIO pc10out = new PeripheralIO("Q"+id+"_10", Boolean.class, "10", "PIN_Q"+id+"_10", IO.OUTPUT);
+				PeripheralIO pc11out = new PeripheralIO("Q"+id+"_11", Boolean.class, "11", "PIN_Q"+id+"_11", IO.OUTPUT);
+				PeripheralIO pc12out = new PeripheralIO("Q"+id+"_12", Boolean.class, "12", "PIN_Q"+id+"_12", IO.OUTPUT);
+				PeripheralIO pc13out = new PeripheralIO("Q"+id+"_13", Boolean.class, "13", "PIN_Q"+id+"_13", IO.OUTPUT);
+				PeripheralIO pc14out = new PeripheralIO("Q"+id+"_14", Boolean.class, "14", "PIN_Q"+id+"_14", IO.OUTPUT);
+				PeripheralIO pc15out = new PeripheralIO("Q"+id+"_15", Boolean.class, "15", "PIN_Q"+id+"_15", IO.OUTPUT);
+				PeripheralIO pc16out = new PeripheralIO("Q"+id+"_16", Boolean.class, "16", "PIN_Q"+id+"_16", IO.OUTPUT);
 				
-				PeripheralIO pc1in = new PeripheralIO("I"+id+"_1", Boolean.class, "14", "PIN_I"+id+"_1", IO.INPUT);
-				PeripheralIO pc2in = new PeripheralIO("I"+id+"_2", Boolean.class, "16", "PIN_I"+id+"_2", IO.INPUT);
-				PeripheralIO pc3in = new PeripheralIO("I"+id+"_3", Boolean.class, "17", "PIN_I"+id+"_3", IO.INPUT);
-				PeripheralIO pc4in = new PeripheralIO("I"+id+"_4", Boolean.class, "18", "PIN_I"+id+"_4", IO.INPUT);
-				PeripheralIO pc5in = new PeripheralIO("I"+id+"_5", Boolean.class, "19", "PIN_I"+id+"_5", IO.INPUT);
-				PeripheralIO pc6in = new PeripheralIO("I"+id+"_6", Boolean.class, "21", "PIN_I"+id+"_6", IO.INPUT);
-				PeripheralIO pc7in = new PeripheralIO("I"+id+"_7", Boolean.class, "22", "PIN_I"+id+"_7", IO.INPUT);
-				PeripheralIO pc8in = new PeripheralIO("I"+id+"_8", Boolean.class, "23", "PIN_I"+id+"_8", IO.INPUT);
-				PeripheralIO pc9in = new PeripheralIO("I"+id+"_9", Boolean.class, "25", "PIN_I"+id+"_9", IO.INPUT);
-				PeripheralIO pc10in = new PeripheralIO("I"+id+"_10", Boolean.class, "26", "PIN_I"+id+"_10", IO.INPUT);
-				PeripheralIO pc11in = new PeripheralIO("I"+id+"_11", Boolean.class, "27", "PIN_I"+id+"_11", IO.INPUT);
-				PeripheralIO pc12in = new PeripheralIO("I"+id+"_12", Boolean.class, "28", "PIN_I"+id+"_12", IO.INPUT);
-				PeripheralIO pc13in = new PeripheralIO("I"+id+"_13", Boolean.class, "28", "PIN_I"+id+"_13", IO.INPUT);
-				PeripheralIO pc14in = new PeripheralIO("I"+id+"_14", Boolean.class, "28", "PIN_I"+id+"_14", IO.INPUT);
-				PeripheralIO pc15in = new PeripheralIO("I"+id+"_15", Boolean.class, "28", "PIN_I"+id+"_15", IO.INPUT);
-				PeripheralIO pc16in = new PeripheralIO("I"+id+"_16", Boolean.class, "28", "PIN_I"+id+"_16", IO.INPUT);
+				PeripheralIO pc1in = new PeripheralIO("I"+id+"_1", Boolean.class, "1", "PIN_I"+id+"_1", IO.INPUT);
+				PeripheralIO pc2in = new PeripheralIO("I"+id+"_2", Boolean.class, "2", "PIN_I"+id+"_2", IO.INPUT);
+				PeripheralIO pc3in = new PeripheralIO("I"+id+"_3", Boolean.class, "3", "PIN_I"+id+"_3", IO.INPUT);
+				PeripheralIO pc4in = new PeripheralIO("I"+id+"_4", Boolean.class, "4", "PIN_I"+id+"_4", IO.INPUT);
+				PeripheralIO pc5in = new PeripheralIO("I"+id+"_5", Boolean.class, "5", "PIN_I"+id+"_5", IO.INPUT);
+				PeripheralIO pc6in = new PeripheralIO("I"+id+"_6", Boolean.class, "6", "PIN_I"+id+"_6", IO.INPUT);
+				PeripheralIO pc7in = new PeripheralIO("I"+id+"_7", Boolean.class, "7", "PIN_I"+id+"_7", IO.INPUT);
+				PeripheralIO pc8in = new PeripheralIO("I"+id+"_8", Boolean.class, "8", "PIN_I"+id+"_8", IO.INPUT);
+				PeripheralIO pc9in = new PeripheralIO("I"+id+"_9", Boolean.class, "9", "PIN_I"+id+"_9", IO.INPUT);
+				PeripheralIO pc10in = new PeripheralIO("I"+id+"_10", Boolean.class, "10", "PIN_I"+id+"_10", IO.INPUT);
+				PeripheralIO pc11in = new PeripheralIO("I"+id+"_11", Boolean.class, "11", "PIN_I"+id+"_11", IO.INPUT);
+				PeripheralIO pc12in = new PeripheralIO("I"+id+"_12", Boolean.class, "12", "PIN_I"+id+"_12", IO.INPUT);
+				PeripheralIO pc13in = new PeripheralIO("I"+id+"_13", Boolean.class, "13", "PIN_I"+id+"_13", IO.INPUT);
+				PeripheralIO pc14in = new PeripheralIO("I"+id+"_14", Boolean.class, "14", "PIN_I"+id+"_14", IO.INPUT);
+				PeripheralIO pc15in = new PeripheralIO("I"+id+"_15", Boolean.class, "15", "PIN_I"+id+"_15", IO.INPUT);
+				PeripheralIO pc16in = new PeripheralIO("I"+id+"_16", Boolean.class, "16", "PIN_I"+id+"_16", IO.INPUT);
 				
 				output.addPeripheralItem(pc1out);
 				output.addPeripheralItem(pc2out);

@@ -90,8 +90,8 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 			addIoTIncludes(c);
 		}
 		addDefaultDefines(c);
-		addStaticDefines(c);
-		//addPinDefines(c);
+//		addStaticDefines(c);
+		addPinDefines(c);
 		if(isConnectionConfigured()) {
 			addWifiConst(c);
 			addMqttConst(c);
@@ -325,9 +325,21 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 	
 	private void addPinDefines(SourceCode c) {
 		c.newLine();
+//		for(Peripheral peripheral : device.getPeripherals()) {
+//			for(PeripheralIO peripheralIO : peripheral.getPeripheralItems()) {
+//				c.addl("#define "+peripheralIO.getPath()+" "+peripheralIO.getPin());
+//			}
+//		}
 		for(Peripheral peripheral : device.getPeripherals()) {
+			c.newLine();
 			for(PeripheralIO peripheralIO : peripheral.getPeripheralItems()) {
-				c.addl("#define "+peripheralIO.getPath()+" "+peripheralIO.getPin());
+				String outputOrInput = (peripheralIO.getIo() == IO.INPUT) ? ".digitalInputStates" : ".digitalOutputStates" ;
+				c.addl("Ladder2Pin LD_" 
+						+ peripheralIO.getName() 
+						+ "(" 
+						+ peripheralIO.getPin() 
+						+ ", &inputs[0]"
+						+ outputOrInput + ");");
 			}
 		}
 	}
