@@ -331,7 +331,11 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 //			}
 //		}
 		for(Peripheral peripheral : device.getPeripherals()) {
+			
+			String comment = (peripheral.getName().equals("Input")) ? "// Inputs defines" : "// Outputs defines" ;
 			c.newLine();
+			c.addl(comment);
+			
 			for(PeripheralIO peripheralIO : peripheral.getPeripheralItems()) {
 				String outputOrInput = (peripheralIO.getIo() == IO.INPUT) ? ".digitalInputStates" : ".digitalOutputStates" ;
 				c.addl("Ladder2Pin LD_" 

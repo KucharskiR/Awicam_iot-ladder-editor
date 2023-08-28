@@ -12,6 +12,7 @@
 
 
 
+	//Outputs defines
 Ladder2Pin LD_Q0_1(1, &inputs[0].digitalOutputStates);
 Ladder2Pin LD_Q0_2(2, &inputs[0].digitalOutputStates);
 Ladder2Pin LD_Q0_3(3, &inputs[0].digitalOutputStates);
@@ -23,6 +24,7 @@ Ladder2Pin LD_Q0_8(8, &inputs[0].digitalOutputStates);
 Ladder2Pin LD_Q1_1(1, &inputs[1].digitalOutputStates);
 Ladder2Pin LD_Q1_2(2, &inputs[1].digitalOutputStates);
 
+		//Inputs defines
 Ladder2Pin LD_I0_1(1, &inputs[0].digitalInputStates);
 Ladder2Pin LD_I0_2(2, &inputs[0].digitalInputStates);
 Ladder2Pin LD_I0_3(3, &inputs[0].digitalInputStates);
