@@ -36,9 +36,18 @@ import com.github.leofds.iotladdereditor.util.FileUtils;
 public class Compiler{
 	
 	private int compilationStatus;
+	private int uploadingStatus;
 
 	public int getCompilationStatus() {
 		return compilationStatus;
+	}
+
+	public int getUploadingStatus() {
+		return uploadingStatus;
+	}
+
+	public void setUploadingStatus(int uploadingStatus) {
+		this.uploadingStatus = uploadingStatus;
 	}
 
 	public void setCompilationStatus(int compilationStatus) {
@@ -95,6 +104,8 @@ public class Compiler{
 
 		// Info string
 		String info = Strings.compilationStartInfo();
+		
+		this.compilationStatus = 2;
 
 		// Output to the console
 		consoleOutput(info+"...");
@@ -180,6 +191,8 @@ public class Compiler{
 
 		// Info string
 		String info = Strings.uploadingInfo();
+		
+		this.uploadingStatus = 2;
 
 		// Output to the console
 		consoleOutput(info);
@@ -239,9 +252,10 @@ public class Compiler{
 				System.out.println(line);
 				consoleOutput(line);
 			}
-
+			
 			// Wait for the process to complete
 			int exitCode = process.waitFor();
+			this.uploadingStatus = exitCode == 0 ? 0 : 1;
 			consoleOutput("Process exited with code: " + exitCode);
 			
 			return exitCode;

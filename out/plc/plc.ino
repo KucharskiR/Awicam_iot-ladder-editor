@@ -4,36 +4,47 @@
 //
 // https://github.com/leofds/iot-ladder-editor
 //
-// Project: test
-#include "include/main.h"
+// Project: blink
 
+// Device 
+#define W1VC_128R_BOARD
+#include "include/controller.h"
 
-#if CONFIG_FREERTOS_UNICORE
-#define ARDUINO_RUNNING_CORE 0
-#else
-#define ARDUINO_RUNNING_CORE 1
-#endif
+#define LD_Q0_1(value) ((inputs[0].digitalOutputStates = ((inputs[0].digitalOutputStates & ~(0x0001)) | ((value & 0x01)))))
+#define LD_Q0_2(value) ((inputs[0].digitalOutputStates = ((inputs[0].digitalOutputStates & ~(0x0002)) | ((value & 0x01) << 1))))
+#define LD_Q0_3(value) ((inputs[0].digitalOutputStates = ((inputs[0].digitalOutputStates & ~(0x0004)) | ((value & 0x01) << 2))))
+#define LD_Q0_4(value) ((inputs[0].digitalOutputStates = ((inputs[0].digitalOutputStates & ~(0x0008)) | ((value & 0x01) << 3))))
+#define LD_Q0_5(value) ((inputs[0].digitalOutputStates = ((inputs[0].digitalOutputStates & ~(0x0010)) | ((value & 0x01) << 4))))
+#define LD_Q0_6(value) ((inputs[0].digitalOutputStates = ((inputs[0].digitalOutputStates & ~(0x0020)) | ((value & 0x01) << 5))))
+#define LD_Q0_7(value) ((inputs[0].digitalOutputStates = ((inputs[0].digitalOutputStates & ~(0x0040)) | ((value & 0x01) << 6))))
+#define LD_Q0_8(value) ((inputs[0].digitalOutputStates = ((inputs[0].digitalOutputStates & ~(0x0080)) | ((value & 0x01) << 7))))
+#define LD_Q0_9(value) ((inputs[0].digitalOutputStates = ((inputs[0].digitalOutputStates & ~(0x0100)) | ((value & 0x01) << 8))))
+#define LD_Q0_10(value) ((inputs[0].digitalOutputStates = ((inputs[0].digitalOutputStates & ~(0x0200)) | ((value & 0x01) << 9))))
+#define LD_Q0_11(value) ((inputs[0].digitalOutputStates = ((inputs[0].digitalOutputStates & ~(0x0400)) | ((value & 0x01) << 10))))
+#define LD_Q0_12(value) ((inputs[0].digitalOutputStates = ((inputs[0].digitalOutputStates & ~(0x0800)) | ((value & 0x01) << 11))))
 
-#define PIN_Q0_1 2
-#define PIN_Q0_2 4
-#define PIN_Q0_3 12
-#define PIN_Q0_4 13
-#define PIN_Q0_5 33
-#define PIN_Q0_6 25
-#define PIN_Q0_7 26
-#define PIN_Q0_8 27
-#define PIN_I0_1 14
-#define PIN_I0_2 16
-#define PIN_I0_3 17
-#define PIN_I0_4 18
-#define PIN_I0_5 19
-#define PIN_I0_6 21
-#define PIN_I0_7 22
-#define PIN_I0_8 23
-#define PIN_I0_9 25
-#define PIN_I0_10 26
-#define PIN_I0_11 27
-#define PIN_I0_12 28
+#define LD_I0_1 ((inputs[0].digitalInputStates & 0x0001))
+#define LD_I0_2 (((inputs[0].digitalInputStates>>1) & 0x0001))
+#define LD_I0_3 (((inputs[0].digitalInputStates>>2) & 0x0001))
+#define LD_I0_4 (((inputs[0].digitalInputStates>>3) & 0x0001))
+#define LD_I0_5 (((inputs[0].digitalInputStates>>4) & 0x0001))
+#define LD_I0_6 (((inputs[0].digitalInputStates>>5) & 0x0001))
+#define LD_I0_7 (((inputs[0].digitalInputStates>>6) & 0x0001))
+#define LD_I0_8 (((inputs[0].digitalInputStates>>7) & 0x0001))
+#define LD_I0_9 (((inputs[0].digitalInputStates>>8) & 0x0001))
+#define LD_I0_10 (((inputs[0].digitalInputStates>>9) & 0x0001))
+#define LD_I0_11 (((inputs[0].digitalInputStates>>10) & 0x0001))
+#define LD_I0_12 (((inputs[0].digitalInputStates>>11) & 0x0001))
+
+// Timer struct
+typedef struct {
+  int32_t PRE;
+  int32_t AC;
+  int32_t B;
+  int32_t DN;
+  int32_t EN;
+  uint64_t TT;
+} LD_TIMER;
 
 union {
   uint32_t p[2];
@@ -44,17 +55,8 @@ uint64_t getTime(){
   return LD_TIME.v;
 }
 
-uint8_t LD_I0_8 = 0;
-uint8_t LD_Q0_3 = 0;
-uint8_t LD_Q0_1 = 0;
-uint8_t LD_Q0_2 = 0;
-uint8_t LD_Q0_4 = 0;
-uint8_t LD_I0_1 = 0;
-uint8_t LD_I0_2 = 0;
-uint8_t LD_I0_3 = 0;
-uint8_t LD_I0_4 = 0;
-uint8_t LD_I0_5 = 0;
-
+LD_TIMER LD_T1;
+LD_TIMER LD_T2;
 
 void refreshTime64bit(){
   unsigned long now = millis();
@@ -64,124 +66,92 @@ void refreshTime64bit(){
   LD_TIME.p[0] = now;
 }
 
-void readInputs(){
- inputs[0].digitalInputStates = gpio_get_level(INPUT1_PIN) |
-							(gpio_get_level(INPUT2_PIN) << 1) | 
-							(gpio_get_level(INPUT3_PIN) << 2) | 
-							(gpio_get_level(INPUT4_PIN) << 3) | 
-							(gpio_get_level(INPUT5_PIN) << 4);
-while(recivedAll == false) {}
-}
-
-void writeOutputs(){
-  for (uint8_t i = 1; i < boardsNumber + 1; i++)
-    SendDigitalOutputs(i, inputs[i].digitalOutputStates);
-
-  gpio_set_level(OUTPUT1_PIN, inputs[0].digitalOutputStates & 0x0001);
-  gpio_set_level(OUTPUT2_PIN, inputs[0].digitalOutputStates & 0x0002);
-
-// outputs from ladder program
-  digitalWrite(PIN_Q0_3, LD_Q0_3);
-}
-
 void rung001(void){
   uint8_t _LD_S0;
+  uint64_t _LD_T1;
+  uint64_t _LD_T2;
+  uint64_t _LD_T3;
+  uint64_t _LD_T4;
   _LD_S0 = 1;
-  if(!LD_I0_8){
-    _LD_S0 = 0;
+  LD_T1.EN = _LD_S0;
+  if(!_LD_S0){
+    LD_T1.DN = 0;
+    LD_T1.AC = 0;
+    LD_T1.TT =  getTime();
+  }else{
+    if(!LD_T1.DN){
+      _LD_T1 =  getTime();
+      _LD_T2 = _LD_T1 - LD_T1.TT;
+      if(_LD_T2 >= LD_T1.B){
+        LD_T1.TT = _LD_T1;
+        LD_T1.AC = LD_T1.AC + 1;
+        if(LD_T1.AC >= LD_T1.PRE){
+          LD_T1.DN = 1;
+        }
+      }
+    }
   }
-  LD_Q0_3 = _LD_S0;
+  _LD_S0 = LD_T1.DN;
+  LD_Q0_8(_LD_S0);
+  LD_T2.EN = _LD_S0;
+  if(!_LD_S0){
+    LD_T2.DN = 0;
+    LD_T2.AC = 0;
+    LD_T2.TT =  getTime();
+  }else{
+    if(!LD_T2.DN){
+      _LD_T3 =  getTime();
+      _LD_T4 = _LD_T3 - LD_T2.TT;
+      if(_LD_T4 >= LD_T2.B){
+        LD_T2.TT = _LD_T3;
+        LD_T2.AC = LD_T2.AC + 1;
+        if(LD_T2.AC >= LD_T2.PRE){
+          LD_T2.DN = 1;
+        }
+      }
+    }
+  }
+  _LD_S0 = LD_T2.DN;
+  if(_LD_S0){
+    LD_T1.DN = 0;
+    LD_T1.AC = 0;
+    LD_T1.EN = 0;
+    LD_T1.TT =  getTime();
+  }
 }
 
 void initContext(void){
+  LD_T2.EN = 0;
+  LD_T2.AC = 0;
+  LD_T2.PRE = 1;
+  LD_T2.B = 200;
+  LD_T2.DN = 0;
+  LD_T2.TT =  getTime();
+  LD_T1.EN = 0;
+  LD_T1.AC = 0;
+  LD_T1.PRE = 1;
+  LD_T1.B = 200;
+  LD_T1.DN = 0;
+  LD_T1.TT =  getTime();
 }
 
 void init(){
   LD_TIME.v = 0;
   refreshTime64bit();
-  pinMode(PIN_I0_8, INPUT);
-  pinMode(PIN_Q0_3, OUTPUT);
-
-gpio_set_direction(OUTPUT1_PIN, GPIO_MODE_OUTPUT);
-gpio_set_direction(OUTPUT2_PIN, GPIO_MODE_OUTPUT);
-gpio_set_direction(OUTPUT3_PIN, GPIO_MODE_OUTPUT);
-gpio_set_direction(OUTPUT4_PIN, GPIO_MODE_OUTPUT);
-gpio_set_direction(INPUT1_PIN, GPIO_MODE_INPUT);
-gpio_set_direction(INPUT2_PIN, GPIO_MODE_INPUT);
-gpio_set_direction(INPUT3_PIN, GPIO_MODE_INPUT);
-gpio_set_direction(INPUT4_PIN, GPIO_MODE_INPUT);
-gpio_set_direction(INPUT5_PIN, GPIO_MODE_INPUT);
 }
-
-/* zamiast TaskScan pętla while(1) w setup()
-void TaskScan(void *pvParameters){
-  for(;;){
-    vTaskDelay(1);
-    readInputs();
-    refreshTime64bit();
-    rung001();
-    writeOutputs();
-  }
-}
-*/
 void setup()
 {
-  // czasem czeka na otwarcie portu
-  Serial.setRxBufferSize(4096);
-  Serial.begin(115200); 
-  
-  vTaskDelay(1000 / portTICK_PERIOD_MS);
-  #ifdef DEBUG
-  Serial.setDebugOutput(true);
-  static const char *TASK_TAG = "MAIN_TASK";
-	ESP_LOGI(TASK_TAG, "---------MAIN-------- \n");
-	ESP_LOGI(TASK_TAG, "portTick_PERIOD_MS %d\n", (int)portTICK_PERIOD_MS);
-  #else
-  Serial.setDebugOutput(false);
-  #endif
+  initController();
 
-	
-  initController();  //init z controllera
-  xTaskCreate(rx_task, "uart_rx_task", 1024*2, NULL, configMAX_PRIORITIES - 1, NULL);
-  #ifdef DEBUG
-  ESP_LOGI(TASK_TAG, "uart_rx_task created!");
-  #endif
-
-  Update.onProgress(updateCallback);
-  xTaskCreate(usbTask, "usbTask", 4096*2, NULL, configMAX_PRIORITIES - 5, NULL);
-  #ifdef DEBUG
-	ESP_LOGI(TASK_TAG, "usbTask created!");
-  #endif
-
-	// initAP();
-  initMemory();
-  // initWebServer();
-
-/*-------- Progam FPGA ---------*/
-  vTaskDelay(1000 / portTICK_PERIOD_MS);
-  programFPGA();
-  #ifdef DEBUG
-	ESP_LOGI(TASK_TAG, "Program FPGA done!");
-  #endif
-
-
-  vTaskDelay(1000 / portTICK_PERIOD_MS);
-
-
-
+  init();
+  initContext();
   while(1) 
   {
     readInputs();
+    refreshTime64bit();
     vTaskDelay(1 / portTICK_PERIOD_MS);
-    testLadderDiagramProgram();
+    rung001();
     writeOutputs();
-  
-    // for(int i = 1; i < boardsNumber + 1; i++) {
-    // SendDigitalOutputs(i, 0xFFFF);
-    // vTaskDelay(500 / portTICK_PERIOD_MS);
-    // SendDigitalOutputs(i, 0x0000);
-    // vTaskDelay(500 / portTICK_PERIOD_MS);
-    // }
   }
 }
 void loop() {
