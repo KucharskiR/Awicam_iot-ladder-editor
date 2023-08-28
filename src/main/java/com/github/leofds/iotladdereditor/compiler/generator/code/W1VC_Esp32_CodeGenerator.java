@@ -90,8 +90,8 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 			addIoTIncludes(c);
 		}
 		addDefaultDefines(c);
-		addStaticDefines(c);
-		//addPinDefines(c);
+//		addStaticDefines(c);
+		addPinDefines(c);
 		if(isConnectionConfigured()) {
 			addWifiConst(c);
 			addMqttConst(c);
@@ -123,6 +123,7 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 		addInitSystemFunction(p, ir, c);
 //		addTaskScan(ir, c);
 		
+		addLadderDiagramTask(ir, c);
 		addSetup(ir, c);
 		addLoop(c);
 		for (Symbol symbol : ir.getSymbolTable()) {
@@ -324,9 +325,23 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 	
 	private void addPinDefines(SourceCode c) {
 		c.newLine();
+//		for(Peripheral peripheral : device.getPeripherals()) {
+//			for(PeripheralIO peripheralIO : peripheral.getPeripheralItems()) {
+//				c.addl("#define "+peripheralIO.getPath()+" "+peripheralIO.getPin());
+//			}
+//		}
 		for(Peripheral peripheral : device.getPeripherals()) {
+			c.newLine();
 			for(PeripheralIO peripheralIO : peripheral.getPeripheralItems()) {
-				c.addl("#define "+peripheralIO.getPath()+" "+peripheralIO.getPin());
+				String outputOrInput = (peripheralIO.getIo() == IO.INPUT) ? ".digitalInputStates" : ".digitalOutputStates" ;
+				c.addl("Ladder2Pin LD_" 
+						+ peripheralIO.getName() 
+						+ "(" 
+						+ peripheralIO.getPin() 
+						+ ", &inputs["
+						+ peripheralIO.getDeviceNum()
+						+ "]"
+						+ outputOrInput + ");");
 			}
 		}
 	}
@@ -1158,19 +1173,14 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 		 * 
 		 */
 	}
-	
-	private void addSetup( IR ir, SourceCode c) {
-		c.add("void setup()\r\n"
+	private void addLadderDiagramTask(IR ir, SourceCode c) {
+		c.add("void ladderDiagramTask(void* arg)\r\n"
 				+ "{\r\n"
-				+ "  initController();\r\n"
-				+ "\r\n"
-				+ "  init();\r\n"
-				+ "  initContext();\r\n"
 				+ "  while(1) \r\n"
 				+ "  {\r\n"
 				+ "    readInputs();\r\n"
-				+ "    refreshTime64bit();\r\n"
-				+ "    vTaskDelay(1 / portTICK_PERIOD_MS);\r\n");
+				+ "    vTaskDelay(1 / portTICK_PERIOD_MS);\r\n"
+				+ "    refreshTime64bit();\r\n");
 		
 		// rung loop generator
 		for(Symbol symbol:ir.getSymbolTable()){
@@ -1184,7 +1194,20 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 		//--------------------
 				c.add("    writeOutputs();\r\n"
 				+ "  }\r\n"
-				+ "}");
+				+ "}");		
+	}
+
+	private void addSetup( IR ir, SourceCode c) {
+		c.add("void setup()\r\n"
+				+ "{\r\n"
+				+ "  initController();\r\n"
+				+ "\r\n"
+				+ "  init();\r\n"
+				+ "  initContext();\r\n"
+				+ "\r\n"
+				+ "  xTaskCreate(ladderDiagramTask, \"ladderDiagramTask\", 2048, NULL, configMAX_PRIORITIES - 2, NULL);\r\n"
+				+ "}"
+				);
 				
 //		c.add("void setup()\r\n"
 //				+ "{\r\n"

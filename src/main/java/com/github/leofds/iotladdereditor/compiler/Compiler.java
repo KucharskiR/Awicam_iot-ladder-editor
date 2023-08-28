@@ -127,7 +127,8 @@ public class Compiler{
 			// Command to run
 //			String command = "cmd /c start cmd /k arduino-cli compile --fqbn esp32:esp32:esp32s2 plc.ino"; // Replace "dir" with your desired command
 //			String command = "cmd /c arduino-cli compile --fqbn esp32:esp32:esp32c3 plc.ino"; // Replace "dir" with your desired command
-			String command = "cmd /c arduino-cli compile --fqbn esp32:esp32:esp32c3:CDCOnBoot=cdc --build-property build.extra_flags=-DCORE_DEBUG_LEVEL=5 plc.ino"; // Replace "dir" with your desired command
+//			String command = "cmd /c arduino-cli compile --fqbn esp32:esp32:esp32c3:CDCOnBoot=cdc --build-property build.extra_flags=-DCORE_DEBUG_LEVEL=5 plc.ino"; // Replace "dir" with your desired command
+			String command = "cmd /c arduino-cli compile --fqbn  esp32:esp32:esp32c3:CDCOnBoot=cdc --build-property \"build.extra_flags=-DCORE_DEBUG_LEVEL=5 -DARDUINO_USB_MODE=1 -DARDUINO_USB_CDC_ON_BOOT=1\" plc.ino"; // Replace "dir" with your desired command
 
 			String currentWorkingDirectory = System.getProperty("user.dir");
 //			System.out.println("Current Working Directory: " + currentWorkingDirectory);

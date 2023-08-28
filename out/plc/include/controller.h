@@ -7,29 +7,23 @@
 #include "driver/gpio.h"
 #include "driver/spi_master.h"
 #include "esp_task_wdt.h"
-// #include "esp_wifi.h"
-// #include "nvs_flash.h"
-// #include "esp_http_server.h"
 #include "lwip/err.h"
 #include "lwip/sys.h"
 #include "esp_partition.h"
-// #include "esp_rom_gpio.h"
 #include "esp_ota_ops.h"
-// #include <WebServer.h>
 #include "esp_spiffs.h"
 #include "SPIFFS.h"
 #include "esp32-hal-gpio.h"
-// #include "esp32-hal-spi.h"
 
 #include <Arduino.h>
 #include <SPI.h>
 #include <Update.h>
 #include <WiFi.h>
 #include <WiFiAP.h>
-// #include <ESPAsyncWebServer.h>
+#include <WebServer.h>
 
 #include "defines.h"
-
+#include "ladder2pin.h"
 
 #define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
 #define BYTE_TO_BINARY(byte)  \
@@ -61,6 +55,10 @@ struct digitalInputsStructure {
 // Inputs and outputs structure   inputs[0]->ESP32
 digitalInputsStructure inputs[32] = {0};
 
+
+/*---------------------------------------------*/
+/*--------------UART communication-------------*/
+/*---------------------------------------------*/
 const uint8_t PARITY_EVEN_TABLE[128] = {
     0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
     1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
@@ -73,15 +71,6 @@ const uint8_t PARITY_EVEN_TABLE[128] = {
 
 static const int RX_BUF_SIZE = 1024;
 uint8_t bytes[4];
-
-spi_device_handle_t fpga;
-
-
-
-
-/*---------------------------------------------*/
-/*--------------UART communication-------------*/
-/*---------------------------------------------*/
 
 //Start transmit to start recive equals ~17us
 uint32_t lastSendTime = 0;
@@ -325,7 +314,7 @@ volatile uint32_t errorsUart = 0;
 void checkQuartet(const char* logName, uint8_t quartet[]) {
   uint8_t calculatedXOR = quartet[0] ^ quartet[1] ^ quartet[2];
   if(calculatedXOR != quartet[3]) {
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
+    // vTaskDelay(1000 / portTICK_PERIOD_MS);
     // uart_flush(UART_BB);
     errorsUart |= 0x0001;
     #ifdef DEBUG
@@ -499,10 +488,10 @@ static void rx_task(void *arg)
           errorsUart |= 0x0001;
           #ifdef DEBUG
           ESP_LOGI(RX_TASK_TAG, "Sent data but no response!");
-          uart_flush(UART_BB);
-          lastSendTime = 0;
-          recivedAll = true;
+          // uart_flush(UART_BB);
+          // lastSendTime = 0;
           #endif
+          recivedAll = true;
         }
         else if(recivedAll==false)
           recivedAll = true;
@@ -524,24 +513,29 @@ static void rx_task(void *arg)
 //    free(data);
 }
 
-void initExtensionModules()
+
+inline void initExtensionModules()
 {
+  #if defined(DEBUG)
   const char* TASK_TAG = "EXT_MODULES_INIT";
+  #endif
   
   for (uint8_t i = 0; i < 5; i++)
   {
     vTaskDelay(500 / portTICK_PERIOD_MS);
-    #ifdef DEBUG
+    #if defined(DEBUG)
     ESP_LOGI(TASK_TAG, "Send init command, send %d bytes", SendInitCommand());
     #else
     SendInitCommand();
     #endif
+    if(boardsNumber != 0)
+      break;
   }
 
   if(boardsNumber == 0)
   {
-    #ifdef DEBUG
-    ESP_LOGI(TASK_TAG, "No extension modules found");
+    #if defined(DEBUG)
+    ESP_LOGI(TASK_TAG, "No extension modules connected");
     #endif  
     return;
   }
@@ -558,12 +552,16 @@ void initExtensionModules()
     vTaskDelay(1 / portTICK_PERIOD_MS);
   }
 
-  #ifdef DEBUG
-  ESP_LOGI(TASK_TAG, "Initialized, boards number: %d \n", boardsNumber);
+  #if defined(DEBUG)
+  ESP_LOGI(TASK_TAG, "Initialized extension modules, number: %d \n", boardsNumber);
   #endif
 }
 
-//---------SPIFFS-----------
+
+/*---------------------------------------------*/
+/*---------------------SPIFFS------------------*/
+/*---------------------------------------------*/
+
 void initMemory()
 {
   // esp_vfs_spiffs_conf_t config{
@@ -594,17 +592,45 @@ void initMemory()
 }
 
 
-
 /*---------------------------------------------*/
 /*--------------FPGA communication-------------*/
 /*---------------------------------------------*/
+spi_device_handle_t fpga;
+
+spi_bus_config_t spi_conifg={//Default MSB
+    .mosi_io_num = FPGA_SPI_MOSI,
+    .miso_io_num = FPGA_SPI_MISO,
+    .sclk_io_num = FPGA_SPI_CLK,
+    .quadwp_io_num = -1,
+    .quadhd_io_num = -1,
+    .flags = SPICOMMON_BUSFLAG_GPIO_PINS | SPICOMMON_BUSFLAG_MASTER
+  };
+
+spi_device_interface_config_t device_conifg2 = {
+    .command_bits = 0,
+    .address_bits = 0,
+    .dummy_bits = 0,
+    .mode = 0,                  //SPI mode 0
+    .clock_speed_hz = FPGA_SPI_SPEED_HZ, 
+    .spics_io_num = FPGA_SPI_CS,         // CS Pin
+  #ifdef TEST_SPI
+    .flags = SPI_DEVICE_HALFDUPLEX  | SPI_DEVICE_3WIRE,
+  #else
+    .flags = SPI_DEVICE_HALFDUPLEX | SPI_DEVICE_3WIRE | SPI_DEVICE_POSITIVE_CS,
+  #endif
+    .queue_size = 1,
+    .pre_cb = NULL,
+    .post_cb = NULL,
+  };
 
 void programFPGA()
 {
+  gpio_set_level(FPGA_SPI_CS, 0);
+
   #if defined(DEBUG) && !defined(NO_DEBUG_SPI)
   const char* TASK_TAG = "PROGAM_FPGA";
   #endif
-  
+
   char* buffer = new char[104161];
   if(!SPIFFS.exists("/fpga.bin"))
   {
@@ -621,13 +647,15 @@ void programFPGA()
   ESP_LOGI(TASK_TAG, "%#02x %#02x %#02x %#02x %#02x", buffer[0], buffer[1], buffer[2], buffer[3], buffer[4]);
   #endif
 
+  // gpio_reset_pin(FPGA_SPI_CLK);
+  
   spi_device_interface_config_t device_conifg = {
     .command_bits = 0,
     .address_bits = 0,
     .dummy_bits = 0,
     .mode = 0,                  //SPI mode 0
-    .clock_speed_hz = FPGA_SPI_SPEED_HZ,  // 10 MHz
-    .spics_io_num = -1, //FPGA_SPI_CS,         // CS Pin
+    .clock_speed_hz = FPGA_SPI_SPEED_HZ,   
+    .spics_io_num = -1,       // CS Pin drive manually
     .flags = SPI_DEVICE_HALFDUPLEX | SPI_DEVICE_3WIRE,
     .queue_size = 1,
     .pre_cb = NULL,
@@ -644,11 +672,11 @@ void programFPGA()
   gpio_set_direction(FPGA_SPI_CS, GPIO_MODE_OUTPUT);
 
   gpio_set_level(FPGA_CRESET_B, 0);
-  #ifdef TEST_SPI
-  gpio_set_level(FPGA_SPI_CS, 0);
-  #else
+  // #ifdef TEST_SPI
+  // gpio_set_level(FPGA_SPI_CS, 0);
+  // #else
   gpio_set_level(FPGA_SPI_CS, 1);
-  #endif
+  // #endif
   gpio_set_level(FPGA_SPI_CLK, 1);
   //wait minimum 200ns
   vTaskDelay(0.3 / portTICK_PERIOD_MS);
@@ -657,11 +685,11 @@ void programFPGA()
   vTaskDelay(1.3 / portTICK_PERIOD_MS);
   
   //send 8 dummy clocks
-  #ifdef TEST_SPI
-  gpio_set_level(FPGA_SPI_CS, 1);
-  #else
+  // #ifdef TEST_SPI
+  // gpio_set_level(FPGA_SPI_CS, 1);
+  // #else
   gpio_set_level(FPGA_SPI_CS, 0);
-  #endif
+  // #endif
   
   spi_transaction_t transaction ={
     .length = 8,
@@ -676,11 +704,11 @@ void programFPGA()
   //send program
   size_t sent = 0;
   
-  #ifdef TEST_SPI
-  gpio_set_level(FPGA_SPI_CS, 0);
-  #else
+  // #ifdef TEST_SPI
+  // gpio_set_level(FPGA_SPI_CS, 0);
+  // #else
   gpio_set_level(FPGA_SPI_CS, 1);
-  #endif
+  // #endif
   while (sent < fileSize)
   {
     size_t length = (sent + 64 < fileSize) ? 64 : fileSize - sent;
@@ -695,11 +723,11 @@ void programFPGA()
     ESP_LOGI("PROGRAM FPGA", "Send: %d / %d bytes ", sent, fileSize);
     #endif
   }
-  #ifdef TEST_SPI
-  gpio_set_level(FPGA_SPI_CS, 1);
-  #else
+  // #ifdef TEST_SPI
+  // gpio_set_level(FPGA_SPI_CS, 1);
+  // #else
   gpio_set_level(FPGA_SPI_CS, 0);
-  #endif
+  // #endif
 
   #if defined(DEBUG) && !defined(NO_DEBUG_SPI)
   ESP_LOGI("PROGRAM FPGA", "wait");
@@ -720,32 +748,15 @@ void programFPGA()
 
   // CDONE -> 1
   delete[] buffer;
+
   spi_bus_remove_device(fpga);
+  spi_bus_free(SPI2_HOST);
+  
   #ifdef DEBUG
   ESP_LOGI("PROGRAM_FPGA", "Program FPGA done!");
   #endif
 }
 //After programming reinit spi device
-void postProgramFPGA()
-{
-  spi_device_interface_config_t device_conifg = {
-    .command_bits = 0,
-    .address_bits = 0,
-    .dummy_bits = 0,
-    .mode = 0,                  //SPI mode 0
-    .clock_speed_hz = FPGA_SPI_SPEED_HZ, 
-    .spics_io_num = FPGA_SPI_CS,         // CS Pin
-  #ifdef TEST_SPI
-    .flags = SPI_DEVICE_HALFDUPLEX  | SPI_DEVICE_3WIRE,
-  #else
-    .flags = SPI_DEVICE_HALFDUPLEX | SPI_DEVICE_3WIRE | SPI_DEVICE_POSITIVE_CS,
-  #endif
-    .queue_size = 1,
-    .pre_cb = NULL,
-    .post_cb = NULL,
-  };
-  spi_bus_add_device(SPI2_HOST, &device_conifg, &fpga);
-}
 
 // Read and write ports
 inline uint8_t readInputsFPGA(uint8_t data)
@@ -917,20 +928,23 @@ void writeFPGAi2c(uint8_t sendData, uint8_t reciveData, uint8_t numOfSend, uint8
 
 void testFPGA()
 {
+  spi_bus_initialize(SPI2_HOST, &spi_conifg, SPI_DMA_DISABLED);
+  spi_bus_add_device(SPI2_HOST, &device_conifg2, &fpga);
+
   uint8_t dataToSend2 = 0x00;
-    uint16_t buff = 0b0000000001000000;
+    uint16_t buff = 0b0000000000000100;
 
   while(1)
   {
     // Test stage 1
     ESP_LOGI("TEST_FPGA", "Test stage 1");
     
-    for(int i = 0; i < 16; i++)
+    for(int i = 0; i < 32; i++)
     {
       if(buff != 0b0010000000000000)
         buff = buff << 1;  
       else
-        buff = 0b0000000001000000;
+        buff = 0b00000000000000100;
 
 
       writeFPGAstage1(buff);
@@ -981,78 +995,85 @@ void testFPGA()
 /*------------------Acess point----------------*/
 /*---------------------------------------------*/
 
-// #include "sites/indexSite.h"
-// WebServer server(80);
-// AsyncWebServer server(80);
-// inline void initAP()
-// {
-//   IPAddress ip(192, 168, 4, 1);
-//   IPAddress gate(192, 168, 4, 1);
-//   IPAddress subnet(255, 255, 255, 0);
-//   WiFi.softAPConfig(ip, gate, subnet);
-//   WiFi.mode(WIFI_AP);
-//   WiFi.softAP(AP_SSID, AP_PASS);
-//   // WiFi.disconnect();
-// }
-// inline void initWebServer()
-// {
-//   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-//     request->send(SPIFFS, "/indexSite.html");
-//     });
+WebServer server(80);
+inline void initAP()
+{
+  IPAddress ip(192, 168, 4, 1);
+  IPAddress gate(192, 168, 4, 1);
+  IPAddress subnet(255, 255, 255, 0);
+  WiFi.softAPConfig(ip, gate, subnet);
+  WiFi.mode(WIFI_AP);
+  WiFi.softAP(AP_SSID, AP_PASS);
+  // WiFi.disconnect();
+}
+inline void initWebServer()
+{
+  
+   server.on("/", HTTP_GET, []( ) {
+    // server.send(SPIFFS, "/indexSite.html");
+    File indexSiteFile = SPIFFS.open("/indexSite.html");
+    
+    char* indexSite = new char[indexSiteFile.size()];
+    indexSiteFile.readBytes(indexSite, indexSiteFile.size());
 
-//   server.on("/getDevices", HTTP_POST, [](AsyncWebServerRequest *request){
-//     String res = "{ \"boardsNumber\":\"" + String(boardsNumber) + "\", \"boards\":[";
-//     for (uint8_t i = 0; i < boardsNumber + 1; i++)
-//     {
-//       res += "{";
-//       res += "\"deviceInitTime\": \"" + String(inputs[i].deviceInitTime) + "\",";
-//       res += "\"deviceType\": \"" + String(inputs[i].deviceType) + "\",";
-//       res += "\"firmwareVersion\": \"" + String(inputs[i].firmwareVersion) + "\",";
-//       res += "\"numberOfAnalogInputs\": \"" + String(inputs[i].numberOfAnalogInputs) + "\"";
-//       res += "}";
-//       if(i != boardsNumber)
-//         res+=",";
-//     }
-//     res += "]}\n";
+    server.send_P(200, "text/html", indexSite);
+    delete[] indexSite;
+    ESP_LOGI("webserver", "Delete index site");
+    });
 
-//     request->send_P(200, "application/json", res.c_str());
-//   });
+  server.on("/getDevices", HTTP_POST, [](){
+    String res = "{ \"boardsNumber\":\"" + String(boardsNumber) + "\", \"boards\":[";
+    for (uint8_t i = 0; i < boardsNumber + 1; i++)
+    {
+      res += "{";
+      res += "\"deviceInitTime\": \"" + String(inputs[i].deviceInitTime) + "\",";
+      res += "\"deviceType\": \"" + String(inputs[i].deviceType) + "\",";
+      res += "\"firmwareVersion\": \"" + String(inputs[i].firmwareVersion) + "\",";
+      res += "\"numberOfAnalogInputs\": \"" + String(inputs[i].numberOfAnalogInputs) + "\"";
+      res += "}";
+      if(i != boardsNumber)
+        res+=",";
+    }
+    res += "]}\n";
 
-//   server.on("/getDevicesState", HTTP_POST, [](AsyncWebServerRequest *request){
-//     String res = "{ \"boardsNumber\":\""+String(boardsNumber)+"\", \"errorUart\":\"" + String(errorsUart) + "\", \"boards\":[";
-//     for (uint8_t i = 0; i < boardsNumber + 1; i++)
-//     {
-//       res += "{";
-//       res += "\"lastDigitalInputUpdateTime\": \"" + String(inputs[i].lastDigitalInputUpdateTime) + "\",";
-//       res += "\"digitalInputStates\": \"" + String(inputs[i].digitalInputStates) + "\",";
-//       res += "\"digitalOutputStates\": \"" + String(inputs[i].digitalOutputStates) + "\",";
-//       res += "\"aIUpdateTime0\": \"" + String(inputs[i].aIUpdateTime[0]) + "\",";
-//       res += "\"aIValue0\": \"" + String(inputs[i].aIValue[0]) + "\",";
-//       res += "\"aIUpdateTime1\": \"" + String(inputs[i].aIUpdateTime[1]) + "\",";
-//       res += "\"aIValue1\": \"" + String(inputs[i].aIValue[1]) + "\",";
-//       res += "\"aIUpdateTime2\": \"" + String(inputs[i].aIUpdateTime[2]) + "\",";
-//       res += "\"aIValue2\": \"" + String(inputs[i].aIValue[2]) + "\",";
-//       res += "\"aIUpdateTime3\": \"" + String(inputs[i].aIUpdateTime[3]) + "\",";
-//       res += "\"aIValue3\": \"" + String(inputs[i].aIValue[3]) + "\"";
-//       res += "}";
-//       if(i != boardsNumber)
-//         res+=",";
-//     }
-//     res += "]}\n";
+    server.send_P(200, "application/json", res.c_str());
+  });
 
-//     request->send_P(200, "application/json", res.c_str());
-//   });
+  server.on("/getDevicesState", HTTP_POST, [](){
+    String res = "{ \"boardsNumber\":\""+String(boardsNumber)+"\", \"errorUart\":\"" + String(errorsUart) + "\", \"boards\":[";
+    for (uint8_t i = 0; i < boardsNumber + 1; i++)
+    {
+      res += "{";
+      res += "\"lastDigitalInputUpdateTime\": \"" + String(inputs[i].lastDigitalInputUpdateTime) + "\",";
+      res += "\"digitalInputStates\": \"" + String(inputs[i].digitalInputStates) + "\",";
+      res += "\"digitalOutputStates\": \"" + String(inputs[i].digitalOutputStates) + "\",";
+      res += "\"aIUpdateTime0\": \"" + String(inputs[i].aIUpdateTime[0]) + "\",";
+      res += "\"aIValue0\": \"" + String(inputs[i].aIValue[0]) + "\",";
+      res += "\"aIUpdateTime1\": \"" + String(inputs[i].aIUpdateTime[1]) + "\",";
+      res += "\"aIValue1\": \"" + String(inputs[i].aIValue[1]) + "\",";
+      res += "\"aIUpdateTime2\": \"" + String(inputs[i].aIUpdateTime[2]) + "\",";
+      res += "\"aIValue2\": \"" + String(inputs[i].aIValue[2]) + "\",";
+      res += "\"aIUpdateTime3\": \"" + String(inputs[i].aIUpdateTime[3]) + "\",";
+      res += "\"aIValue3\": \"" + String(inputs[i].aIValue[3]) + "\"";
+      res += "}";
+      if(i != boardsNumber)
+        res+=",";
+    }
+    res += "]}\n";
 
-//   server.begin();
-// }
-// void handleClientTask(void*arg)
-// {
-//   while (1)
-//   {
-//     server.handleClient();
-//     vTaskDelay(10 / portTICK_PERIOD_MS);    
-//   }
-// }
+    server.send_P(200, "application/json", res.c_str());
+  });
+
+  server.begin();
+}
+void webServerTask(void*arg)
+{
+  while(1)
+  {
+    server.handleClient();
+    vTaskDelay(1 / portTICK_PERIOD_MS);
+  }
+}
 
 
 //------LD Program---------
@@ -1215,13 +1236,14 @@ void updateCallback(size_t a, size_t b)
 }
 
 
-
-
 /*---------------------------------------------*/
 /*------------Initialize controller------------*/
 /*---------------------------------------------*/
 void initController(void) {
-//-----Configure USB Serial-----
+  
+  inputs[0].firmwareVersion = FIRMWARE_VERSION;
+
+/*------- Configure USB -------*/
   // czasem czeka na otwarcie portu
   Serial.setRxBufferSize(4096);
   Serial.begin(115200); 
@@ -1236,8 +1258,14 @@ void initController(void) {
   Serial.setDebugOutput(false);
   #endif
 
+  Update.onProgress(updateCallback);
+  xTaskCreate(usbTask, "usbTask", 4096*2, NULL, configMAX_PRIORITIES - 5, NULL);
 
-//--------Configure UART--------
+  #ifdef DEBUG
+	ESP_LOGI(TASK_TAG, "usbTask created!");
+  #endif
+
+/*------ Configure UART -------*/
   uart_driver_delete(UART_BB);
   const uart_config_t uart_config = {
       .baud_rate = 3062500,
@@ -1252,18 +1280,7 @@ void initController(void) {
   uart_param_config(UART_BB, &uart_config);
   uart_set_pin(UART_BB, TXD_PIN, RXD_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
 
-//---------Configure SPI--------
-  SPI.end();
-  spi_bus_config_t spi_conifg={//Default MSB
-    .mosi_io_num = FPGA_SPI_MOSI,
-    .miso_io_num = FPGA_SPI_MISO,
-    .sclk_io_num = FPGA_SPI_CLK,
-    .quadwp_io_num = -1,
-    .quadhd_io_num = -1,
-  };
-  spi_bus_initialize(SPI2_HOST, &spi_conifg, SPI_DMA_DISABLED);
-
-//--------Configure GPIO--------
+/*------ Configure GPIO -------*/
   gpio_pad_select_gpio(INPUT1_PIN);
   gpio_pad_select_gpio(INPUT2_PIN);
   gpio_pad_select_gpio(INPUT3_PIN);
@@ -1287,37 +1304,41 @@ void initController(void) {
 
   gpio_pad_select_gpio(OUTPUT1_PIN); //To trzeba dodać, bez tego dziala w pio ale arduino tego wymaga
   gpio_pad_select_gpio(OUTPUT2_PIN); 
-  gpio_pad_select_gpio(OUTPUT3_PIN); 
-  // gpio_pad_select_gpio(OUTPUT4_PIN); 
   gpio_set_direction(OUTPUT1_PIN, GPIO_MODE_OUTPUT);
   gpio_set_direction(OUTPUT2_PIN, GPIO_MODE_OUTPUT);
-  gpio_set_direction(OUTPUT3_PIN, GPIO_MODE_OUTPUT);
+  
+  // Ustawianie tych pinów następuje po wysłaniu danych SPI
+  // gpio_pad_select_gpio(OUTPUT3_PIN); 
+  // gpio_set_direction(OUTPUT3_PIN, GPIO_MODE_OUTPUT);
+  // gpio_pad_select_gpio(OUTPUT4_PIN); 
   // gpio_set_direction(OUTPUT4_PIN, GPIO_MODE_OUTPUT);
+  
+/*------- Configure SPI -------*/
+  SPI.end();
+  spi_bus_initialize(SPI2_HOST, &spi_conifg, SPI_DMA_DISABLED);
 
-
-  inputs[0].firmwareVersion = FIRMWARE_VERSION;
-
-
-  xTaskCreate(rx_task, "uart_rx_task", 1024*2, NULL, configMAX_PRIORITIES - 1, NULL);
-  #ifdef DEBUG
-  ESP_LOGI(TASK_TAG, "uart_rx_task created!");
-  #endif
-
-  Update.onProgress(updateCallback);
-  xTaskCreate(usbTask, "usbTask", 4096*2, NULL, configMAX_PRIORITIES - 5, NULL);
-  #ifdef DEBUG
-	ESP_LOGI(TASK_TAG, "usbTask created!");
-  #endif
-
-	// initAP();
+/*----------- SPIFFS -----------*/
   initMemory();
-  // initWebServer();
+
+
+/*-------------- AP ------------*/
+	initAP();
+  initWebServer();
+  xTaskCreate(webServerTask, "webServerTask", 2*2048, NULL, configMAX_PRIORITIES - 5, NULL);
 
 /*-------- Progam FPGA ---------*/
   #if defined(W1VC128R_BOARD) || defined(W1VC1616R_BOARD)
   programFPGA();
-  postProgramFPGA();
   #endif
+
+
+/*-------- Connect BB ---------*/
+  uart_flush(UART_BB);
+  xTaskCreate(rx_task, "uart_rx_task", 1024*2, NULL, configMAX_PRIORITIES - 1, NULL);
+  #ifdef DEBUG
+  ESP_LOGI(TASK_TAG, "uart_rx_task created!");
+  #endif
+  initExtensionModules();
 }
 
 
@@ -1328,15 +1349,48 @@ inline void readInputs()
 {
   //clear
   inputs[0].digitalInputStates = 0;
-
   
-  #ifdef W1VC128R_BOARD
+  #if defined(W1VC128R_BOARD)
     // SPI -> FPGA
     // Only if TOP board has 12 input ports
     // Read port B -> Read IN6-IN12 
+    
+    spi_bus_initialize(SPI2_HOST, &spi_conifg, SPI_DMA_DISABLED);
+    spi_bus_add_device(SPI2_HOST, &device_conifg2, &fpga);
+    
     uint8_t inputsFPGA = readInputsFPGA(static_cast<uint8_t>(inputs[0].digitalOutputStates >> 12));
+    
+    spi_bus_remove_device(fpga);
+    spi_bus_free(SPI2_HOST);
+    gpio_pad_select_gpio(OUTPUT3_PIN); 
+    gpio_set_direction(OUTPUT3_PIN, GPIO_MODE_OUTPUT);
+    gpio_pad_select_gpio(OUTPUT4_PIN); 
+    gpio_set_direction(OUTPUT4_PIN, GPIO_MODE_OUTPUT);
+    gpio_set_level(OUTPUT3_PIN, (~inputs[0].digitalOutputStates & 0x0004));
+    gpio_set_level(OUTPUT4_PIN, (~inputs[0].digitalOutputStates & 0x0008));
     inputs[0].digitalInputStates |= ((inputsFPGA & 0x7f) << 5);  //Piny są odwrócone względem komunikacji do fpga ale bym tak zostawił by było mniej obliczeń
-  #else
+    /*|  //IN6
+                                    (inputsFPGA << 6) |  //IN7
+                                    (inputsFPGA << 7) |  //IN8
+                                    (inputsFPGA << 8) |  //IN9
+                                    (inputsFPGA << 9) |  //IN10
+                                    (inputsFPGA << 10) |*/ //IN11
+    //                                 (inputsFPGA << 11);  //IN12
+  #elif defined(W1VC1616R_BOARD)
+  #error "FPGA can't read 12 ports now"
+  uint16_t inputsFPGA = readInputsFPGA(static_cast<uint8_t>(inputs[0].digitalOutputStates >> 12));
+  inputs[0].digitalInputStates |= (inputsFPGA << 5) |  //IN6
+                                  (inputsFPGA << 6) |  //IN7
+                                  (inputsFPGA << 7) |  //IN8
+                                  (inputsFPGA << 8) |  //IN9
+                                  (inputsFPGA << 9) |  //IN10
+                                  (inputsFPGA << 10) | //IN11
+                                  (inputsFPGA << 11);  //IN12
+                                  (inputsFPGA << 12);  //IN13
+                                  (inputsFPGA << 13);  //IN14
+                                  (inputsFPGA << 14);  //IN15
+                                  (inputsFPGA << 15);  //IN16
+  #elif defined(W1VC64R_BOARD)
     inputs[0].digitalInputStates |= (gpio_get_level(INPUT6_PIN) << 5);
   #endif
   
@@ -1359,15 +1413,29 @@ inline void writeOutputs()
   for (uint8_t i = 1; i < boardsNumber + 1; i++)
     SendDigitalOutputs(i, inputs[i].digitalOutputStates);
 
-  // SPI -> FPGA
+   // SPI -> FPGA
   #if defined(W1VC128R_BOARD) || defined(W1VC1616R_BOARD)
+  spi_bus_initialize(SPI2_HOST, &spi_conifg, SPI_DMA_DISABLED);
+  spi_bus_add_device(SPI2_HOST, &device_conifg2, &fpga);
+  
   writeOutputsFPGA((inputs[0].digitalOutputStates >> 4));
   // writeOutputsFPGA((inputs[0].digitalOutputStates << 2)); // Tymczasowo
+  
+  spi_bus_remove_device(fpga);
+  spi_bus_free(SPI2_HOST);
+  gpio_reset_pin(OUTPUT3_PIN);
+  gpio_reset_pin(OUTPUT4_PIN);
+  gpio_pad_select_gpio(OUTPUT3_PIN); 
+  gpio_set_direction(OUTPUT3_PIN, GPIO_MODE_OUTPUT);
+  gpio_pad_select_gpio(OUTPUT4_PIN); 
+  gpio_set_direction(OUTPUT4_PIN, GPIO_MODE_OUTPUT);
   #endif
 
   // GPIO
   gpio_set_level(OUTPUT1_PIN, inputs[0].digitalOutputStates & 0x0001);
   gpio_set_level(OUTPUT2_PIN, inputs[0].digitalOutputStates & 0x0002);
-  gpio_set_level(OUTPUT3_PIN, inputs[0].digitalOutputStates & 0x0004);
-  gpio_set_level(OUTPUT4_PIN, inputs[0].digitalOutputStates & 0x0008);
+  gpio_set_level(OUTPUT3_PIN, (~inputs[0].digitalOutputStates & 0x0004));
+  gpio_set_level(OUTPUT4_PIN, (~inputs[0].digitalOutputStates & 0x0008));
+  
+  ESP_LOGI("out", "Outputs:" BYTE_TO_BINARY_PATTERN " " BYTE_TO_BINARY_PATTERN " ", BYTE_TO_BINARY(inputs[0].digitalOutputStates>>8), BYTE_TO_BINARY(inputs[0].digitalOutputStates));
 }

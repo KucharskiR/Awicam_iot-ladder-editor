@@ -10,31 +10,34 @@
 #define W1VC_128R_BOARD
 #include "include/controller.h"
 
-#define LD_Q0_1(value) ((inputs[0].digitalOutputStates = ((inputs[0].digitalOutputStates & ~(0x0001)) | ((value & 0x01)))))
-#define LD_Q0_2(value) ((inputs[0].digitalOutputStates = ((inputs[0].digitalOutputStates & ~(0x0002)) | ((value & 0x01) << 1))))
-#define LD_Q0_3(value) ((inputs[0].digitalOutputStates = ((inputs[0].digitalOutputStates & ~(0x0004)) | ((value & 0x01) << 2))))
-#define LD_Q0_4(value) ((inputs[0].digitalOutputStates = ((inputs[0].digitalOutputStates & ~(0x0008)) | ((value & 0x01) << 3))))
-#define LD_Q0_5(value) ((inputs[0].digitalOutputStates = ((inputs[0].digitalOutputStates & ~(0x0010)) | ((value & 0x01) << 4))))
-#define LD_Q0_6(value) ((inputs[0].digitalOutputStates = ((inputs[0].digitalOutputStates & ~(0x0020)) | ((value & 0x01) << 5))))
-#define LD_Q0_7(value) ((inputs[0].digitalOutputStates = ((inputs[0].digitalOutputStates & ~(0x0040)) | ((value & 0x01) << 6))))
-#define LD_Q0_8(value) ((inputs[0].digitalOutputStates = ((inputs[0].digitalOutputStates & ~(0x0080)) | ((value & 0x01) << 7))))
-#define LD_Q0_9(value) ((inputs[0].digitalOutputStates = ((inputs[0].digitalOutputStates & ~(0x0100)) | ((value & 0x01) << 8))))
-#define LD_Q0_10(value) ((inputs[0].digitalOutputStates = ((inputs[0].digitalOutputStates & ~(0x0200)) | ((value & 0x01) << 9))))
-#define LD_Q0_11(value) ((inputs[0].digitalOutputStates = ((inputs[0].digitalOutputStates & ~(0x0400)) | ((value & 0x01) << 10))))
-#define LD_Q0_12(value) ((inputs[0].digitalOutputStates = ((inputs[0].digitalOutputStates & ~(0x0800)) | ((value & 0x01) << 11))))
 
-#define LD_I0_1 ((inputs[0].digitalInputStates & 0x0001))
-#define LD_I0_2 (((inputs[0].digitalInputStates>>1) & 0x0001))
-#define LD_I0_3 (((inputs[0].digitalInputStates>>2) & 0x0001))
-#define LD_I0_4 (((inputs[0].digitalInputStates>>3) & 0x0001))
-#define LD_I0_5 (((inputs[0].digitalInputStates>>4) & 0x0001))
-#define LD_I0_6 (((inputs[0].digitalInputStates>>5) & 0x0001))
-#define LD_I0_7 (((inputs[0].digitalInputStates>>6) & 0x0001))
-#define LD_I0_8 (((inputs[0].digitalInputStates>>7) & 0x0001))
-#define LD_I0_9 (((inputs[0].digitalInputStates>>8) & 0x0001))
-#define LD_I0_10 (((inputs[0].digitalInputStates>>9) & 0x0001))
-#define LD_I0_11 (((inputs[0].digitalInputStates>>10) & 0x0001))
-#define LD_I0_12 (((inputs[0].digitalInputStates>>11) & 0x0001))
+
+Ladder2Pin LD_Q0_1(1, &inputs[0].digitalOutputStates);
+Ladder2Pin LD_Q0_2(2, &inputs[0].digitalOutputStates);
+Ladder2Pin LD_Q0_3(3, &inputs[0].digitalOutputStates);
+Ladder2Pin LD_Q0_4(4, &inputs[0].digitalOutputStates);
+Ladder2Pin LD_Q0_5(5, &inputs[0].digitalOutputStates);
+Ladder2Pin LD_Q0_6(6, &inputs[0].digitalOutputStates);
+Ladder2Pin LD_Q0_7(7, &inputs[0].digitalOutputStates);
+Ladder2Pin LD_Q0_8(8, &inputs[0].digitalOutputStates);
+Ladder2Pin LD_Q1_1(1, &inputs[1].digitalOutputStates);
+Ladder2Pin LD_Q1_2(2, &inputs[1].digitalOutputStates);
+
+Ladder2Pin LD_I0_1(1, &inputs[0].digitalInputStates);
+Ladder2Pin LD_I0_2(2, &inputs[0].digitalInputStates);
+Ladder2Pin LD_I0_3(3, &inputs[0].digitalInputStates);
+Ladder2Pin LD_I0_4(4, &inputs[0].digitalInputStates);
+Ladder2Pin LD_I0_5(5, &inputs[0].digitalInputStates);
+Ladder2Pin LD_I0_6(6, &inputs[0].digitalInputStates);
+Ladder2Pin LD_I0_7(7, &inputs[0].digitalInputStates);
+Ladder2Pin LD_I0_8(8, &inputs[0].digitalInputStates);
+Ladder2Pin LD_I0_9(9, &inputs[0].digitalInputStates);
+Ladder2Pin LD_I0_10(10, &inputs[0].digitalInputStates);
+Ladder2Pin LD_I0_11(11, &inputs[0].digitalInputStates);
+Ladder2Pin LD_I0_12(12, &inputs[0].digitalInputStates);
+Ladder2Pin LD_I1_1(1, &inputs[1].digitalInputStates);
+Ladder2Pin LD_I1_2(2, &inputs[1].digitalInputStates);
+Ladder2Pin LD_I1_3(3, &inputs[1].digitalInputStates);
 
 // Timer struct
 typedef struct {
@@ -139,20 +142,24 @@ void init(){
   LD_TIME.v = 0;
   refreshTime64bit();
 }
-void setup()
+void ladderDiagramTask(void* arg)
+{
+  while(1) 
+  {
+    readInputs();
+    vTaskDelay(1 / portTICK_PERIOD_MS);
+    refreshTime64bit();
+    rung001();
+    writeOutputs();
+  }
+}void setup()
 {
   initController();
 
   init();
   initContext();
-  while(1) 
-  {
-    readInputs();
-    refreshTime64bit();
-    vTaskDelay(1 / portTICK_PERIOD_MS);
-    rung001();
-    writeOutputs();
-  }
+
+  xTaskCreate(ladderDiagramTask, "ladderDiagramTask", 2048, NULL, configMAX_PRIORITIES - 2, NULL);
 }
 void loop() {
 }
