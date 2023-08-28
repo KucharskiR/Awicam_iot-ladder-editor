@@ -183,9 +183,11 @@ public class BuildRunEvent implements Observer {
 			compilation.compile();
 			
 			if (compilation.getCompilationStatus() == 0) {
-				sharedResource.setData(true);
 				uploading(); // uploading method invoke
+			} else {
+				consoleOutput("Compilation error");
 			}
+			sharedResource.setData(true);
 			sharedResource.setCompilationStatus(compilation.getCompilationStatus());
 		});
 		

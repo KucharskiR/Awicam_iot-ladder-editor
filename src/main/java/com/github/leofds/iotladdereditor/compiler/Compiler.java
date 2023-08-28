@@ -42,6 +42,14 @@ public class Compiler{
 		return compilationStatus;
 	}
 
+	public int getUploadingStatus() {
+		return uploadingStatus;
+	}
+
+	public void setUploadingStatus(int uploadingStatus) {
+		this.uploadingStatus = uploadingStatus;
+	}
+
 	public void setCompilationStatus(int compilationStatus) {
 		this.compilationStatus = compilationStatus;
 	}

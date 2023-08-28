@@ -1,5 +1,6 @@
 package com.github.leofds.iotladdereditor.view.event;
 
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -11,13 +12,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import com.fazecast.jSerialComm.SerialPort;
+import com.github.leofds.iotladdereditor.application.Mediator;
 import com.github.leofds.iotladdereditor.compiler.Compiler;
 import com.github.leofds.iotladdereditor.i18n.Strings;
 import com.github.leofds.iotladdereditor.util.bars.UploadingWaitingBar;
-import com.github.leofds.iotladdereditor.view.event.BuildRunEvent.SharedResource;
-import java.awt.BorderLayout;
-import javax.swing.BoxLayout;
-import java.awt.FlowLayout;
 
 
 public class ComPortChooser extends JFrame {
@@ -61,6 +59,10 @@ public class ComPortChooser extends JFrame {
 			Compiler uploadingCompiler = new Compiler();
 			
 			uploadingCompiler.upload(portName);
+			
+			if (uploadingCompiler.getUploadingStatus() == 1) {
+				consoleOutput("Uploading error");
+			}
 			
 			sharedResource.setData(true);
 			
@@ -113,6 +115,11 @@ public class ComPortChooser extends JFrame {
 			String portName = port.getSystemPortName();
 			comPortComboBox.addItem(portName);
 		}
+	}
+	
+	private void consoleOutput(String msg) {
+		// output console 
+		Mediator.getInstance().outputConsoleMessage(msg);
 	}
 	
 	class SharedResource {
