@@ -1,6 +1,6 @@
 package com.github.leofds.iotladdereditor.util;
 
-import java.awt.FlowLayout;
+import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,8 +14,6 @@ import javax.swing.Timer;
 
 import com.github.leofds.iotladdereditor.i18n.Strings;
 
-import java.awt.BorderLayout;
-
 public class WaitingBar  {
     private JLabel statusLabel;
     private Timer timer;
@@ -26,7 +24,7 @@ public class WaitingBar  {
         this.frame = new JFrame("Progress/Waiting Bar");
         frame.setTitle(title());;
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.setSize(242, 113);
+        frame.setSize(300, 113);
         frame.setLocationRelativeTo(null);
         frame.getContentPane().setLayout(new BorderLayout(0, 0));
 

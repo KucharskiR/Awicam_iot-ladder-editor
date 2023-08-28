@@ -72,51 +72,49 @@ public class BuildRunEvent implements Observer {
 
 	private void uploading() {
 		// TODO Auto-generated method stub
-		Thread uploadingThread = new Thread(() -> {
-			JFrame frame = new JFrame("Uploading...");
-			frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-
-			int choice = JOptionPane.showConfirmDialog(frame, "Do you want to upload?", "Confirmation",
-					JOptionPane.YES_NO_OPTION);
-
-			if (choice == JOptionPane.YES_OPTION) {
-				System.out.println("Yes");
-				
-				comPortChooser(); 
-
-			} else if (choice == JOptionPane.NO_OPTION) {
-				System.out.println("No");
-			}
-
-			frame.pack();
-			frame.setVisible(false);
-		});
-
-		uploadingThread.start();
-	}
-
-	private void comPortChooser() {
-
-		System.out.println("Ok");
-
 		ComPortChooser comPortChooser = new ComPortChooser();
 
-		Thread uploadingTerminalThread = new Thread(() -> {
-			Compiler uploadingCompiler = new Compiler();
-			uploadingCompiler.upload(comPortChooser.getPortName());
-		});
-		
-		Thread uploadingWaitingBar = new Thread(() -> {
-			UploadingWaitingBar uploadWaitingBar = new UploadingWaitingBar();
-		});
-		
-		if (comPortChooser.isUploadingStart() && comPortChooser.getPortName() != null) {
-			uploadingTerminalThread.start();
-			uploadingWaitingBar.start();
-		} 
-		comPortChooser.setVisible(true);
+		JFrame frame = new JFrame("Uploading...");
+		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+		int choice = JOptionPane.showConfirmDialog(frame, "Do you want to upload?", "Confirmation",
+				JOptionPane.YES_NO_OPTION);
+
+		if (choice == JOptionPane.YES_OPTION) {
+			System.out.println("Yes");
+
+			comPortChooser.setVisible(true);
+
+
+		} else if (choice == JOptionPane.NO_OPTION) {
+			System.out.println("No");
+		}
+
+		frame.pack();
+		frame.setVisible(false);
 
 	}
+
+//	private void comPortChooser() {
+//
+//		System.out.println("comPortChooser");
+//
+//		Thread uploadingTerminalThread = new Thread(() -> {
+//			Compiler uploadingCompiler = new Compiler();
+//			uploadingCompiler.upload(comPortChooser.getPortName());
+//		});
+//		
+//		Thread uploadingWaitingBar = new Thread(() -> {
+//			UploadingWaitingBar uploadWaitingBar = new UploadingWaitingBar();
+//		});
+//		
+//		if (comPortChooser.isUploadingStart() && comPortChooser.getPortName() != null) {
+//			uploadingTerminalThread.start();
+//			uploadingWaitingBar.start();
+//		} 
+//		comPortChooser.setVisible(true);
+//
+//	}
 
 	private void compilationConfirm() {
 		// confirmation compiling dialog box

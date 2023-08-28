@@ -11,7 +11,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import com.fazecast.jSerialComm.SerialPort;
+import com.github.leofds.iotladdereditor.compiler.Compiler;
 import com.github.leofds.iotladdereditor.i18n.Strings;
+import com.github.leofds.iotladdereditor.util.bars.UploadingWaitingBar;
 
 
 public class ComPortChooser extends JFrame {
@@ -36,7 +38,7 @@ public class ComPortChooser extends JFrame {
     	this.portName = null;
     	
         setTitle("ESP Upload");
-        setSize(300, 100);
+        setSize(350, 100);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -59,6 +61,17 @@ public class ComPortChooser extends JFrame {
                 	uploadingStart = true;
                     portName = selectedPort;
                     System.out.println("Connecting to " + selectedPort);
+                	Thread uploadingTerminalThread = new Thread(() -> {
+            			Compiler uploadingCompiler = new Compiler();
+            			uploadingCompiler.upload(portName);
+            		});
+
+            		Thread uploadingWaitingBar = new Thread(() -> {
+            			UploadingWaitingBar uploadWaitingBar = new UploadingWaitingBar();
+            		});
+            		
+        			uploadingTerminalThread.start();
+        			uploadingWaitingBar.start();
                 }
             }
         });
@@ -75,7 +88,7 @@ public class ComPortChooser extends JFrame {
         getContentPane().add(panel);
     }
 
-    private void populateComPortComboBox() {
+	private void populateComPortComboBox() {
 //        @SuppressWarnings("unchecked")
 //		Enumeration<CommPortIdentifier> portEnum = CommPortIdentifier.getPortIdentifiers();
 //        while (portEnum.hasMoreElements()) {
@@ -84,12 +97,11 @@ public class ComPortChooser extends JFrame {
 //                comPortComboBox.addItem(portIdentifier.getName());
 //            }
 //        }
-        SerialPort[] ports = SerialPort.getCommPorts();
-        for (SerialPort port : ports) {
-            String portName = port.getSystemPortName();
-            System.out.println("COM Port: " + portName);
-            comPortComboBox.addItem(portName);
-        }
-    }
+		SerialPort[] ports = SerialPort.getCommPorts();
+		for (SerialPort port : ports) {
+			String portName = port.getSystemPortName();
+			comPortComboBox.addItem(portName);
+		}
+	}
 
 }
