@@ -23,6 +23,7 @@ public class PeripheralIO extends DeviceMemory implements Serializable{
 	private static final long serialVersionUID = 3470318238269022501L;
 	private String pin;
 	private String path;
+	private int deviceNum;
 	private IO io;
 	
 	public PeripheralIO(String name, Class<?> type, String pin, IO io) {
@@ -37,6 +38,18 @@ public class PeripheralIO extends DeviceMemory implements Serializable{
 		this.pin = id;
 		this.path = path;
 		this.io = io;
+	}
+	
+	public PeripheralIO(String name, Class<?> type, String id, String path, int deviceNum, IO io) {
+		super(name, type);
+		this.pin = id;
+		this.path = path;
+		this.deviceNum = deviceNum;
+		this.io = io;
+	}
+
+	public int getDeviceNum() {
+		return deviceNum;
 	}
 
 	public String getPin() {

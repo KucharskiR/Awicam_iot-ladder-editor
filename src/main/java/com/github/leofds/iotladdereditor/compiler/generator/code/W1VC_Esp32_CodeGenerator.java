@@ -338,7 +338,9 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 						+ peripheralIO.getName() 
 						+ "(" 
 						+ peripheralIO.getPin() 
-						+ ", &inputs[0]"
+						+ ", &inputs["
+						+ peripheralIO.getDeviceNum()
+						+ "]"
 						+ outputOrInput + ");");
 			}
 		}
