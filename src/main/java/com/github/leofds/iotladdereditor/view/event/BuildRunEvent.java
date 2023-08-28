@@ -16,8 +16,6 @@
  ******************************************************************************/
 package com.github.leofds.iotladdereditor.view.event;
 
-import java.awt.Desktop;
-import java.io.File;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -26,8 +24,8 @@ import javax.swing.JOptionPane;
 
 import com.github.leofds.iotladdereditor.application.Mediator;
 import com.github.leofds.iotladdereditor.compiler.Compiler;
+import com.github.leofds.iotladdereditor.i18n.Strings;
 import com.github.leofds.iotladdereditor.util.bars.CompileWaitingBar;
-import com.github.leofds.iotladdereditor.util.bars.UploadingWaitingBar;
 import com.github.leofds.iotladdereditor.view.event.Subject.SubMsg;
 
 public class BuildRunEvent implements Observer {
@@ -185,7 +183,7 @@ public class BuildRunEvent implements Observer {
 			if (compilation.getCompilationStatus() == 0) {
 				uploading(); // uploading method invoke
 			} else {
-				consoleOutput("Compilation error");
+				consoleOutput(Strings.compilationError());
 			}
 			sharedResource.setData(true);
 			sharedResource.setCompilationStatus(compilation.getCompilationStatus());

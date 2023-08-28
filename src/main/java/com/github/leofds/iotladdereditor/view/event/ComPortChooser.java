@@ -61,7 +61,7 @@ public class ComPortChooser extends JFrame {
 			uploadingCompiler.upload(portName);
 			
 			if (uploadingCompiler.getUploadingStatus() == 1) {
-				consoleOutput("Uploading error");
+				consoleOutput(Strings.uploadingError());
 			}
 			
 			sharedResource.setData(true);

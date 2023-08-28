@@ -191,6 +191,8 @@ public class Strings {
 	public static String information() { return bundle.getString("information"); }
 	public static String uploadingCompleted() { return bundle.getString("uploadingCompleted"); }
 	public static String compilationCompleted() { return bundle.getString("compilationCompleted"); }
+	public static String uploadingError() { return bundle.getString("uploadingError"); }
+	public static String compilationError() { return bundle.getString("compilationError"); }
 
 
 	
