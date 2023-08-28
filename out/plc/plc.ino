@@ -55,6 +55,9 @@ uint64_t getTime(){
   return LD_TIME.v;
 }
 
+LD_TIMER LD_T1;
+LD_TIMER LD_T2;
+
 void refreshTime64bit(){
   unsigned long now = millis();
   if(now < LD_TIME.p[0]){
@@ -64,6 +67,11 @@ void refreshTime64bit(){
 }
 
 void rung001(void){
+  uint8_t _LD_S0;
+  uint64_t _LD_T1;
+  uint64_t _LD_T2;
+  uint64_t _LD_T3;
+  uint64_t _LD_T4;
   _LD_S0 = 1;
   LD_T1.EN = _LD_S0;
   if(!_LD_S0){
@@ -84,7 +92,7 @@ void rung001(void){
     }
   }
   _LD_S0 = LD_T1.DN;
-  LD_Q0_8 = _LD_S0;
+  LD_Q0_8(_LD_S0);
   LD_T2.EN = _LD_S0;
   if(!_LD_S0){
     LD_T2.DN = 0;
