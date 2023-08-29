@@ -845,9 +845,9 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 					for(int i=0;i<labels.size();i++) { 
 						c.add("  ");
 					}
-					if (result.getName().contains("Q") || result.getName().contains("I"))
-						c.addl("  " + cname(result.getName()) + "(" + cname(argument1.getName()) + ");");
-					else
+//					if (result.getName().contains("Q") || result.getName().contains("I"))
+//						c.addl("  " + cname(result.getName()) + "(" + cname(argument1.getName()) + ");");
+//					else
 						c.addl("  " + cname(result.getName())+" = "+cname(argument1.getName())+";");
 					break;
 				case NOT:
