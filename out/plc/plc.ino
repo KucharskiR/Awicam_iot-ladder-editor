@@ -4,7 +4,7 @@
 //
 // https://github.com/leofds/iot-ladder-editor
 //
-// Project: blink
+// Project: blink_memory
 
 // Device 
 #define W1VC_128R_BOARD
@@ -12,7 +12,7 @@
 
 
 
-	//Outputs defines
+// Outputs defines
 Ladder2Pin LD_Q0_1(1, &inputs[0].digitalOutputStates);
 Ladder2Pin LD_Q0_2(2, &inputs[0].digitalOutputStates);
 Ladder2Pin LD_Q0_3(3, &inputs[0].digitalOutputStates);
@@ -24,7 +24,7 @@ Ladder2Pin LD_Q0_8(8, &inputs[0].digitalOutputStates);
 Ladder2Pin LD_Q1_1(1, &inputs[1].digitalOutputStates);
 Ladder2Pin LD_Q1_2(2, &inputs[1].digitalOutputStates);
 
-		//Inputs defines
+// Inputs defines
 Ladder2Pin LD_I0_1(1, &inputs[0].digitalInputStates);
 Ladder2Pin LD_I0_2(2, &inputs[0].digitalInputStates);
 Ladder2Pin LD_I0_3(3, &inputs[0].digitalInputStates);
@@ -59,6 +59,9 @@ union {
 uint64_t getTime(){
   return LD_TIME.v;
 }
+
+int32_t LD_MI01 = 0;
+int32_t LD_MI05 = 0;
 
 LD_TIMER LD_T1;
 LD_TIMER LD_T2;
@@ -97,7 +100,7 @@ void rung001(void){
     }
   }
   _LD_S0 = LD_T1.DN;
-  LD_Q0_8(_LD_S0);
+  LD_Q0_8 = _LD_S0;
   LD_T2.EN = _LD_S0;
   if(!_LD_S0){
     LD_T2.DN = 0;
@@ -122,6 +125,14 @@ void rung001(void){
     LD_T1.AC = 0;
     LD_T1.EN = 0;
     LD_T1.TT =  getTime();
+  }
+}
+
+void rung002(void){
+  uint8_t _LD_S0;
+  _LD_S0 = 1;
+  if(_LD_S0){
+    LD_Q0_1 = ((int)LD_MI01 & (int)LD_MI05);
   }
 }
 
@@ -152,6 +163,7 @@ void ladderDiagramTask(void* arg)
     vTaskDelay(1 / portTICK_PERIOD_MS);
     refreshTime64bit();
     rung001();
+    rung002();
     writeOutputs();
   }
 }void setup()

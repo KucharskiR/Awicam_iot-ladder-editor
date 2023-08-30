@@ -5,11 +5,41 @@
 // https://github.com/leofds/iot-ladder-editor
 //
 // Project: blink
-#include "include/controller.h"
-
 
 // Device 
 #define W1VC_128R_BOARD
+#include "include/controller.h"
+
+
+
+// Outputs defines
+Ladder2Pin LD_Q0_1(1, &inputs[0].digitalOutputStates);
+Ladder2Pin LD_Q0_2(2, &inputs[0].digitalOutputStates);
+Ladder2Pin LD_Q0_3(3, &inputs[0].digitalOutputStates);
+Ladder2Pin LD_Q0_4(4, &inputs[0].digitalOutputStates);
+Ladder2Pin LD_Q0_5(5, &inputs[0].digitalOutputStates);
+Ladder2Pin LD_Q0_6(6, &inputs[0].digitalOutputStates);
+Ladder2Pin LD_Q0_7(7, &inputs[0].digitalOutputStates);
+Ladder2Pin LD_Q0_8(8, &inputs[0].digitalOutputStates);
+Ladder2Pin LD_Q1_1(1, &inputs[1].digitalOutputStates);
+Ladder2Pin LD_Q1_2(2, &inputs[1].digitalOutputStates);
+
+// Inputs defines
+Ladder2Pin LD_I0_1(1, &inputs[0].digitalInputStates);
+Ladder2Pin LD_I0_2(2, &inputs[0].digitalInputStates);
+Ladder2Pin LD_I0_3(3, &inputs[0].digitalInputStates);
+Ladder2Pin LD_I0_4(4, &inputs[0].digitalInputStates);
+Ladder2Pin LD_I0_5(5, &inputs[0].digitalInputStates);
+Ladder2Pin LD_I0_6(6, &inputs[0].digitalInputStates);
+Ladder2Pin LD_I0_7(7, &inputs[0].digitalInputStates);
+Ladder2Pin LD_I0_8(8, &inputs[0].digitalInputStates);
+Ladder2Pin LD_I0_9(9, &inputs[0].digitalInputStates);
+Ladder2Pin LD_I0_10(10, &inputs[0].digitalInputStates);
+Ladder2Pin LD_I0_11(11, &inputs[0].digitalInputStates);
+Ladder2Pin LD_I0_12(12, &inputs[0].digitalInputStates);
+Ladder2Pin LD_I1_1(1, &inputs[1].digitalInputStates);
+Ladder2Pin LD_I1_2(2, &inputs[1].digitalInputStates);
+Ladder2Pin LD_I1_3(3, &inputs[1].digitalInputStates);
 
 // Timer struct
 typedef struct {
@@ -31,15 +61,8 @@ uint64_t getTime(){
 }
 
 uint8_t LD_Q0_8 = 0;
-uint8_t LD_Q0_1 = 0;
-uint8_t LD_Q0_2 = 0;
-uint8_t LD_Q0_3 = 0;
-uint8_t LD_Q0_4 = 0;
-uint8_t LD_I0_1 = 0;
-uint8_t LD_I0_2 = 0;
-uint8_t LD_I0_3 = 0;
-uint8_t LD_I0_4 = 0;
-uint8_t LD_I0_5 = 0;
+int32_t LD_MI01 = 0;
+int32_t LD_MI05 = 0;
 
 LD_TIMER LD_T1;
 LD_TIMER LD_T2;
@@ -106,6 +129,16 @@ void rung001(void){
   }
 }
 
+void rung002(void){
+  uint8_t _LD_S0;
+  _LD_S0 = 1;
+  if(_LD_S0){
+    if(LD_MI01 != LD_MI05){
+      _LD_S0 = 0;
+    }
+  }
+}
+
 void initContext(void){
   LD_T2.EN = 0;
   LD_T2.AC = 0;
@@ -125,32 +158,25 @@ void init(){
   LD_TIME.v = 0;
   refreshTime64bit();
 }
-
-/* zamiast TaskScan pętla while(1) w setup()
-void TaskScan(void *pvParameters){
-  for(;;){
-    vTaskDelay(1);
+void ladderDiagramTask(void* arg)
+{
+  while(1) 
+  {
     readInputs();
+    vTaskDelay(1 / portTICK_PERIOD_MS);
     refreshTime64bit();
     rung001();
+    rung002();
     writeOutputs();
   }
-}
-*/
-void setup()
+}void setup()
 {
   initController();
 
   init();
   initContext();
-  while(1) 
-  {
-    readInputs();
-    refreshTime64bit();
-    vTaskDelay(1 / portTICK_PERIOD_MS);
-    rung001();
-    writeOutputs();
-  }
+
+  xTaskCreate(ladderDiagramTask, "ladderDiagramTask", 2048, NULL, configMAX_PRIORITIES - 2, NULL);
 }
 void loop() {
 }

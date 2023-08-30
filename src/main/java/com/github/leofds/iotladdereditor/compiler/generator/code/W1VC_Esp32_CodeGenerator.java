@@ -105,7 +105,7 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 		addCountStruct(ir, c);
 		addGlobalSystemVariables(ir, c);
 		addTimerSystemFunction(c);
-//		addGlobalVariables(ir, c);
+		addGlobalVariables(ir, c);
 		
 		addGlobalStructs(ir, c);
 		if(isConnectionConfigured()) {
@@ -494,8 +494,10 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 					if(symbol.getScope().equals(GenContext.GLOBAL_SCOPE)){
 						if(!symbol.getType().equals(TimerInstruction.class) && !symbol.getType().equals(CountInstruction.class)){
 							if(!symbol.getName().contains(":")){
-								if(!symbol.getName().equals(varTime)){
-									vars.add(symbol);
+								if(symbol.getName().contains("M")){  // 30.08.2023 added to generate memory variables eg. LD_MI05
+									if(!symbol.getName().equals(varTime)){
+										vars.add(symbol);
+									}
 								}
 							}
 						}
