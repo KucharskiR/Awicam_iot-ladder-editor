@@ -1,5 +1,6 @@
 package com.github.leofds.iotladdereditor.view.event;
 
+import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -10,14 +11,14 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
 
 import com.fazecast.jSerialComm.SerialPort;
 import com.github.leofds.iotladdereditor.application.Mediator;
 import com.github.leofds.iotladdereditor.compiler.Compiler;
 import com.github.leofds.iotladdereditor.i18n.Strings;
 import com.github.leofds.iotladdereditor.util.bars.UploadingWaitingBar;
-import java.awt.BorderLayout;
-import java.awt.CardLayout;
 
 
 public class ComPortChooser extends JFrame {
@@ -28,6 +29,7 @@ public class ComPortChooser extends JFrame {
 	private JComboBox<String> comPortComboBox;
 	private boolean uploadingStart;
 	private String portName;
+	private Compiler compilation;
 
     public boolean isUploadingStart() {
 		return uploadingStart;
@@ -38,8 +40,10 @@ public class ComPortChooser extends JFrame {
 	}
 
 	public ComPortChooser() {
+		setAlwaysOnTop(true);
 		this.uploadingStart = false;
 		this.portName = null;
+		this.compilation = new Compiler();
 
 		setTitle("ESP Upload");
 		setSize(350, 149);
@@ -47,11 +51,13 @@ public class ComPortChooser extends JFrame {
 		setLocationRelativeTo(null);
 
 		comPortComboBox = new JComboBox<>();
+		comPortComboBox.setEnabled(false);
 		comPortComboBox.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		populateComPortComboBox();
 		JButton connectButton = new JButton(Strings.upload());
+		connectButton.setEnabled(false);
 		connectButton.setFont(new Font("Tahoma", Font.PLAIN, 13));
-
+		
 		// sharing thread data
 		SharedResource sharedResource = new SharedResource();
 		
@@ -111,20 +117,51 @@ public class ComPortChooser extends JFrame {
 		
 		JPanel panel_1 = new JPanel();
 		getContentPane().add(panel_1, BorderLayout.NORTH);
-		panel_1.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+		panel_1.setLayout(new BorderLayout(0, 0));
 		
-		JButton btnCompile = new JButton("Compile");
+		JButton btnCompile = new JButton("Run compilation");
+		btnCompile.setBorder(new EmptyBorder(10, 0, 10, 0));
 		btnCompile.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		panel_1.add(btnCompile);
 		
 		JPanel panel_2 = new JPanel();
 		getContentPane().add(panel_2, BorderLayout.SOUTH);
 		
-		JLabel lblOutputLabel = new JLabel("Output Label");
-		lblOutputLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		JLabel lblStatus = new JLabel("Status:");
+		lblStatus.setHorizontalAlignment(SwingConstants.LEFT);
+		lblStatus.setFont(new Font("Tahoma", Font.PLAIN, 15));
+		panel_2.add(lblStatus);
+		
+		JLabel lblOutputLabel = new JLabel("not compiled");
+		lblOutputLabel.setBorder(new EmptyBorder(0, 10, 0, 15));
+		lblOutputLabel.setHorizontalAlignment(SwingConstants.LEFT);
+		lblOutputLabel.setFont(new Font("Tahoma", Font.ITALIC, 13));
 		panel_2.add(lblOutputLabel);
-	}
+		
+		btnCompile.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				compilation.setCompilationStatus(5);
+				// compile Thread2
+				Thread compileThread = new Thread(() -> {
+					// Operation 2 code here
+					sharedResource.setData(false);
 
+					compilation.compile();
+
+					if (compilation.getCompilationStatus() == 0) {
+						// uploading method invoke
+					} else {
+						consoleOutput(Strings.compilationError());
+					}
+					sharedResource.setData(true);
+					sharedResource.setCompilationStatus(compilation.getCompilationStatus());
+				});
+				compileThread.start();
+			}
+		});
+	}
+	
 	private void populateComPortComboBox() {
 		
 		SerialPort[] ports = SerialPort.getCommPorts();

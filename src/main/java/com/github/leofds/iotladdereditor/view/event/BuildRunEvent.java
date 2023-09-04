@@ -32,6 +32,15 @@ public class BuildRunEvent implements Observer {
 
 	private Subject subject;
 	private Compiler compilation;
+	private ComPortChooser comPortChooser;
+
+	public ComPortChooser getComPortChooser() {
+		return comPortChooser;
+	}
+
+	public void setComPortChooser(ComPortChooser comPortChooser) {
+		this.comPortChooser = comPortChooser;
+	}
 
 	public BuildRunEvent(Subject subject) {
 		subject.addObserver(this);
@@ -57,8 +66,10 @@ public class BuildRunEvent implements Observer {
 //				break;
 			case W1VC_ESP32_FREERTOS:
 //				Desktop.getDesktop().open(new File("out/plc/plc.ino"));
-				CompileWindow compileWindow = new CompileWindow();
-				compilationConfirm();
+				ComPortChooser comPortChooser = new ComPortChooser();
+				setComPortChooser(comPortChooser);
+				this.comPortChooser.setVisible(true);
+//				compilationConfirm();
 				break;
 			default:
 				break;
@@ -71,7 +82,6 @@ public class BuildRunEvent implements Observer {
 
 	private void uploading() {
 		// TODO Auto-generated method stub
-		ComPortChooser comPortChooser = new ComPortChooser();
 
 		JFrame frame = new JFrame("Uploading...");
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -117,8 +127,8 @@ public class BuildRunEvent implements Observer {
 
 	private void compilationConfirm() {
 		// confirmation compiling dialog box
-		JFrame frame = new JFrame("Compiling...");
-		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+//		JFrame frame = new JFrame("Compiling...");
+//		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
 		// sharing thread data
 		SharedResource sharedResource = new SharedResource();
@@ -190,10 +200,10 @@ public class BuildRunEvent implements Observer {
 			sharedResource.setCompilationStatus(compilation.getCompilationStatus());
 		});
 		
-		int choice = JOptionPane.showConfirmDialog(frame, "Do you want to proceed compilation?", "Confirmation",
-				JOptionPane.YES_NO_OPTION);
-
-		if (choice == JOptionPane.YES_OPTION) {
+//		int choice = JOptionPane.showConfirmDialog(frame, "Do you want to proceed compilation?", "Confirmation",
+//				JOptionPane.YES_NO_OPTION);
+//
+//		if (choice == JOptionPane.YES_OPTION) {
 //			System.out.println("Yes");
 //				frame.dispose(); // Close the window if "No" is chosen
 
@@ -206,12 +216,12 @@ public class BuildRunEvent implements Observer {
 //						e.printStackTrace();
 //					}
 
-		} else if (choice == JOptionPane.NO_OPTION) {
-			System.out.println("No");
-		}
+//		} else if (choice == JOptionPane.NO_OPTION) {
+//			System.out.println("No");
+//		}
 
-		frame.pack();
-		frame.setVisible(false);
+//		frame.pack();
+//		frame.setVisible(false);
 	}
 
 	private void consoleOutput(String msg) {
