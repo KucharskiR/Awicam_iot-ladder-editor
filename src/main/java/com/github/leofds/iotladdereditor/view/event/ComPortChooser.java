@@ -16,6 +16,8 @@ import com.github.leofds.iotladdereditor.application.Mediator;
 import com.github.leofds.iotladdereditor.compiler.Compiler;
 import com.github.leofds.iotladdereditor.i18n.Strings;
 import com.github.leofds.iotladdereditor.util.bars.UploadingWaitingBar;
+import java.awt.BorderLayout;
+import java.awt.CardLayout;
 
 
 public class ComPortChooser extends JFrame {
@@ -40,7 +42,7 @@ public class ComPortChooser extends JFrame {
 		this.portName = null;
 
 		setTitle("ESP Upload");
-		setSize(350, 100);
+		setSize(350, 149);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setLocationRelativeTo(null);
 
@@ -106,6 +108,21 @@ public class ComPortChooser extends JFrame {
 		panel.add(connectButton);
 
 		getContentPane().add(panel);
+		
+		JPanel panel_1 = new JPanel();
+		getContentPane().add(panel_1, BorderLayout.NORTH);
+		panel_1.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+		
+		JButton btnCompile = new JButton("Compile");
+		btnCompile.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		panel_1.add(btnCompile);
+		
+		JPanel panel_2 = new JPanel();
+		getContentPane().add(panel_2, BorderLayout.SOUTH);
+		
+		JLabel lblOutputLabel = new JLabel("Output Label");
+		lblOutputLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		panel_2.add(lblOutputLabel);
 	}
 
 	private void populateComPortComboBox() {
@@ -142,5 +159,4 @@ public class ComPortChooser extends JFrame {
 	        return isFinished;
 	    }
 	}
-
 }
