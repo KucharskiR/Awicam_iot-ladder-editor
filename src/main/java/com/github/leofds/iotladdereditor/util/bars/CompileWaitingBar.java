@@ -12,7 +12,6 @@ public class CompileWaitingBar extends WaitingBar {
 		super();
 		
 	}
-
 	@Override
 	public String loadingText() {
 		return Strings.pleaseWait();
