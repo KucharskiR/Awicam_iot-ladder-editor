@@ -57,6 +57,7 @@ public class BuildRunEvent implements Observer {
 //				break;
 			case W1VC_ESP32_FREERTOS:
 //				Desktop.getDesktop().open(new File("out/plc/plc.ino"));
+				CompileWindow compileWindow = new CompileWindow();
 				compilationConfirm();
 				break;
 			default:
