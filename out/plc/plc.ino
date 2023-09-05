@@ -4,7 +4,7 @@
 //
 // https://github.com/leofds/iot-ladder-editor
 //
-// Project: blink_memory
+// Project: blink
 
 // Device 
 #define W1VC_128R_BOARD
@@ -60,8 +60,6 @@ uint64_t getTime(){
   return LD_TIME.v;
 }
 
-int32_t LD_MI01 = 0;
-int32_t LD_MI05 = 0;
 
 LD_TIMER LD_T1;
 LD_TIMER LD_T2;
@@ -128,14 +126,6 @@ void rung001(void){
   }
 }
 
-void rung002(void){
-  uint8_t _LD_S0;
-  _LD_S0 = 1;
-  if(_LD_S0){
-    LD_Q0_1 = ((int)LD_MI01 & (int)LD_MI05);
-  }
-}
-
 void initContext(void){
   LD_T2.EN = 0;
   LD_T2.AC = 0;
@@ -163,7 +153,6 @@ void ladderDiagramTask(void* arg)
     vTaskDelay(1 / portTICK_PERIOD_MS);
     refreshTime64bit();
     rung001();
-    rung002();
     writeOutputs();
   }
 }void setup()
