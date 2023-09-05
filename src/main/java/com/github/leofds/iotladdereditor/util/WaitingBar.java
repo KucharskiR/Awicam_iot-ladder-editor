@@ -12,6 +12,8 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.github.leofds.iotladdereditor.i18n.Strings;
 
 public class WaitingBar  {
@@ -59,7 +61,8 @@ public class WaitingBar  {
 
 	private void updateStatusLabel() {
         dotCount = (dotCount + 1) % 4; // Cycling through 0, 1, 2, 3
-        String dots = ".".repeat(dotCount);
+//        String dots = ".".repeat(dotCount);
+        String dots = StringUtils.repeat(".", dotCount);
 
         statusLabel.setText(loadingText() + dots);
         statusLabel.setFont(new Font("Tahoma", Font.PLAIN, 13));
