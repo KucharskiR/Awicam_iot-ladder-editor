@@ -193,6 +193,12 @@ public class Strings {
 	public static String compilationCompleted() { return bundle.getString("compilationCompleted"); }
 	public static String uploadingError() { return bundle.getString("uploadingError"); }
 	public static String compilationError() { return bundle.getString("compilationError"); }
+	public static String notCompiled() { return bundle.getString("notCompiled"); }
+	public static String notUploaded() { return bundle.getString("notUploaded"); }
+	public static String compilationStatus() { return bundle.getString("compilationStatus"); }
+	public static String uploadingStatus() { return bundle.getString("uploadingStatus"); }
+	public static String uploadingDots() { return bundle.getString("uploadingDots"); }
+	public static String compilationDots() { return bundle.getString("compilationDots"); }
 
 
 	
