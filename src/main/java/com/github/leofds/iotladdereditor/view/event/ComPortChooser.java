@@ -19,6 +19,7 @@ import com.github.leofds.iotladdereditor.application.Mediator;
 import com.github.leofds.iotladdereditor.compiler.Compiler;
 import com.github.leofds.iotladdereditor.i18n.Strings;
 import com.github.leofds.iotladdereditor.util.bars.UploadingWaitingBar;
+import java.awt.Color;
 
 
 public class ComPortChooser extends JFrame {
@@ -46,7 +47,7 @@ public class ComPortChooser extends JFrame {
 		this.compilation = new Compiler();
 
 		setTitle("ESP Upload");
-		setSize(350, 149);
+		setSize(350, 176);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setLocationRelativeTo(null);
 
@@ -126,17 +127,35 @@ public class ComPortChooser extends JFrame {
 		
 		JPanel panel_2 = new JPanel();
 		getContentPane().add(panel_2, BorderLayout.SOUTH);
+		panel_2.setLayout(new BorderLayout(0, 0));
 		
-		JLabel lblStatus = new JLabel("Status:");
+		JPanel panel_3 = new JPanel();
+		panel_2.add(panel_3, BorderLayout.SOUTH);
+		
+		JLabel lblStatusUpload = new JLabel("Uploading status:");
+		lblStatusUpload.setHorizontalAlignment(SwingConstants.LEFT);
+		lblStatusUpload.setFont(new Font("Tahoma", Font.PLAIN, 15));
+		panel_3.add(lblStatusUpload);
+		
+		JLabel lblOutputUpload = new JLabel("not uploaded");
+		lblOutputUpload.setHorizontalAlignment(SwingConstants.LEFT);
+		lblOutputUpload.setFont(new Font("Tahoma", Font.ITALIC, 13));
+		lblOutputUpload.setBorder(new EmptyBorder(0, 10, 0, 15));
+		panel_3.add(lblOutputUpload);
+		
+		JPanel panel_4 = new JPanel();
+		panel_2.add(panel_4, BorderLayout.NORTH);
+		
+		JLabel lblStatus = new JLabel("Compilation status:");
+		panel_4.add(lblStatus);
 		lblStatus.setHorizontalAlignment(SwingConstants.LEFT);
 		lblStatus.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		panel_2.add(lblStatus);
 		
-		JLabel lblOutputLabel = new JLabel("not compiled");
-		lblOutputLabel.setBorder(new EmptyBorder(0, 10, 0, 15));
-		lblOutputLabel.setHorizontalAlignment(SwingConstants.LEFT);
-		lblOutputLabel.setFont(new Font("Tahoma", Font.ITALIC, 13));
-		panel_2.add(lblOutputLabel);
+		JLabel lblOutputCompile = new JLabel("not compiled");
+		panel_4.add(lblOutputCompile);
+		lblOutputCompile.setBorder(new EmptyBorder(0, 10, 0, 15));
+		lblOutputCompile.setHorizontalAlignment(SwingConstants.LEFT);
+		lblOutputCompile.setFont(new Font("Tahoma", Font.ITALIC, 13));
 		
 		btnCompile.addActionListener(new ActionListener() {
 			@Override
@@ -151,8 +170,14 @@ public class ComPortChooser extends JFrame {
 
 					if (compilation.getCompilationStatus() == 0) {
 						// uploading method invoke
+						lblOutputCompile.setText("COMPILED!");
+						lblOutputCompile.setFont(new Font("Tahoma", Font.BOLD, 13));
+						lblOutputCompile.setForeground(Color.GREEN);
 					} else {
 						consoleOutput(Strings.compilationError());
+						lblOutputCompile.setText("COMPILATION ERROR!");
+						lblOutputCompile.setFont(new Font("Tahoma", Font.BOLD, 13));
+						lblOutputCompile.setForeground(Color.RED);
 					}
 					sharedResource.setData(true);
 					sharedResource.setCompilationStatus(compilation.getCompilationStatus());
