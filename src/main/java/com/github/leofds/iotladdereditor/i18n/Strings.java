@@ -199,6 +199,8 @@ public class Strings {
 	public static String uploadingStatus() { return bundle.getString("uploadingStatus"); }
 	public static String uploadingDots() { return bundle.getString("uploadingDots"); }
 	public static String compilationDots() { return bundle.getString("compilationDots"); }
+	public static String selectComPort() { return bundle.getString("selectComPort"); }
+	public static String runCompilation() { return bundle.getString("runCompilation"); }
 
 
 	

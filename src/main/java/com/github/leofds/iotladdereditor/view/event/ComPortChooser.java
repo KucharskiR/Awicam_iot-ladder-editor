@@ -63,20 +63,20 @@ public class ComPortChooser extends JFrame {
 		SharedResource sharedResource = new SharedResource();
 		
 
-		
-		Thread uploadingWaitingBar = new Thread(() -> {
-			UploadingWaitingBar uploadWaitingBar = new UploadingWaitingBar();
-			
-			while (!sharedResource.getData())
-				;
-			uploadWaitingBar.close();
-			
-		});
+//		
+//		Thread uploadingWaitingBar = new Thread(() -> {
+//			UploadingWaitingBar uploadWaitingBar = new UploadingWaitingBar();
+//			
+//			while (!sharedResource.getData())
+//				;
+//			uploadWaitingBar.close();
+//			
+//		});
 
 
 		JPanel panel = new JPanel();
 		panel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
-		JLabel label = new JLabel("Select COM Port:");
+		JLabel label = new JLabel(Strings.selectComPort());
 		label.setFont(new Font("Tahoma", Font.PLAIN, 13));
 		panel.add(label);
 		panel.add(comPortComboBox);
@@ -88,7 +88,7 @@ public class ComPortChooser extends JFrame {
 		getContentPane().add(panel_1, BorderLayout.NORTH);
 		panel_1.setLayout(new BorderLayout(0, 0));
 		
-		JButton btnCompile = new JButton("Run compilation");
+		JButton btnCompile = new JButton(Strings.runCompilation());
 		btnCompile.setBorder(new EmptyBorder(10, 0, 10, 0));
 		btnCompile.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		panel_1.add(btnCompile);
@@ -190,6 +190,9 @@ public class ComPortChooser extends JFrame {
 					lblOutputCompile.setText(Strings.compilationDots());
 					lblOutputCompile.setFont(new Font("Tahoma", Font.ITALIC, 13));
 					lblOutputCompile.setForeground(Color.BLACK);
+					lblOutputUpload.setFont(new Font("Tahoma", Font.ITALIC, 13));
+					lblOutputUpload.setForeground(Color.BLACK);
+					lblOutputUpload.setText(Strings.notUploaded());
 					compilation.compile();
 					
 
