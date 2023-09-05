@@ -62,20 +62,7 @@ public class ComPortChooser extends JFrame {
 		// sharing thread data
 		SharedResource sharedResource = new SharedResource();
 		
-		Thread uploadingTerminalThread = new Thread(() -> {
-			sharedResource.setData(false);
-			
-			Compiler uploadingCompiler = new Compiler();
-			
-			uploadingCompiler.upload(portName);
-			
-			if (uploadingCompiler.getUploadingStatus() == 1) {
-				consoleOutput(Strings.uploadingError());
-			}
-			
-			sharedResource.setData(true);
-			
-		});
+
 		
 		Thread uploadingWaitingBar = new Thread(() -> {
 			UploadingWaitingBar uploadWaitingBar = new UploadingWaitingBar();
@@ -86,25 +73,6 @@ public class ComPortChooser extends JFrame {
 			
 		});
 
-		connectButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				String selectedPort = (String) comPortComboBox.getSelectedItem();
-				if (selectedPort != null) {
-					// Perform actions to connect using the selected COM port
-					// For example: Open and configure the serial port
-//                	Compiler uploadCompiler = new Compiler();
-//                	uploadCompiler.upload(selectedPort);
-					uploadingStart = true;
-					portName = selectedPort;
-
-					System.out.println("Connecting to " + selectedPort);
-
-					uploadingTerminalThread.start();
-					uploadingWaitingBar.start();
-				}
-			}
-		});
 
 		JPanel panel = new JPanel();
 		panel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
@@ -157,6 +125,59 @@ public class ComPortChooser extends JFrame {
 		lblOutputCompile.setHorizontalAlignment(SwingConstants.LEFT);
 		lblOutputCompile.setFont(new Font("Tahoma", Font.ITALIC, 13));
 		
+		
+		// upload action listener
+		connectButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String selectedPort = (String) comPortComboBox.getSelectedItem();
+				if (selectedPort != null) {
+					
+					// uploading thread
+					Thread uploadingTerminalThread = new Thread(() -> {
+						sharedResource.setData(false);
+
+						Compiler uploadingCompiler = new Compiler();
+
+						lblOutputUpload.setText("uploading...");
+						lblOutputUpload.setFont(new Font("Tahoma", Font.ITALIC, 13));
+						lblOutputUpload.setForeground(Color.BLACK);
+						uploadingCompiler.upload(portName);
+						
+						if (uploadingCompiler.getUploadingStatus() == 0) {
+							lblOutputUpload.setText("UPLOADED!");
+							lblOutputUpload.setFont(new Font("Tahoma", Font.BOLD, 13));
+							lblOutputUpload.setForeground(Color.green);
+
+						} else {
+							consoleOutput(Strings.uploadingError());
+							lblOutputUpload.setText("UPLOADING ERROR!");
+							lblOutputUpload.setFont(new Font("Tahoma", Font.BOLD, 13));
+							lblOutputUpload.setForeground(Color.RED);
+						}
+
+						sharedResource.setData(true);
+
+					});
+					
+					
+					// Perform actions to connect using the selected COM port
+					// For example: Open and configure the serial port
+//                	Compiler uploadCompiler = new Compiler();
+//                	uploadCompiler.upload(selectedPort);
+					uploadingStart = true;
+					portName = selectedPort;
+
+					System.out.println("Connecting to " + selectedPort);
+
+					uploadingTerminalThread.start();
+//					uploadingWaitingBar.start();
+				}
+			}
+		});
+		
+		
+		// compile action listener
 		btnCompile.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -166,13 +187,18 @@ public class ComPortChooser extends JFrame {
 					// Operation 2 code here
 					sharedResource.setData(false);
 
+					lblOutputCompile.setText("compilation...");
+					lblOutputCompile.setFont(new Font("Tahoma", Font.ITALIC, 13));
+					lblOutputCompile.setForeground(Color.BLACK);
 					compilation.compile();
+					
 
 					if (compilation.getCompilationStatus() == 0) {
-						// uploading method invoke
 						lblOutputCompile.setText("COMPILED!");
 						lblOutputCompile.setFont(new Font("Tahoma", Font.BOLD, 13));
-						lblOutputCompile.setForeground(Color.GREEN);
+						lblOutputCompile.setForeground(Color.green);
+						connectButton.setEnabled(true);
+						comPortComboBox.setEnabled(true);
 					} else {
 						consoleOutput(Strings.compilationError());
 						lblOutputCompile.setText("COMPILATION ERROR!");
