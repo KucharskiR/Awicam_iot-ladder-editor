@@ -1,6 +1,7 @@
 package com.github.leofds.iotladdereditor.view.event;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -18,8 +19,6 @@ import com.fazecast.jSerialComm.SerialPort;
 import com.github.leofds.iotladdereditor.application.Mediator;
 import com.github.leofds.iotladdereditor.compiler.Compiler;
 import com.github.leofds.iotladdereditor.i18n.Strings;
-import com.github.leofds.iotladdereditor.util.bars.UploadingWaitingBar;
-import java.awt.Color;
 
 
 public class ComPortChooser extends JFrame {
@@ -139,21 +138,16 @@ public class ComPortChooser extends JFrame {
 
 						Compiler uploadingCompiler = new Compiler();
 
-						lblOutputUpload.setText(Strings.uploadingDots());
-						lblOutputUpload.setFont(new Font("Tahoma", Font.ITALIC, 13));
-						lblOutputUpload.setForeground(Color.BLACK);
+						lblSet(lblOutputUpload, Strings.uploadingDots(), "Tahoma", Font.ITALIC, 13, Color.BLACK);
+						
 						uploadingCompiler.upload(portName);
 						
 						if (uploadingCompiler.getUploadingStatus() == 0) {
-							lblOutputUpload.setText(Strings.uploadingCompleted());
-							lblOutputUpload.setFont(new Font("Tahoma", Font.BOLD, 13));
-							lblOutputUpload.setForeground(Color.green);
+							lblSet(lblOutputUpload, Strings.uploadingCompleted(), "Tahoma", Font.BOLD, 13, Color.green);
 
 						} else {
 							consoleOutput(Strings.uploadingError());
-							lblOutputUpload.setText(Strings.uploadingError());
-							lblOutputUpload.setFont(new Font("Tahoma", Font.BOLD, 13));
-							lblOutputUpload.setForeground(Color.RED);
+							lblSet(lblOutputUpload, Strings.uploadingError(), "Tahoma", Font.BOLD, 13, Color.RED);
 						}
 
 						sharedResource.setData(true);
@@ -176,7 +170,6 @@ public class ComPortChooser extends JFrame {
 			}
 		});
 		
-		
 		// compile action listener
 		btnCompile.addActionListener(new ActionListener() {
 			@Override
@@ -187,26 +180,17 @@ public class ComPortChooser extends JFrame {
 					// Operation 2 code here
 					sharedResource.setData(false);
 
-					lblOutputCompile.setText(Strings.compilationDots());
-					lblOutputCompile.setFont(new Font("Tahoma", Font.ITALIC, 13));
-					lblOutputCompile.setForeground(Color.BLACK);
-					lblOutputUpload.setFont(new Font("Tahoma", Font.ITALIC, 13));
-					lblOutputUpload.setForeground(Color.BLACK);
-					lblOutputUpload.setText(Strings.notUploaded());
+					lblSet(lblOutputCompile, Strings.compilationDots(), "Tahoma", Font.ITALIC, 13, Color.BLACK);
+					lblSet(lblOutputUpload, Strings.uploadingDots(),"Tahoma", Font.ITALIC, 13, Color.BLACK);
 					compilation.compile();
-					
 
 					if (compilation.getCompilationStatus() == 0) {
-						lblOutputCompile.setText(Strings.compilationCompleted());
-						lblOutputCompile.setFont(new Font("Tahoma", Font.BOLD, 13));
-						lblOutputCompile.setForeground(Color.green);
+						lblSet(lblOutputCompile, Strings.compilationCompleted(), "Tahoma", Font.BOLD, 13, Color.green);
 						connectButton.setEnabled(true);
 						comPortComboBox.setEnabled(true);
 					} else {
 						consoleOutput(Strings.compilationError());
-						lblOutputCompile.setText(Strings.compilationError());
-						lblOutputCompile.setFont(new Font("Tahoma", Font.BOLD, 13));
-						lblOutputCompile.setForeground(Color.RED);
+						lblSet(lblOutputCompile, Strings.compilationError(), "Tahoma", Font.BOLD, 13, Color.RED);
 					}
 					sharedResource.setData(true);
 					sharedResource.setCompilationStatus(compilation.getCompilationStatus());
@@ -214,6 +198,15 @@ public class ComPortChooser extends JFrame {
 				compileThread.start();
 			}
 		});
+	}
+	
+	private void lblSet(JLabel label, String text, String font, int fontType, int fontSize,
+			Color fontColor) {
+		
+		label.setText(text);
+		label.setFont(new Font(font, fontType, fontSize));
+		label.setForeground(fontColor);
+		
 	}
 	
 	private void populateComPortComboBox() {
