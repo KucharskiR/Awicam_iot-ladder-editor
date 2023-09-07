@@ -25,7 +25,6 @@ import com.github.leofds.iotladdereditor.application.Mediator;
 import com.github.leofds.iotladdereditor.application.Preferences;
 import com.github.leofds.iotladdereditor.application.ProjectContainer;
 import com.github.leofds.iotladdereditor.i18n.Strings;
-import com.github.leofds.iotladdereditor.util.FileUtils;
 import com.github.leofds.iotladdereditor.view.UI;
 
 public class IotLadderEditor{

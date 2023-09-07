@@ -43,15 +43,21 @@ public class Strings {
 	public static List<ResourceBundle> getResourceBundles() {
 		Set<ResourceBundle> rs = new HashSet<ResourceBundle>();
 
-		for (Locale locale : Locale.getAvailableLocales()) {
-			try {
-				rs.add(ResourceBundle.getBundle(baseName, locale));
-			} catch (MissingResourceException e) {
-				e.printStackTrace();
-			}
-		}
-		List<ResourceBundle> rsList = rs.stream().collect(Collectors.toList()); 
-		Comparator<ResourceBundle> res = (ResourceBundle res1, ResourceBundle res2) -> res1.getString("lang").compareTo(res2.getString("lang"));
+//		for (Locale locale : Locale.getAvailableLocales()) {
+//			try {
+//				rs.add(ResourceBundle.getBundle(baseName, locale));
+//			} catch (MissingResourceException e) {
+//				e.printStackTrace();
+//			}
+//		}
+		
+		Locale locale = Locale.US; // static set of locale to United States
+
+		rs.add(ResourceBundle.getBundle(baseName, locale));
+
+		List<ResourceBundle> rsList = rs.stream().collect(Collectors.toList());
+		Comparator<ResourceBundle> res = (ResourceBundle res1, ResourceBundle res2) -> res1.getString("lang")
+				.compareTo(res2.getString("lang"));
 		rsList.sort(res);
 		return rsList;
 	}

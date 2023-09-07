@@ -17,6 +17,7 @@
 package com.github.leofds.iotladdereditor.view;
 
 import java.awt.BorderLayout;
+import java.awt.Font;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -42,6 +43,7 @@ public class ConsolePanel extends JPanel{
 
 		text = new JTextArea();
 		text.setEditable(false);
+		text.setFont(new Font("Raster Fonts", Font.PLAIN, 14));
 		caret = (DefaultCaret) text.getCaret();
 		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 		scroll = new JScrollPane(text,JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);

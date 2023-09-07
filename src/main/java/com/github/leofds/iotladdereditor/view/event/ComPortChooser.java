@@ -181,7 +181,7 @@ public class ComPortChooser extends JFrame {
 					sharedResource.setData(false);
 
 					lblSet(lblOutputCompile, Strings.compilationDots(), "Tahoma", Font.ITALIC, 13, Color.BLACK);
-					lblSet(lblOutputUpload, Strings.uploadingDots(),"Tahoma", Font.ITALIC, 13, Color.BLACK);
+					lblSet(lblOutputUpload, Strings.notUploaded(),"Tahoma", Font.ITALIC, 13, Color.BLACK);
 					compilation.compile();
 
 					if (compilation.getCompilationStatus() == 0) {
