@@ -55,6 +55,7 @@ public class UI extends JFrame implements WindowListener{
 
 		JComponent contentPane = new ContentPanel(); 
 		contentPane.setOpaque(true);
+		contentPane.setSize(500,1000);
 		setContentPane(contentPane);
 		setJMenuBar(new Menu());
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
