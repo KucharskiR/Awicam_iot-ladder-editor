@@ -52,14 +52,14 @@ public class SplashDemo extends Frame implements ActionListener {
     static void renderSplashFrame(Graphics2D g, int frame) {
         final String[] comps = {"foo", "bar", "baz"};
         g.setComposite(AlphaComposite.Clear);
-        g.fillRect(120,140,200,40);
+        g.fillRect(0,0,600,338);
         g.setPaintMode();
         g.setColor(Color.BLACK);
-        g.drawString("Loading "+comps[(frame/5)%3]+"...", 120, 150);
+        g.drawString("Loading "+comps[(frame/5)%3]+"...", 50, 330);
     }
     public SplashDemo() {
         super("SplashScreen demo");
-        setSize(300, 200);
+        setSize(600, 338);
         setLayout(new BorderLayout());
 //        Menu m1 = new Menu("File");
 //        MenuItem mi1 = new MenuItem("Exit");
@@ -84,15 +84,17 @@ public class SplashDemo extends Frame implements ActionListener {
             renderSplashFrame(g, i);
             splash.update();
             try {
-                Thread.sleep(90);
+                Thread.sleep(20);
             }
             catch(InterruptedException e) {
             }
         }
         splash.close();
-        setVisible(true);
+        setVisible(false);
         toFront();
+        this.dispose();
     }
+    
     public void actionPerformed(ActionEvent ae) {
         System.exit(0);
     }
@@ -102,8 +104,4 @@ public class SplashDemo extends Frame implements ActionListener {
             e.getWindow().dispose();
         }
     };
-    
-    public static void main (String args[]) {
-        
-    }
 }
