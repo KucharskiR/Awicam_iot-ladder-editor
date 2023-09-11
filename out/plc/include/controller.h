@@ -51,13 +51,153 @@ struct digitalInputsStructure {
   uint16_t  digitalOutputStates;
   uint32_t  aIUpdateTime[4];
   uint16_t  aIValue[4];
+
+  uint8_t lowerBoardId;
 };
 // Inputs and outputs structure   inputs[0]->ESP32
 digitalInputsStructure inputs[32] = {0};
 
+/*---------------------------------------------*/
+/*--------------------MultiIO------------------*/
+/*---------------------------------------------*/
+//Packet: <addresss> <comanddd> <datadata> <datadata>
+enum MultiIOStates 
+{
+  MULTI_IO_RECIVE,
+  MULTI_IO_SEND
+};
+
+uint8_t modeMultiIO = MULTI_IO_RECIVE;
+uint8_t writeBuf[4] = {0};
+
+
+inline void processMultiIOData(const char*TASK_TAG, uint8_t data[])
+{
+  if(data[0] == MULTI_IO_MY_ADDRESS) 
+  {
+    switch (data[1])
+    {
+    case MULTI_IO_COMMAND_INTRODUCE:
+        ESP_LOGI(TASK_TAG, "Lower board signature %d", data[3]);
+        inputs[0].lowerBoardId = data[3];
+      break;
+
+    default:
+        ESP_LOGW(TASK_TAG, "Command NOT exists!");
+      break;
+    }
+  }
+}
+
+void multiIOTask(void* arg)
+{
+  static const char *TASK_TAG = "MULTIIO_TASK";
+
+  uint8_t* readBuf = (uint8_t*)malloc(64);
+  uint8_t processBuf[4];
+
+  while(1)
+  {
+    if(modeMultiIO == MULTI_IO_SEND)
+    {
+      modeMultiIO = MULTI_IO_RECIVE;
+      
+      //Change to sending
+      ESP_ERROR_CHECK(uart_set_pin(MULTI_IO, MULTI_IO_PIN, -1, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
+      const int sendBytes = uart_write_bytes(MULTI_IO, writeBuf, 4);
+      if(sendBytes > 0)
+        ESP_LOGI(TASK_TAG, "Sent %d bytes", sendBytes);
+      else
+        ESP_LOGE(TASK_TAG, "Send error!");
+
+      ESP_ERROR_CHECK(uart_wait_tx_done(MULTI_IO, 1 / portTICK_PERIOD_MS));
+
+      //Change to reciving
+      ESP_ERROR_CHECK(uart_set_pin(MULTI_IO, -1, MULTI_IO_PIN,  UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
+      uart_flush(MULTI_IO); // clen rx buffer after send
+      // vTaskDelay(5 / portTICK_PERIOD_MS);
+    }
+    else if(modeMultiIO == MULTI_IO_RECIVE)
+    {
+      const int readBytes = uart_read_bytes(MULTI_IO, readBuf, 64, 1 / portTICK_PERIOD_MS);
+      if(readBytes > 0)
+      {
+        ESP_LOGI(TASK_TAG, "Read %d bytes", readBytes);
+
+        ESP_LOGI(TASK_TAG, "Bytes read: " BYTE_TO_BINARY_PATTERN " " BYTE_TO_BINARY_PATTERN " " BYTE_TO_BINARY_PATTERN " " BYTE_TO_BINARY_PATTERN " ",BYTE_TO_BINARY(readBuf[0]),BYTE_TO_BINARY(readBuf[1]),BYTE_TO_BINARY(readBuf[2]),BYTE_TO_BINARY(readBuf[3]));
+
+        if(readBytes != 4)
+        {
+          ESP_LOGI(TASK_TAG, "Red bytes is not correct");
+          continue;
+        }
+
+        //process recived data
+        processMultiIOData(TASK_TAG, readBuf);
+      }
+      else if(readBytes < 0 )
+      {
+        ESP_LOGE("MULITIO_RX_TASK", "ERROR");
+      }
+    }
+    vTaskDelay(1 / portTICK_PERIOD_MS);
+  }  
+}
+
+inline void writeMultiIO(uint32_t toSend)
+{
+  modeMultiIO = MULTI_IO_SEND;
+  writeBuf[0] = toSend;
+  writeBuf[1] = toSend>>8;
+  writeBuf[2] = toSend>>16;
+  writeBuf[3] = toSend>>24;
+  ESP_LOGI("SEND", "send");
+}
+inline void writeMultiIO(uint8_t address, uint8_t command, uint16_t data)
+{
+  modeMultiIO = MULTI_IO_SEND;
+  writeBuf[0] = address;
+  writeBuf[1] = command;
+  writeBuf[2] = data;
+  writeBuf[3] = data>>8;
+  // ESP_LOGI("SEND", "send");
+}
+
+inline void initMultiIO()
+{
+  /*----- Configure Low Board UART ------*/
+  uart_driver_delete(MULTI_IO);
+  const uart_config_t uart_lower_board_config = {
+      .baud_rate = 115200,
+      .data_bits = UART_DATA_8_BITS,
+      .parity = UART_PARITY_DISABLE,
+      .stop_bits = UART_STOP_BITS_1,
+      .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
+      .source_clk = UART_SCLK_APB,
+  };
+  ESP_ERROR_CHECK(uart_driver_install(MULTI_IO, 1024, 0, 0, NULL, 0));
+  ESP_ERROR_CHECK(uart_param_config(MULTI_IO, &uart_lower_board_config));
+
+  ESP_ERROR_CHECK(uart_set_pin(MULTI_IO, -1, MULTI_IO_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
+  ESP_LOGI("MultiIO", "Initialized");
+}
+
+
+void testMultiIOTask(void* arg)
+{
+  TickType_t lastTickCount = xTaskGetTickCount();
+  while (1)
+  {
+    // uint8_t bb[4] = {0xaa,0xaa,0xaa,0xaa};
+    uint32_t bb = 0xacacacad;
+    writeMultiIO(MULTI_IO_LOWER_BOARD_ADDRESS, MULTI_IO_COMMAND_INTRODUCE, 0xffff);
+    vTaskDelay(5000 / portTICK_PERIOD_MS);
+  }
+}
+
 
 /*---------------------------------------------*/
-/*--------------UART communication-------------*/
+/*----------------UART Extension---------------*/
 /*---------------------------------------------*/
 const uint8_t PARITY_EVEN_TABLE[128] = {
     0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
@@ -607,14 +747,14 @@ spi_bus_config_t spi_conifg={//Default MSB
   };
 
 spi_device_interface_config_t device_conifg2 = {
-    .command_bits = 0,
+    .command_bits = 8, //powinno być 8
     .address_bits = 0,
     .dummy_bits = 0,
     .mode = 0,                  //SPI mode 0
     .clock_speed_hz = FPGA_SPI_SPEED_HZ, 
     .spics_io_num = FPGA_SPI_CS,         // CS Pin
   #ifdef TEST_SPI
-    .flags = SPI_DEVICE_HALFDUPLEX  | SPI_DEVICE_3WIRE,
+    .flags = SPI_DEVICE_HALFDUPLEX  | SPI_DEVICE_3WIRE | SPI_DEVICE_NO_DUMMY,
   #else
     .flags = SPI_DEVICE_HALFDUPLEX | SPI_DEVICE_3WIRE | SPI_DEVICE_POSITIVE_CS,
   #endif
@@ -623,7 +763,7 @@ spi_device_interface_config_t device_conifg2 = {
     .post_cb = NULL,
   };
 
-void programFPGA()
+inline void programFPGA()
 {
   gpio_set_level(FPGA_SPI_CS, 0);
 
@@ -672,6 +812,7 @@ void programFPGA()
   gpio_set_direction(FPGA_SPI_CS, GPIO_MODE_OUTPUT);
 
   gpio_set_level(FPGA_CRESET_B, 0);
+  vTaskDelay(20 / portTICK_PERIOD_MS); // delayed signal on pcb
   // #ifdef TEST_SPI
   // gpio_set_level(FPGA_SPI_CS, 0);
   // #else
@@ -679,6 +820,7 @@ void programFPGA()
   // #endif
   gpio_set_level(FPGA_SPI_CLK, 1);
   //wait minimum 200ns
+  // vTaskDelay(1 / portTICK_PERIOD_MS);
   vTaskDelay(0.3 / portTICK_PERIOD_MS);
   gpio_set_level(FPGA_CRESET_B, 1);
   //wait minimum 1200ns -> clear internal configuration
@@ -765,9 +907,10 @@ inline uint8_t readInputsFPGA(uint8_t data)
   uint8_t recived;
 
   spi_transaction_t transaction = {
-    .length = 2*8,
+    .cmd = toSend,
+    .length = 1*8,
     .rxlength = 8,
-    .tx_buffer = &toSend,
+    // .tx_buffer = &toSend,
     .rx_buffer = &recived,
   };
 
@@ -781,13 +924,13 @@ inline uint8_t readInputsFPGA(uint8_t data)
 }
 inline void writeOutputsFPGA(uint16_t data)
 {
-  uint8_t toSend[2] = {0};
-  toSend[0] = 0x3f & (data >> 8) ;
-  toSend[1] = 0x00ff & data;
+  uint8_t toSend0 = 0x3f & (data >> 8) ;
+  uint8_t toSend1 = 0x00ff & data;
 
   spi_transaction_t transaction = {
-    .length = 2*8,
-    .tx_buffer = toSend,
+    .cmd = toSend0,
+    .length = 1*8,
+    .tx_buffer = &toSend1,
     .rx_buffer = nullptr,
   };
 
@@ -803,20 +946,20 @@ inline void writeOutputsFPGA(uint16_t data)
 // Etap 1 wysyła 14 bitów i ustawia o=z
 void writeFPGAstage1(uint16_t data)
 {
-  uint8_t toSend[2] = {0};
-  toSend[0] = 0x3f & (data>> 8) ;
-  toSend[1] = 0x00ff & data;
+  uint8_t dataa = 0x00ff & data;
+  uint8_t cmd = 0x3f & (data>> 8) ;
 
   spi_transaction_t transaction = {
-    .length = 2*8,
-    .tx_buffer = toSend,
+    .cmd = cmd,
+    .length = 1*8,
+    .tx_buffer = &dataa,
     .rx_buffer = nullptr,
   };
 
   spi_device_transmit(fpga, &transaction);
 
   ESP_LOGI("FPGA_SPI", "send: " BYTE_TO_BINARY_PATTERN " " BYTE_TO_BINARY_PATTERN "",
-  BYTE_TO_BINARY(toSend[0]), BYTE_TO_BINARY(toSend[1]));
+  BYTE_TO_BINARY(cmd), BYTE_TO_BINARY(dataa));
 }
 
 // Etap 2 wysłanie bajtu i odebranie bajtu
@@ -828,9 +971,10 @@ void writeFPGAstage2(uint8_t data)
   uint8_t recived;
 
   spi_transaction_t transaction = {
-    .length = 2*8,
+    .cmd = toSend,
+    .length = 1*8,
     .rxlength = 8,
-    .tx_buffer = &toSend,
+    // .tx_buffer = &toSend,
     .rx_buffer = &recived,
   };
 
@@ -844,15 +988,17 @@ void writeFPGAstage2(uint8_t data)
 // Etap 3      
 // data -> AD AC 
 // >1>0>0>1>SD>SC>AD>AC <SA<C6<C5<C4<C3<C2<C1<C0
+//Nie testowane
 void writeFPGAstage3(uint8_t data, uint8_t i2c)
 {
   uint8_t toSend = 0x90 | ((0x03 & i2c)<<2) | (0x03 & data); 
   uint8_t recived;
 
   spi_transaction_t transaction = {
-    .length = 2*8,
+    .cmd = toSend,
+    .length = 1*8,
     .rxlength = 8,
-    .tx_buffer = &toSend,
+    // .tx_buffer = &toSend,
     .rx_buffer = &recived,
   };
 
@@ -864,7 +1010,8 @@ void writeFPGAstage3(uint8_t data, uint8_t i2c)
   BYTE_TO_BINARY(toSend), BYTE_TO_BINARY(recived));
 }
 
-//MSB
+
+//Not work
 void writeFPGAi2c(uint8_t sendData, uint8_t reciveData, uint8_t numOfSend, uint8_t numOfRecive)
 {
 
@@ -918,7 +1065,25 @@ void writeFPGAi2c(uint8_t sendData, uint8_t reciveData, uint8_t numOfSend, uint8
   BYTE_TO_BINARY(sendData), BYTE_TO_BINARY(reciveData));
 }
 
+void writeFPGAstage4(uint8_t data)
+{
+  uint32_t toSend = 0x80 | (0x0f & data); 
+  // uint8_t recived[3] ={0};
+  uint32_t recived = 0;
 
+  spi_transaction_t transaction = {
+    .cmd = toSend, //Bez bitow danych i z tx_buffer nie dziala tak jak powinno
+    .length = 4*8, //Nie jestem pewien czy dobrze
+    .rxlength = 3*8,
+    // .tx_buffer = &toSend,
+    .rx_buffer = &recived,
+  };
+
+  spi_device_transmit(fpga, &transaction);
+
+  ESP_LOGI("FPGA_SPI", "send: " BYTE_TO_BINARY_PATTERN "  recived: " BYTE_TO_BINARY_PATTERN " " BYTE_TO_BINARY_PATTERN " " BYTE_TO_BINARY_PATTERN " ",
+  BYTE_TO_BINARY(toSend), BYTE_TO_BINARY(recived), BYTE_TO_BINARY(recived>>8), BYTE_TO_BINARY(recived>>16));
+}
 //Send to EEPROM
 // void testFPGAi2c()
 // {
@@ -936,56 +1101,60 @@ void testFPGA()
 
   while(1)
   {
+    // writeFPGAstage2(0b01010101);
+    // writeFPGAstage4(0xff);
     // Test stage 1
     ESP_LOGI("TEST_FPGA", "Test stage 1");
     
-    for(int i = 0; i < 32; i++)
-    {
-      if(buff != 0b0010000000000000)
-        buff = buff << 1;  
-      else
-        buff = 0b00000000000000100;
+    // for(int i = 0; i < 32; i++)
+    // {
+    //   if(buff != 0b0010000000000000)
+    //     buff = buff << 1;  
+    //   else
+    //     buff = 0b00000000000000100;
 
+      // buff=0xcccc;
+      // writeFPGAstage1(buff);
 
-      writeFPGAstage1(buff);
-
-      vTaskDelay(100 / portTICK_PERIOD_MS);
-    }
+    //   vTaskDelay(100 / portTICK_PERIOD_MS);
+    // }
 
     
     // Test stage 2
-    writeFPGAstage1(0xffff);
-    ESP_LOGI("TEST_FPGA", "Test stage 2");
-    dataToSend2 = 0x00;
-    for(uint8_t i = 0; i < 16; i++)
-    {
+    // writeFPGAstage1(0xffff);
+    // ESP_LOGI("TEST_FPGA", "Test stage 2");
+    dataToSend2 = 0b00001100;
+    // for(uint8_t i = 0; i < 16; i++)
+    // {
       writeFPGAstage2(dataToSend2);
-      dataToSend2 = dataToSend2 + 1;
-      vTaskDelay(1000 / portTICK_PERIOD_MS);
-    }
+    //   // dataToSend2 = dataToSend2 + 1;
+    //   vTaskDelay(100 / portTICK_PERIOD_MS);
+    // }
 
 
-    // Test stage 3
-    // Clk:  0b10 0001 0010 0100 1001 0111
-    // Data: 0b10 1000 0111 1110 0011 1000
-    //                       | <- tu chyba mozna zmienic 
-    writeFPGAstage1(0xffff);
-    dataToSend2 = 1;
-    ESP_LOGI("TEST_FPGA", "Test stage 3");
-    uint32_t i2cClk =  0b110101010101010101010101011;
-    uint32_t i2cData = 0b110100000111111100001111001;
-    for(uint8_t i = 0; i < 27; i++)
-    {
-      writeFPGAstage3(dataToSend2, ((i2cData & 0x01)<<1) | (i2cClk & 0x01));
-      dataToSend2 = ~dataToSend2;
-//      i2cData = ~(0x01 & i2cData) | 0xfe & i2cData;
-      i2cClk = i2cClk>>1;
-      i2cData = i2cData>>1;
+//     // Test stage 3
+//     // Clk:  0b10 0001 0010 0100 1001 0111
+//     // Data: 0b10 1000 0111 1110 0011 1000
+//     //                       | <- tu chyba mozna zmienic 
+//     writeFPGAstage1(0xffff);
+//     dataToSend2 = 1;
+//     ESP_LOGI("TEST_FPGA", "Test stage 3");
+//     uint32_t i2cClk =  0b110101010101010101010101011;
+//     uint32_t i2cData = 0b110100000111111100001111001;
+//     for(uint8_t i = 0; i < 27; i++)
+//     {
+//       writeFPGAstage3(dataToSend2, ((i2cData & 0x01)<<1) | (i2cClk & 0x01));
+//       dataToSend2 = ~dataToSend2;
+// //      i2cData = ~(0x01 & i2cData) | 0xfe & i2cData;
+//       i2cClk = i2cClk>>1;
+//       i2cData = i2cData>>1;
 
-      // vTaskDelay(100 / portTICK_PERIOD_MS);
-    }
-    
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
+//       // vTaskDelay(100 / portTICK_PERIOD_MS);
+//     }
+    //Test stage 4
+
+
+    vTaskDelay(5 / portTICK_PERIOD_MS);
   }
 }
 
@@ -1265,7 +1434,10 @@ void initController(void) {
 	ESP_LOGI(TASK_TAG, "usbTask created!");
   #endif
 
-/*------ Configure UART -------*/
+
+
+
+/*----- Configure Extensions UART ------*/
   uart_driver_delete(UART_BB);
   const uart_config_t uart_config = {
       .baud_rate = 3062500,
@@ -1279,6 +1451,7 @@ void initController(void) {
   uart_driver_install(UART_BB, RX_BUF_SIZE * 2, 0, 0, NULL, 0);
   uart_param_config(UART_BB, &uart_config);
   uart_set_pin(UART_BB, TXD_PIN, RXD_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+
 
 /*------ Configure GPIO -------*/
   gpio_pad_select_gpio(INPUT1_PIN);
@@ -1324,15 +1497,27 @@ void initController(void) {
 /*-------------- AP ------------*/
 	initAP();
   initWebServer();
-  xTaskCreate(webServerTask, "webServerTask", 2*2048, NULL, configMAX_PRIORITIES - 5, NULL);
+  xTaskCreate(webServerTask, "webServerTask", 2*2048, NULL, configMAX_PRIORITIES - 6, NULL);
 
 /*-------- Progam FPGA ---------*/
   #if defined(W1VC128R_BOARD) || defined(W1VC1616R_BOARD)
   programFPGA();
   #endif
 
+/*----- Init MultiIO ------*/
+  initMultiIO();
+  vTaskDelay(100 / portTICK_PERIOD_MS);
+  xTaskCreate(multiIOTask, "multiIOTask", 1024*2, NULL, configMAX_PRIORITIES - 4, NULL);
 
-/*-------- Connect BB ---------*/
+  //Test task
+  xTaskCreate(testMultiIOTask, "testMultiIOTask", 1024 * 2, NULL, configMAX_PRIORITIES - 5, NULL);
+
+
+/*----- Check Lower Board ------*/
+  // identifyLowerBoard();
+
+
+/*--------- Connect BB ---------*/
   uart_flush(UART_BB);
   xTaskCreate(rx_task, "uart_rx_task", 1024*2, NULL, configMAX_PRIORITIES - 1, NULL);
   #ifdef DEBUG
@@ -1437,5 +1622,5 @@ inline void writeOutputs()
   gpio_set_level(OUTPUT3_PIN, (~inputs[0].digitalOutputStates & 0x0004));
   gpio_set_level(OUTPUT4_PIN, (~inputs[0].digitalOutputStates & 0x0008));
   
-  ESP_LOGI("out", "Outputs:" BYTE_TO_BINARY_PATTERN " " BYTE_TO_BINARY_PATTERN " ", BYTE_TO_BINARY(inputs[0].digitalOutputStates>>8), BYTE_TO_BINARY(inputs[0].digitalOutputStates));
+  // ESP_LOGI("out", "Outputs:" BYTE_TO_BINARY_PATTERN " " BYTE_TO_BINARY_PATTERN " ", BYTE_TO_BINARY(inputs[0].digitalOutputStates>>8), BYTE_TO_BINARY(inputs[0].digitalOutputStates));
 }

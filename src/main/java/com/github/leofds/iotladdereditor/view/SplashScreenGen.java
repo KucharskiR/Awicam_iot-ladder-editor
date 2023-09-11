@@ -38,6 +38,7 @@ package com.github.leofds.iotladdereditor.view;
 import java.awt.AlphaComposite;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Frame;
 import java.awt.Graphics2D;
 import java.awt.MenuBar;
@@ -48,16 +49,26 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
-public class SplashDemo extends Frame implements ActionListener {
-    static void renderSplashFrame(Graphics2D g, int frame) {
-        final String[] comps = {"foo", "bar", "baz"};
+public class SplashScreenGen extends Frame implements ActionListener {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	static void renderSplashFrame(Graphics2D g, int frame) {
+		String test = "DeviceGenerator module;"
+						+ "LadderDesign module;"
+						+ "Preferences;"
+						+ "GUI;";
+		final String[] comps = test.split(";"); //		final String[] comps = { "DeviceGenerator module", "LadderDesign module", "Preferences", "GUI module"};
         g.setComposite(AlphaComposite.Clear);
         g.fillRect(0,0,600,338);
         g.setPaintMode();
         g.setColor(Color.BLACK);
-        g.drawString("Loading "+comps[(frame/5)%3]+"...", 50, 330);
+        g.setFont(new Font("Arial", Font.PLAIN, 17)); 
+        g.drawString("Loading: "+comps[(frame/(100/comps.length))%comps.length]+"...", 45, 326);
     }
-    public SplashDemo() {
+    public SplashScreenGen() {
         super("SplashScreen demo");
         setSize(600, 338);
         setLayout(new BorderLayout());
@@ -84,7 +95,7 @@ public class SplashDemo extends Frame implements ActionListener {
             renderSplashFrame(g, i);
             splash.update();
             try {
-                Thread.sleep(20);
+                Thread.sleep(30);
             }
             catch(InterruptedException e) {
             }
@@ -92,7 +103,6 @@ public class SplashDemo extends Frame implements ActionListener {
         splash.close();
         setVisible(false);
         toFront();
-        this.dispose();
     }
     
     public void actionPerformed(ActionEvent ae) {

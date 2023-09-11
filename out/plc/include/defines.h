@@ -32,16 +32,40 @@
 #define FPGA_SPI_SPEED_HZ 1000000 //1MHz => 20MHz
 
 
+/*---------------------------------------------*/
+/*-----------MultiIO CONFIGURATION-------------*/
+/*---------------------------------------------*/
+#define MULTI_IO_PIN (GPIO_NUM_9)
+#define MULTI_IO UART_NUM_1
+
+//#define MULTI_IO_TIME_TO_WAIT 5
+
+//Temporary address
+#define MULTI_IO_CONTROLLER_ADDRESS 0x01
+#define MULTI_IO_LOWER_BOARD_ADDRESS 0xaa
+
+#define MULTI_IO_MY_ADDRESS MULTI_IO_CONTROLLER_ADDRESS
+
+
+//Temporary commands
+#define MULTI_IO_COMMAND_INTRODUCE 0x01
+
+//Temp lower board identification signatures
+#define LOWER_BOARD_TEST 0xcc
+#define LOWER_BOARD_UNDEFINED 0x00
+#define LOWER_BOARD_64R 0x01
+#define LOWER_BOARD_128R 0x02
+#define LOWER_BOARD_1616R 0x03
 
 /*---------------------------------------------*/
 /*-------------UART CONFIGURATION--------------*/
 /*---------------------------------------------*/
-// UART -> BB
+// UART -> Extensions(BB)
 //Póki co uart1 zamiast uart0 bo na arduino cli nie dziala (coś jeszcze jakieś smieci wysyła)
-#define UART_BB UART_NUM_1
+#define UART_BB UART_NUM_0
 #define TXD_PIN (GPIO_NUM_21)
 #define RXD_PIN (GPIO_NUM_20)
-#define MULTI_IO (GPIO_NUM_9)
+
 
 #define SEND_RESPONSE_WAIT 200
 
@@ -73,11 +97,11 @@
 #define INPUT3_PIN (GPIO_NUM_3)
 
 #ifndef TEST_UART_BB
-#define INPUT4_PIN (GPIO_NUM_4)
-#define INPUT5_PIN (GPIO_NUM_5)
-#else
 #define INPUT4_PIN (GPIO_NUM_0)
 #define INPUT5_PIN (GPIO_NUM_0)
+#else
+#define INPUT4_PIN (GPIO_NUM_4)
+#define INPUT5_PIN (GPIO_NUM_5)
 #endif
 
 #ifdef W1VC64R_BOARD

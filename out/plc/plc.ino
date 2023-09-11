@@ -21,8 +21,6 @@ Ladder2Pin LD_Q0_5(5, &inputs[0].digitalOutputStates);
 Ladder2Pin LD_Q0_6(6, &inputs[0].digitalOutputStates);
 Ladder2Pin LD_Q0_7(7, &inputs[0].digitalOutputStates);
 Ladder2Pin LD_Q0_8(8, &inputs[0].digitalOutputStates);
-Ladder2Pin LD_Q1_1(1, &inputs[1].digitalOutputStates);
-Ladder2Pin LD_Q1_2(2, &inputs[1].digitalOutputStates);
 
 // Inputs defines
 Ladder2Pin LD_I0_1(1, &inputs[0].digitalInputStates);
@@ -37,9 +35,6 @@ Ladder2Pin LD_I0_9(9, &inputs[0].digitalInputStates);
 Ladder2Pin LD_I0_10(10, &inputs[0].digitalInputStates);
 Ladder2Pin LD_I0_11(11, &inputs[0].digitalInputStates);
 Ladder2Pin LD_I0_12(12, &inputs[0].digitalInputStates);
-Ladder2Pin LD_I1_1(1, &inputs[1].digitalInputStates);
-Ladder2Pin LD_I1_2(2, &inputs[1].digitalInputStates);
-Ladder2Pin LD_I1_3(3, &inputs[1].digitalInputStates);
 
 // Timer struct
 typedef struct {

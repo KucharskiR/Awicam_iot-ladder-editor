@@ -128,7 +128,7 @@ public class Compiler{
 //			String command = "cmd /c start cmd /k arduino-cli compile --fqbn esp32:esp32:esp32s2 plc.ino"; // Replace "dir" with your desired command
 //			String command = "cmd /c arduino-cli compile --fqbn esp32:esp32:esp32c3 plc.ino"; // Replace "dir" with your desired command
 //			String command = "cmd /c arduino-cli compile --fqbn esp32:esp32:esp32c3:CDCOnBoot=cdc --build-property build.extra_flags=-DCORE_DEBUG_LEVEL=5 plc.ino"; // Replace "dir" with your desired command
-			String command = "cmd /c arduino-cli compile --fqbn esp32:esp32:esp32c3:CDCOnBoot=cdc --build-property \"build.extra_flags=-DCORE_DEBUG_LEVEL=5 -DARDUINO_USB_MODE=1 -DARDUINO_USB_CDC_ON_BOOT=1\" plc.ino"; // Replace "dir" with your desired command
+			String command = "cmd /c arduino-cli compile --no-color --verbose --log-level info --fqbn esp32:esp32:esp32c3:CDCOnBoot=cdc --build-property \"build.extra_flags=-DCORE_DEBUG_LEVEL=5 -DARDUINO_USB_MODE=1 -DARDUINO_USB_CDC_ON_BOOT=1\" plc.ino"; // Replace "dir" with your desired command
 
 			String currentWorkingDirectory = System.getProperty("user.dir");
 //			System.out.println("Current Working Directory: " + currentWorkingDirectory);
@@ -174,6 +174,12 @@ public class Compiler{
 			this.compilationStatus = exitCode == 0 ? 0 : 1;
 			consoleOutput("Process exited with code: " + exitCode);
 			
+			if (exitCode == 0)
+				consoleOutput("\n********************* SUCCESSFULLY COMPILED!*************************\r\n"
+						+ "Select the COM port and press the Upload button to program the device ");
+			else 
+				consoleOutput("\nCOMPILATION ERROR!");
+			
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
 			consoleOutput(e.getMessage());
@@ -213,7 +219,7 @@ public class Compiler{
 			 */
 			
 			// Command to run
-			String command = "cmd /c arduino-cli upload -p " + port + " --fqbn esp32:esp32:esp32c3 plc.ino"; // Replace "dir" with your desired command
+			String command = "cmd /c arduino-cli upload -p " + port + " --no-color --verbose --fqbn esp32:esp32:esp32c3 plc.ino"; // Replace "dir" with your desired command
 
 			String currentWorkingDirectory = System.getProperty("user.dir");
 //			System.out.println("Current Working Directory: " + currentWorkingDirectory);
@@ -258,6 +264,13 @@ public class Compiler{
 			int exitCode = process.waitFor();
 			this.uploadingStatus = exitCode == 0 ? 0 : 1;
 			consoleOutput("Process exited with code: " + exitCode);
+			
+			if (exitCode == 0)
+				consoleOutput("\n****** SUCCESSFULLY UPLOADED!******\r\n"
+						+ "\r\n"
+						+ "		Restart your device");
+			else 
+				consoleOutput("\nUPLOADING ERROR!");
 			
 			return exitCode;
 

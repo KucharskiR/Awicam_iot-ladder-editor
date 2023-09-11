@@ -41,6 +41,8 @@ public class UI extends JFrame implements WindowListener{
 
 	public UI() {
 		setTitle(Strings.appName());
+		
+		setExtendedState(JFrame.MAXIMIZED_BOTH); // Start GUI with full screen
 
 		List<Image> images = new ArrayList<Image>();
 		images.add(new ImageIcon(UI.class.getResource("/images/PrototypeLadder_16x16.png")).getImage());

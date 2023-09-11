@@ -27,7 +27,7 @@ import com.github.leofds.iotladdereditor.application.ProjectContainer;
 import com.github.leofds.iotladdereditor.i18n.Strings;
 import com.github.leofds.iotladdereditor.view.UI;
 
-import com.github.leofds.iotladdereditor.view.SplashDemo;
+import com.github.leofds.iotladdereditor.view.SplashScreenGen;
 
 public class IotLadderEditor{
 
@@ -51,9 +51,11 @@ public class IotLadderEditor{
 	}
 	
 	public static void main(String[] args) {
+		
+		SplashScreenGen splash = new SplashScreenGen();  // 
+		
 		loadLanguage();
 		Initialization();
-		SplashDemo test = new SplashDemo();
 		
 		try{
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -61,6 +63,7 @@ public class IotLadderEditor{
 				@Override
 				public void run() {
 					new UI().setVisible(true);
+					splash.dispose();
 				}
 			});
 		}catch (Exception e){
