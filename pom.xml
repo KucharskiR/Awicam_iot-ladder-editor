@@ -75,7 +75,7 @@
 			<plugin>
 <!--				<groupId>org.apache.maven.plugins</groupId>-->
 <!--				<artifactId>maven-jar-plugin</artifactId>-->
-<!--				<version>3.1.0</version>-->
+<!--				<version>3.3.0</version>-->
 <!--				<configuration>-->
 <!--					<archive>-->
 <!--						<manifest>-->
@@ -84,7 +84,7 @@
 <!--								com.github.leofds.iotladdereditor.IotLadderEditor</mainClass>-->
 <!--						</manifest>-->
 <!--						<manifestEntries>-->
-<!--							<SplashScreen-Image>splash.gif</SplashScreen-Image>-->
+<!--							<SplashScreen-Image>images/splash.gif</SplashScreen-Image>-->
 <!--						</manifestEntries>-->
 <!--					</archive>-->
 <!--				</configuration>-->

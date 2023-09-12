@@ -38,7 +38,6 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
 import org.apache.maven.model.Model;
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 import com.github.leofds.iotladdereditor.i18n.Strings;
 import com.github.leofds.iotladdereditor.util.AboutUils;
@@ -54,18 +53,18 @@ public class About extends JDialog{
 		panel.setPreferredSize(new Dimension(600, 450));
 		panel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
-		JLabel icon = new JLabel(new ImageIcon(About.class.getResource("/images/PrototypeLadder_48x48.png")));
-		icon.setBounds(10, 10, 100, 100);
+		JLabel icon = new JLabel(new ImageIcon(About.class.getResource("/images/PrototypeLadder_AW_48x48.png")));
+		icon.setBounds(19, 10, 100, 100);
 		panel.add(icon);
 
 		JLabel version = new JLabel();
 		version.setHorizontalAlignment(SwingConstants.LEFT);
-		version.setBounds(85, 68, 185, 20);
+		version.setBounds(105, 68, 185, 20);
 		version.setFont(new Font("Dialog", Font.PLAIN, 12));
 		panel.add(version);
 
 		JLabel appName = new JLabel();
-		appName.setBounds(85, 45, 250, 30);
+		appName.setBounds(105, 45, 250, 30);
 		appName.setFont(new Font("Dialog", Font.PLAIN, 20));
 		appName.setText(Strings.appName());
 		panel.add(appName);

@@ -42,14 +42,20 @@ public class UI extends JFrame implements WindowListener{
 	public UI() {
 		setTitle(Strings.appName());
 		
-		setExtendedState(JFrame.MAXIMIZED_BOTH); // Start GUI with full screen
 
 		List<Image> images = new ArrayList<Image>();
-		images.add(new ImageIcon(UI.class.getResource("/images/PrototypeLadder_16x16.png")).getImage());
-		images.add(new ImageIcon(UI.class.getResource("/images/PrototypeLadder_24x24.png")).getImage());
-		images.add(new ImageIcon(UI.class.getResource("/images/PrototypeLadder_32x32.png")).getImage());
-		images.add(new ImageIcon(UI.class.getResource("/images/PrototypeLadder_48x48.png")).getImage());
-		images.add(new ImageIcon(UI.class.getResource("/images/PrototypeLadder_64x64.png")).getImage());
+		images.add(new ImageIcon(UI.class.getResource("/images/PrototypeLadder_AWv2_16x16.png")).getImage());
+		images.add(new ImageIcon(UI.class.getResource("/images/PrototypeLadder_AWv2_24x24.png")).getImage());
+		images.add(new ImageIcon(UI.class.getResource("/images/PrototypeLadder_AWv2_32x32.png")).getImage());
+		images.add(new ImageIcon(UI.class.getResource("/images/PrototypeLadder_AWv2_48x48.png")).getImage());
+		images.add(new ImageIcon(UI.class.getResource("/images/PrototypeLadder_AWv2_64x64.png")).getImage());
+		images.add(new ImageIcon(UI.class.getResource("/images/PrototypeLadder_AWv2_90x90.png")).getImage());
+//		images.add(new ImageIcon(UI.class.getResource("/images/PrototypeLadder_AW_16x16.png")).getImage());
+//		images.add(new ImageIcon(UI.class.getResource("/images/PrototypeLadder_AW_24x24.png")).getImage());
+//		images.add(new ImageIcon(UI.class.getResource("/images/PrototypeLadder_AW_32x32.png")).getImage());
+//		images.add(new ImageIcon(UI.class.getResource("/images/PrototypeLadder_AW_48x48.png")).getImage());
+//		images.add(new ImageIcon(UI.class.getResource("/images/PrototypeLadder_AW_64x64.png")).getImage());
+//		images.add(new ImageIcon(UI.class.getResource("/images/PrototypeLadder_AW_90x90.png")).getImage());
 		setIconImages(images);
 		setGlassPane(new GhostGlassPane());
 		addWindowListener(this);
@@ -57,12 +63,13 @@ public class UI extends JFrame implements WindowListener{
 
 		JComponent contentPane = new ContentPanel(); 
 		contentPane.setOpaque(true);
-		contentPane.setSize(500,1000);
 		setContentPane(contentPane);
 		setJMenuBar(new Menu());
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		pack();
 		setLocationRelativeTo(null);
+		setMaximizedBounds(getMaximizedBounds());
+		setExtendedState(MAXIMIZED_BOTH); // Start GUI with full screen
 		//		Toolkit.getDefaultToolkit().setDynamicLayout(true);
 		Mediator.getInstance().setUi(this);
 		

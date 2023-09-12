@@ -101,7 +101,7 @@ public class ComPortChooser extends JFrame {
 		
 		JLabel lblStatusUpload = new JLabel(Strings.uploadingStatus());
 		lblStatusUpload.setHorizontalAlignment(SwingConstants.LEFT);
-		lblStatusUpload.setFont(new Font("Tahoma", Font.PLAIN, 15));
+		lblStatusUpload.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		panel_3.add(lblStatusUpload);
 		
 		JLabel lblOutputUpload = new JLabel(Strings.notUploaded());
@@ -116,7 +116,7 @@ public class ComPortChooser extends JFrame {
 		JLabel lblStatus = new JLabel(Strings.compilationStatus());
 		panel_4.add(lblStatus);
 		lblStatus.setHorizontalAlignment(SwingConstants.LEFT);
-		lblStatus.setFont(new Font("Tahoma", Font.PLAIN, 15));
+		lblStatus.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		
 		JLabel lblOutputCompile = new JLabel(Strings.notCompiled());
 		panel_4.add(lblOutputCompile);
