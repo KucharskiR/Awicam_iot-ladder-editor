@@ -175,8 +175,8 @@ public class Compiler{
 			consoleOutput("Process exited with code: " + exitCode);
 			
 			if (exitCode == 0)
-				consoleOutput("\n********************* SUCCESSFULLY COMPILED!*************************\r\n"
-						+ "Select the COM port and press the Upload button to program the device ");
+				consoleOutput("\n************************* SUCCESSFULLY COMPILED!****************************\r\n"
+						+ "Select the COM port and press the Upload button to send program to the device ");
 			else 
 				consoleOutput("\nCOMPILATION ERROR!");
 			

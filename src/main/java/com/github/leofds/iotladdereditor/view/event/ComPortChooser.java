@@ -44,6 +44,8 @@ public class ComPortChooser extends JFrame {
 		this.uploadingStart = false;
 		this.portName = null;
 		this.compilation = new Compiler();
+		
+		Color veryDarkGreen = new Color(0, 153 ,0);
 
 		setTitle("ESP Upload");
 		setSize(350, 176);
@@ -143,7 +145,7 @@ public class ComPortChooser extends JFrame {
 						uploadingCompiler.upload(portName);
 						
 						if (uploadingCompiler.getUploadingStatus() == 0) {
-							lblSet(lblOutputUpload, Strings.uploadingCompleted(), "Tahoma", Font.BOLD, 13, Color.green);
+							lblSet(lblOutputUpload, Strings.uploadingCompleted(), "Tahoma", Font.BOLD, 13, veryDarkGreen);
 
 						} else {
 							consoleOutput(Strings.uploadingError());
@@ -185,7 +187,7 @@ public class ComPortChooser extends JFrame {
 					compilation.compile();
 
 					if (compilation.getCompilationStatus() == 0) {
-						lblSet(lblOutputCompile, Strings.compilationCompleted(), "Tahoma", Font.BOLD, 13, Color.green);
+						lblSet(lblOutputCompile, Strings.compilationCompleted(), "Tahoma", Font.BOLD, 13, veryDarkGreen);
 						connectButton.setEnabled(true);
 						comPortComboBox.setEnabled(true);
 					} else {

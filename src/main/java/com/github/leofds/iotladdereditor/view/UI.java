@@ -50,12 +50,6 @@ public class UI extends JFrame implements WindowListener{
 		images.add(new ImageIcon(UI.class.getResource("/images/PrototypeLadder_AWv2_48x48.png")).getImage());
 		images.add(new ImageIcon(UI.class.getResource("/images/PrototypeLadder_AWv2_64x64.png")).getImage());
 		images.add(new ImageIcon(UI.class.getResource("/images/PrototypeLadder_AWv2_90x90.png")).getImage());
-//		images.add(new ImageIcon(UI.class.getResource("/images/PrototypeLadder_AW_16x16.png")).getImage());
-//		images.add(new ImageIcon(UI.class.getResource("/images/PrototypeLadder_AW_24x24.png")).getImage());
-//		images.add(new ImageIcon(UI.class.getResource("/images/PrototypeLadder_AW_32x32.png")).getImage());
-//		images.add(new ImageIcon(UI.class.getResource("/images/PrototypeLadder_AW_48x48.png")).getImage());
-//		images.add(new ImageIcon(UI.class.getResource("/images/PrototypeLadder_AW_64x64.png")).getImage());
-//		images.add(new ImageIcon(UI.class.getResource("/images/PrototypeLadder_AW_90x90.png")).getImage());
 		setIconImages(images);
 		setGlassPane(new GhostGlassPane());
 		addWindowListener(this);

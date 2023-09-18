@@ -19,5 +19,5 @@ package com.github.leofds.iotladdereditor.ladder.config;
 public class Constants {
 	public static Float blockWidth = 60.0f;
 	public static Float blockHeight = 60.0f;
-	public static int colsNumber = 12;
+	public static int colsNumber = 25;
 }
