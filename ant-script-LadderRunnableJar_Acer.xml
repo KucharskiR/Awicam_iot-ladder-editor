@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="create_run_jar" name="Create Runnable Jar for Project iot-ladder-editor with Jar-in-Jar Loader">
+    <!--this file was created by Eclipse Runnable JAR file Export Wizard-->
+    <!--ANT 1.7 is required-->
+    <!--define folder properties-->
+    <property name="dir.buildfile" value="."/>
+    <property name="dir.workspace" value="${dir.buildfile}/.."/>
+    <property name="dir.jarfile" value="C:/Users/kucha/Documents/LadderProgram"/>
+    <target name="create_run_jar">
+        <jar destfile="${dir.jarfile}/LadderProgram.jar">
+            <manifest>
+                <attribute name="Main-Class" value="org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader"/>
+                <attribute name="Rsrc-Main-Class" value="com.github.leofds.iotladdereditor.IotLadderEditor"/>
+                <attribute name="Class-Path" value="."/>
+                <attribute name="Rsrc-Class-Path" value="./ maven-model-3.0.2.jar plexus-utils-2.0.4.jar commons-lang3-3.12.0.jar org.knowhowlab.comm.rxtx-patched-0.2.jar jSerialComm-2.10.3.jar"/>
+				<attribute name="SplashScreen-Image" value="images/splash.gif"/>
+            </manifest>
+            <zipfileset src="jar-in-jar-loader.zip"/>
+            <fileset dir="${dir.buildfile}/target/classes"/>
+            <zipfileset dir="C:/Users/kucha/.m2/repository/org/apache/maven/maven-model/3.0.2" includes="maven-model-3.0.2.jar"/>
+            <zipfileset dir="C:/Users/kucha/.m2/repository/org/codehaus/plexus/plexus-utils/2.0.4" includes="plexus-utils-2.0.4.jar"/>
+            <zipfileset dir="C:/Users/kucha/.m2/repository/org/apache/commons/commons-lang3/3.12.0" includes="commons-lang3-3.12.0.jar"/>
+            <zipfileset dir="C:/Users/kucha/.m2/repository/org/knowhowlab/comm/org.knowhowlab.comm.rxtx-patched/0.2" includes="org.knowhowlab.comm.rxtx-patched-0.2.jar"/>
+            <zipfileset dir="C:/Users/kucha/.m2/repository/com/fazecast/jSerialComm/2.10.3" includes="jSerialComm-2.10.3.jar"/>
+        </jar>
+    </target>
+	 <!-- Run the generated JAR file -->
+    <!--<target name="run" depends="create_run_jar">
+        <java jar="${dir.jarfile}/LadderProgram.jar" fork="true"/>
+    </target>-->
+</project>
