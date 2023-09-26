@@ -24,6 +24,8 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.swing.Icon;
+
 public class Strings {
 	
 	private static String baseName = "strings.StringsBundle";
@@ -204,7 +206,9 @@ public class Strings {
 	public static String compilationDots() { return bundle.getString("compilationDots"); }
 	public static String selectComPort() { return bundle.getString("selectComPort"); }
 	public static String runCompilation() { return bundle.getString("runCompilation"); }
-
+	public static String espUpdateMenuTitle() { return bundle.getString("espUpdateMenuTitle"); }
+	public static String espUpdateBtn() { return bundle.getString("espUpdateBtn"); }
+	public static String checkingESP32Updates() { return bundle.getString("checkingESP32Updates"); }
 
 	
 }

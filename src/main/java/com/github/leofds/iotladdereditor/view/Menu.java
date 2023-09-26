@@ -40,6 +40,7 @@ import com.github.leofds.iotladdereditor.example.ExampleFactory;
 import com.github.leofds.iotladdereditor.i18n.Strings;
 import com.github.leofds.iotladdereditor.ladder.LadderProgram;
 import com.github.leofds.iotladdereditor.util.FileUtils;
+import com.github.leofds.iotladdereditor.view.event.EspUpdate;
 import com.github.leofds.iotladdereditor.view.event.Subject;
 import com.github.leofds.iotladdereditor.view.event.Subject.SubMsg;
 
@@ -60,6 +61,7 @@ public class Menu extends JMenuBar {
 		JMenu menuProject = new JMenu(Strings.project());
 		JMenuItem projectBuild = new JMenuItem(Strings.build());
 		JMenuItem projectBuildRun = new JMenuItem(Strings.buildRun());
+		JMenuItem espUpdate = new JMenuItem(Strings.espUpdateMenuTitle());
 		JMenuItem projectChoose = new JMenuItem(Strings.chooseController());
 		JMenuItem projectProprerties = new JMenuItem(Strings.properties());
 		JMenu menuHelp = new JMenu(Strings.help());
@@ -91,6 +93,7 @@ public class Menu extends JMenuBar {
 		fileExit.addActionListener(getFileExitAction());
 		projectBuild.addActionListener(getProjectBuild());
 		projectBuildRun.addActionListener(getProjectBuildRun());
+		espUpdate.addActionListener(getEspUpdateRun());
 		projectChoose.addActionListener(getProjectChoose());
 		projectProprerties.addActionListener(getProjectProperties());
 		helpAbout.addActionListener(getHelpAbout());
@@ -138,6 +141,7 @@ public class Menu extends JMenuBar {
 		menuFile.add(fileExit);
 		menuProject.add(projectBuild);
 		menuProject.add(projectBuildRun);
+		menuProject.add(espUpdate);
 		menuProject.add(projectChoose);
 		menuProject.addSeparator();
 		menuProject.add(projectProprerties);
@@ -251,6 +255,22 @@ public class Menu extends JMenuBar {
 			public void actionPerformed(ActionEvent e) {
 				Subject.getInstance().notifyChange(SubMsg.BUILD_RUN);
 			}
+		};
+	}
+	
+	private AbstractAction getEspUpdateRun() {
+		return new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				EspUpdate updateBox = new EspUpdate();
+				
+				updateBox.setResizable(false);
+				updateBox.pack();
+				updateBox.setLocationRelativeTo(null);
+				updateBox.setVisible(true);			}
 		};
 	}
 
