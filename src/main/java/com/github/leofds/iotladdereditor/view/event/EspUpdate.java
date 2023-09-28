@@ -17,11 +17,17 @@ import javax.swing.border.EmptyBorder;
 
 import com.github.leofds.iotladdereditor.application.Mediator;
 import com.github.leofds.iotladdereditor.i18n.Strings;
+import java.awt.Insets;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 public class EspUpdate extends JFrame {
 	
 	private String installedCore;
 	private String lastAvailableCore;
+	private Boolean isUpdated;
+	private Boolean isInstalled;
+	private Boolean hasChanged;
 
 	/**
 	 * 
@@ -32,64 +38,101 @@ public class EspUpdate extends JFrame {
 		
 		installedCore = "-";
 		lastAvailableCore = "-";
+		isUpdated = false;
+		isInstalled = false;
+		hasChanged = false;
 		
 		setTitle("ESP core updater");
 		setSize(350, 176);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setLocationRelativeTo(null);
 		
+		// Checking current and available version, is core is installed etc.
 		check();
 		
-		JPanel panel = new JPanel();
-		panel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
-		
-		
-		JPanel panel_1 = new JPanel();
-		panel_1.setLayout(new BorderLayout(0, 0));
-		
-		
-		JButton btnUpdate = new JButton(Strings.espUpdateBtn());
-		btnUpdate.setBorder(new EmptyBorder(10, 70, 10, 70));
-		btnUpdate.setFont(new Font("Tahoma", Font.PLAIN, 14));
 //		panel_1.add(btnUpdate);
 		
 		JPanel panel_2 = new JPanel();
+		panel_2.setBorder(new EmptyBorder(0, 10, 0, 150));
 		getContentPane().add(panel_2, BorderLayout.SOUTH);
 		panel_2.setLayout(new BorderLayout(0, 0));
 		
 		JPanel panel_3 = new JPanel();
+		FlowLayout flowLayout_1 = (FlowLayout) panel_3.getLayout();
+		flowLayout_1.setAlignment(FlowLayout.LEFT);
 		panel_2.add(panel_3, BorderLayout.SOUTH);
 		
 //		JPanel panel_4 = new JPanel();
 //		panel_2.add(panel_4, BorderLayout.NORTH);
+		JPanel panel_4 = new JPanel();
+		FlowLayout flowLayout = (FlowLayout) panel_4.getLayout();
+		flowLayout.setAlignment(FlowLayout.LEFT);
 		
-		JLabel lblESP32Core = new JLabel("ESP32 core: ");
-		lblESP32Core.setHorizontalAlignment(SwingConstants.LEFT);
-		lblESP32Core.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		panel_3.add(lblESP32Core);
+		String marks = new String();
+		marks = isInstalled && !isUpdated ? " !!!" : "";
 		
-		JLabel lblESP32InstalledCore = new JLabel("Installed\r\n: " + installedCore);
+		JLabel lblESP32InstalledCore = new JLabel("Installed core\r\n: " + installedCore);
 		lblESP32InstalledCore.setHorizontalAlignment(SwingConstants.LEFT);
-		lblESP32InstalledCore.setFont(new Font("Tahoma", Font.ITALIC, 13));
+		lblESP32InstalledCore.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		lblESP32InstalledCore.setBorder(new EmptyBorder(0, 10, 0, 15));
-		panel_3.add(lblESP32InstalledCore);
+		panel_4.add(lblESP32InstalledCore);
 		
-		JLabel lblESP32LastCore = new JLabel("Last available\r\n: " + lastAvailableCore);
+		JLabel lblESP32LastCore = new JLabel("Last available\r\n: " + lastAvailableCore + marks);
 		lblESP32LastCore.setHorizontalAlignment(SwingConstants.LEFT);
-		lblESP32LastCore.setFont(new Font("Tahoma", Font.ITALIC, 13));
+		lblESP32LastCore.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		lblESP32LastCore.setBorder(new EmptyBorder(0, 10, 0, 15));
 		panel_3.add(lblESP32LastCore);
 		
-		JPanel panel_4 = new JPanel();
 		panel_2.add(panel_4, BorderLayout.NORTH);
+		getContentPane().add(panel_2, BorderLayout.NORTH);
 		
-//		JLabel lblStatus = new JLabel(Strings.compilationStatus());
-//		panel_4.add(lblStatus);
-//		lblStatus.setHorizontalAlignment(SwingConstants.LEFT);
-//		lblStatus.setFont(new Font("Tahoma", Font.PLAIN, 14));
-
-		getContentPane().add(panel);
-		getContentPane().add(panel_1, BorderLayout.NORTH);
+		JPanel panel = new JPanel();
+		panel.setBorder(new EmptyBorder(0, 10, 0, 10));
+		getContentPane().add(panel, BorderLayout.CENTER);
+		
+		JPanel panel_1 = new JPanel();
+		panel.add(panel_1);
+		
+		JPanel panel_Buttons = new JPanel();
+		getContentPane().add(panel_Buttons, BorderLayout.SOUTH);
+		
+		JButton btnInstall = new JButton("Install");
+		btnInstall.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
+		btnInstall.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		btnInstall.setEnabled(false);
+		panel_Buttons.add(btnInstall);
+		
+		JButton btnUpdate = new JButton("Update");
+		btnUpdate.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
+		btnUpdate.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		btnUpdate.setEnabled(false);
+		panel_Buttons.add(btnUpdate);
+		
+		String isUpdatedLbl = new String();
+		
+		if (isInstalled && isUpdated)
+			isUpdatedLbl = "New version available. Click Update to install newer version";
+		else if (isInstalled && !isUpdated) {
+			isUpdatedLbl = "New version available. Click Update to install newer version";
+			btnUpdate.setEnabled(true);
+		}
+		else {
+			isUpdatedLbl = "Core not installed";
+			btnInstall.setEnabled(true);
+		}
+		
+		
+		JLabel lblIsUpdated = new JLabel(isUpdatedLbl);
+		lblIsUpdated.setFont(new Font("Tahoma", Font.PLAIN, 12));
+		
+		panel_1.add(lblIsUpdated);
+		
 	}
 	
 	public void check() {
@@ -137,6 +180,18 @@ public class EspUpdate extends JFrame {
 					lastAvailableCore = parts[2];
 				}
 			}
+			
+			// Check if installed and available version is same
+			if(installedCore.equalsIgnoreCase(lastAvailableCore)) {
+				isUpdated = true;
+				hasChanged = true;
+			}
+			
+			// Checking whether the core is installed at all
+			if(isUpdated && hasChanged)
+				isInstalled = true;
+			
+			isUpdated = false;
 
 			// Wait for the process to complete
 			int exitCode = process.waitFor();
