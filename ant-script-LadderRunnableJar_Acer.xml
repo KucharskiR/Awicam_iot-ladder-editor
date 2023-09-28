@@ -25,7 +25,7 @@
         </jar>
     </target>
 	 <!-- Run the generated JAR file -->
-    <!--<target name="run" depends="create_run_jar">
-        <java jar="${dir.jarfile}/LadderProgram.jar" fork="true"/>
-    </target>-->
+	<target name="run" depends="create_run_jar">
+        <java jar="${dir.jarfile}/LadderProgram.jar" fork="true" />
+    </target>
 </project>
