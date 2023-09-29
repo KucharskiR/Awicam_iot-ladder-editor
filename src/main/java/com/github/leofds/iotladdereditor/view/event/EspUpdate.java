@@ -1,7 +1,6 @@
 package com.github.leofds.iotladdereditor.view.event;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -28,7 +27,6 @@ public class EspUpdate extends JFrame {
 	private Boolean isUpdated;
 	private Boolean isInstalled;
 	private Boolean hasChanged;
-	private Color veryDarkGreen = new Color(0, 153 ,0);
 
 	/**
 	 * 
@@ -45,7 +43,7 @@ public class EspUpdate extends JFrame {
 		
 		
 		
-		setTitle("ESP core updater");
+		setTitle(Strings.espUpdateTitle());
 		setSize(350, 176);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setLocationRelativeTo(null);
@@ -74,13 +72,13 @@ public class EspUpdate extends JFrame {
 		String marks = new String();
 		marks = isInstalled && !isUpdated ? " !!!" : "";
 		
-		JLabel lblESP32InstalledCore = new JLabel("Installed core\r\n: " + installedCore);
+		JLabel lblESP32InstalledCore = new JLabel(Strings.installedEspLibrary() +": " + installedCore);
 		lblESP32InstalledCore.setHorizontalAlignment(SwingConstants.LEFT);
 		lblESP32InstalledCore.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		lblESP32InstalledCore.setBorder(new EmptyBorder(0, 10, 0, 15));
 		panel_4.add(lblESP32InstalledCore);
 		
-		JLabel lblESP32LastCore = new JLabel("Last available\r\n: " + lastAvailableCore + marks);
+		JLabel lblESP32LastCore = new JLabel(Strings.lastAvailableLibrary() +": " + lastAvailableCore + marks);
 		lblESP32LastCore.setHorizontalAlignment(SwingConstants.LEFT);
 		lblESP32LastCore.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		lblESP32LastCore.setBorder(new EmptyBorder(0, 10, 0, 15));
@@ -120,13 +118,13 @@ public class EspUpdate extends JFrame {
 		String isUpdatedLbl = new String();
 		
 		if (isInstalled && isUpdated)
-			isUpdatedLbl = "ESP32 core installed and updated!";
+			isUpdatedLbl = Strings.espLibariesInstalled();
 		else if (isInstalled && !isUpdated) {
-			isUpdatedLbl = "New version available. Click Update to install newer version";
+			isUpdatedLbl = Strings.newLibraryAvailable();
 			btnUpdate.setEnabled(true);
 		}
 		else {
-			isUpdatedLbl = "Core not installed";
+			isUpdatedLbl = Strings.libraryNotInstalled();
 			btnInstall.setEnabled(true);
 		}
 		

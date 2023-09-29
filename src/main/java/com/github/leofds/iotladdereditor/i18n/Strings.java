@@ -209,6 +209,12 @@ public class Strings {
 	public static String espUpdateMenuTitle() { return bundle.getString("espUpdateMenuTitle"); }
 	public static String espUpdateBtn() { return bundle.getString("espUpdateBtn"); }
 	public static String checkingESP32Updates() { return bundle.getString("checkingESP32Updates"); }
+	public static String espUpdateTitle() { return bundle.getString("espUpdateTitle"); }
+	public static String installedEspLibrary() { return bundle.getString("installedEspLibrary"); }
+	public static String lastAvailableLibrary() { return bundle.getString("lastAvailableLibrary"); }
+	public static String espLibariesInstalled() { return bundle.getString("espLibariesInstalled"); }
+	public static String newLibraryAvailable() { return bundle.getString("newLibraryAvailable"); }
+	public static String libraryNotInstalled() { return bundle.getString("libraryNotInstalled"); }
 
 	
 }
