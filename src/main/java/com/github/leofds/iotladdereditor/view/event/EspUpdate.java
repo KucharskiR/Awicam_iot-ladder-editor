@@ -118,7 +118,7 @@ public class EspUpdate extends JFrame {
 		String isUpdatedLbl = new String();
 		
 		if (isInstalled && isUpdated)
-			isUpdatedLbl = Strings.espLibariesInstalled();
+			isUpdatedLbl = Strings.espLibrariesInstalled();
 		else if (isInstalled && !isUpdated) {
 			isUpdatedLbl = Strings.newLibraryAvailable();
 			btnUpdate.setEnabled(true);
