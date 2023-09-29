@@ -174,7 +174,7 @@ public class Mediator {
 	public void outputConsoleMessage(String msg){
 		me.console.append(msg+"\r\n");
 	}
-
+	
 	private void recursiveUpdateDevice(Device device, Rung rung,LadderInstruction instruction) {
 		if(instruction != null){
 			recursiveUpdateDevice(device, rung, instruction.getDown());

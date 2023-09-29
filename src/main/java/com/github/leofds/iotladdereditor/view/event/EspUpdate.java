@@ -1,6 +1,7 @@
 package com.github.leofds.iotladdereditor.view.event;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -27,6 +28,7 @@ public class EspUpdate extends JFrame {
 	private Boolean isUpdated;
 	private Boolean isInstalled;
 	private Boolean hasChanged;
+	private Color veryDarkGreen = new Color(0, 153 ,0);
 
 	/**
 	 * 
@@ -40,6 +42,8 @@ public class EspUpdate extends JFrame {
 		isUpdated = false;
 		isInstalled = false;
 		hasChanged = false;
+		
+		
 		
 		setTitle("ESP core updater");
 		setSize(350, 176);
@@ -116,7 +120,7 @@ public class EspUpdate extends JFrame {
 		String isUpdatedLbl = new String();
 		
 		if (isInstalled && isUpdated)
-			isUpdatedLbl = "New version available. Click Update to install newer version";
+			isUpdatedLbl = "ESP32 core installed and updated!";
 		else if (isInstalled && !isUpdated) {
 			isUpdatedLbl = "New version available. Click Update to install newer version";
 			btnUpdate.setEnabled(true);
@@ -128,7 +132,7 @@ public class EspUpdate extends JFrame {
 		
 		
 		JLabel lblIsUpdated = new JLabel(isUpdatedLbl);
-		lblIsUpdated.setFont(new Font("Tahoma", Font.PLAIN, 12));
+		lblIsUpdated.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		
 		panel_1.add(lblIsUpdated);
 		
@@ -190,18 +194,22 @@ public class EspUpdate extends JFrame {
 			if(isUpdated && hasChanged)
 				isInstalled = true;
 			
+			// Debugging
 			isUpdated = false;
 
 			// Wait for the process to complete
 			int exitCode = process.waitFor();
 			consoleOutput("Process exited with code: " + exitCode);
 			
+			// Debugging
+			exitCode = 1;
+			
 			if (exitCode == 0)
 //				consoleOutput("\n************************* SUCCESSFULLY COMPILED!****************************\r\n"
 //						+ "Select the COM port and press the Upload button to send program to the device ");
-				consoleOutput("\n************************* ESP32 CORE INSTALLED AND UPDATED! ****************************");
+				consoleOutput("OK!");
 			else 
-				consoleOutput("\nCOMPILATION ERROR!");
+				consoleOutput("ERROR! Try again");
 			
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
@@ -212,5 +220,5 @@ public class EspUpdate extends JFrame {
 	private static void consoleOutput(String msg) {
 		Mediator.getInstance().outputConsoleMessage(msg);
 	}
-
+	
 }
