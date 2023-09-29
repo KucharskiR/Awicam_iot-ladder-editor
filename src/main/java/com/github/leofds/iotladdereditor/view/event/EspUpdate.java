@@ -194,15 +194,9 @@ public class EspUpdate extends JFrame {
 			if(isUpdated && hasChanged)
 				isInstalled = true;
 			
-			// Debugging
-			isUpdated = false;
-
 			// Wait for the process to complete
 			int exitCode = process.waitFor();
 			consoleOutput("Process exited with code: " + exitCode);
-			
-			// Debugging
-			exitCode = 1;
 			
 			if (exitCode == 0)
 //				consoleOutput("\n************************* SUCCESSFULLY COMPILED!****************************\r\n"

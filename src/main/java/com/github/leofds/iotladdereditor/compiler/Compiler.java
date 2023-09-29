@@ -178,7 +178,7 @@ public class Compiler{
 				consoleOutput("\n************************* SUCCESSFULLY COMPILED!****************************\r\n"
 						+ "Select the COM port and press the Upload button to send program to the device ");
 			else 
-				consoleOutput("\nCOMPILATION ERROR!");
+				consoleOutput(Strings.compilationError());
 			
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();

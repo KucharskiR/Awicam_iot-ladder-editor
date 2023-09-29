@@ -194,7 +194,6 @@ public class ComPortChooser extends JFrame {
 						connectButton.setEnabled(true);
 						comPortComboBox.setEnabled(true);
 					} else {
-						consoleOutput(Strings.compilationError());
 						lblSet(lblOutputCompile, Strings.compilationError(), "Tahoma", Font.BOLD, 11, Color.RED);
 					}
 					sharedResource.setData(true);
