@@ -99,9 +99,66 @@ public class EspUpdate extends JFrame {
 		
 		JButton btnInstall = new JButton("Install");
 		btnInstall.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
+
+				Thread install = new Thread(() -> {
+					try {
+						/*
+						 * 
+						 */
+
+						// Command to run
+						String command = "cmd /c arduino-cli core install esp32:esp32";
+
+						String currentWorkingDirectory = System.getProperty("user.dir");
+
+						// Working directory
+						String workingDirectory = currentWorkingDirectory + "/out/plc"; // Replace with your desired
+																						// directory path
+
+						// Create the process builder
+						ProcessBuilder processBuilder = new ProcessBuilder(command.split(" "));
+
+						// Set the working directory
+						processBuilder.directory(new File(workingDirectory));
+
+						// Redirect error stream to output stream
+						processBuilder.redirectErrorStream(true);
+
+						// Start the process
+						Process process = processBuilder.start();
+
+						// Get the process output
+						BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+						String line;
+						while ((line = reader.readLine()) != null) {
+							System.out.println(line);
+							consoleOutput(line);
+						}
+
+						// Wait for the process to complete
+						int exitCode = process.waitFor();
+						consoleOutput("Process exited with code: " + exitCode);
+
+						if (exitCode == 0)
+//							TODO: strings install
+							consoleOutput("console install succ");
+						else
+							consoleOutput("console install erro");
+
+					} catch (IOException | InterruptedException e1) {
+						e1.printStackTrace();
+						consoleOutput(e1.getMessage());
+					}
+
+				});
+				
+				// Start install thread
+				install.start();
 			}
 		});
+		
 		btnInstall.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		btnInstall.setEnabled(false);
 		panel_Buttons.add(btnInstall);
@@ -109,6 +166,61 @@ public class EspUpdate extends JFrame {
 		JButton btnUpdate = new JButton("Update");
 		btnUpdate.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+
+				Thread update = new Thread(() -> {
+					try {
+						/*
+						 * 
+						 */
+
+						// Command to run
+						String command = "cmd /c arduino-cli core upgrade esp32:esp32";
+
+						String currentWorkingDirectory = System.getProperty("user.dir");
+
+						// Working directory
+						String workingDirectory = currentWorkingDirectory + "/out/plc"; // Replace with your desired
+																						// directory path
+
+						// Create the process builder
+						ProcessBuilder processBuilder = new ProcessBuilder(command.split(" "));
+
+						// Set the working directory
+						processBuilder.directory(new File(workingDirectory));
+
+						// Redirect error stream to output stream
+						processBuilder.redirectErrorStream(true);
+
+						// Start the process
+						Process process = processBuilder.start();
+
+						// Get the process output
+						BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+						String line;
+						while ((line = reader.readLine()) != null) {
+							System.out.println(line);
+							consoleOutput(line);
+						}
+
+						// Wait for the process to complete
+						int exitCode = process.waitFor();
+						consoleOutput("Process exited with code: " + exitCode);
+
+						if (exitCode == 0)
+//							TODO: strings upgrade
+							consoleOutput("console upgrade succ");
+						else
+							consoleOutput("console upgrade erro");
+
+					} catch (IOException | InterruptedException e1) {
+						e1.printStackTrace();
+						consoleOutput(e1.getMessage());
+					}
+
+				});
+				
+				// Start update thread
+				update.start();
 			}
 		});
 		btnUpdate.setFont(new Font("Tahoma", Font.PLAIN, 11));

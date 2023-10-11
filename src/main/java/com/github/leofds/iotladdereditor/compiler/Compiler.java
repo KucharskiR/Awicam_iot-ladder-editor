@@ -266,11 +266,9 @@ public class Compiler{
 			consoleOutput("Process exited with code: " + exitCode);
 			
 			if (exitCode == 0)
-				consoleOutput("\n****** SUCCESSFULLY UPLOADED!******\r\n"
-						+ "\r\n"
-						+ "		Restart your device");
+				consoleOutput(Strings.successfullyUploadConsole());
 			else 
-				consoleOutput("\nUPLOADING ERROR!");
+				consoleOutput(Strings.uploadingError());
 			
 			return exitCode;
 

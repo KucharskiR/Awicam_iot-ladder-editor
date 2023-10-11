@@ -215,6 +215,7 @@ public class Strings {
 	public static String espLibrariesInstalled() { return bundle.getString("espLibrariesInstalled"); }
 	public static String newLibraryAvailable() { return bundle.getString("newLibraryAvailable"); }
 	public static String libraryNotInstalled() { return bundle.getString("libraryNotInstalled"); }
+	public static String successfullyUploadConsole() { return bundle.getString("successfullyUploadConsole"); }
 
 	
 }
