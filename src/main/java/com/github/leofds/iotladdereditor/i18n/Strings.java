@@ -24,6 +24,8 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.swing.Icon;
+
 public class Strings {
 	
 	private static String baseName = "strings.StringsBundle";
@@ -204,7 +206,16 @@ public class Strings {
 	public static String compilationDots() { return bundle.getString("compilationDots"); }
 	public static String selectComPort() { return bundle.getString("selectComPort"); }
 	public static String runCompilation() { return bundle.getString("runCompilation"); }
-
+	public static String espUpdateMenuTitle() { return bundle.getString("espUpdateMenuTitle"); }
+	public static String espUpdateBtn() { return bundle.getString("espUpdateBtn"); }
+	public static String checkingESP32Updates() { return bundle.getString("checkingESP32Updates"); }
+	public static String espUpdateTitle() { return bundle.getString("espUpdateTitle"); }
+	public static String installedEspLibrary() { return bundle.getString("installedEspLibrary"); }
+	public static String lastAvailableLibrary() { return bundle.getString("lastAvailableLibrary"); }
+	public static String espLibrariesInstalled() { return bundle.getString("espLibrariesInstalled"); }
+	public static String newLibraryAvailable() { return bundle.getString("newLibraryAvailable"); }
+	public static String libraryNotInstalled() { return bundle.getString("libraryNotInstalled"); }
+	public static String successfullyUploadConsole() { return bundle.getString("successfullyUploadConsole"); }
 
 	
 }

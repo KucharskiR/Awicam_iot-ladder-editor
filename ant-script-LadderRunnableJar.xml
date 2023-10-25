@@ -24,4 +24,7 @@
             <zipfileset dir="C:/Users/Dell/.m2/repository/com/fazecast/jSerialComm/2.10.3" includes="jSerialComm-2.10.3.jar"/>
         </jar>
     </target>
+	 <target name="run" depends="create_run_jar">
+        <java jar="${dir.jarfile}/Awicam-Ladder.jar" fork="true" />
+    </target>
 </project>

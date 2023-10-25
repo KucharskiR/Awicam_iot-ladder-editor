@@ -2,6 +2,7 @@ package com.github.leofds.iotladdereditor.view.event;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -48,7 +49,7 @@ public class ComPortChooser extends JFrame {
 		Color veryDarkGreen = new Color(0, 153 ,0);
 
 		setTitle("ESP Upload");
-		setSize(350, 176);
+		setSize(256, 191);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setLocationRelativeTo(null);
 
@@ -58,7 +59,7 @@ public class ComPortChooser extends JFrame {
 		populateComPortComboBox();
 		JButton connectButton = new JButton(Strings.upload());
 		connectButton.setEnabled(false);
-		connectButton.setFont(new Font("Tahoma", Font.PLAIN, 13));
+		connectButton.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		
 		// sharing thread data
 		SharedResource sharedResource = new SharedResource();
@@ -78,7 +79,7 @@ public class ComPortChooser extends JFrame {
 		JPanel panel = new JPanel();
 		panel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 		JLabel label = new JLabel(Strings.selectComPort());
-		label.setFont(new Font("Tahoma", Font.PLAIN, 13));
+		label.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		panel.add(label);
 		panel.add(comPortComboBox);
 		panel.add(connectButton);
@@ -86,11 +87,13 @@ public class ComPortChooser extends JFrame {
 		getContentPane().add(panel);
 		
 		JPanel panel_1 = new JPanel();
+		panel_1.setBorder(new EmptyBorder(5, 0, 5, 0));
 		getContentPane().add(panel_1, BorderLayout.NORTH);
 		panel_1.setLayout(new BorderLayout(0, 0));
 		
 		JButton btnCompile = new JButton(Strings.runCompilation());
-		btnCompile.setBorder(new EmptyBorder(10, 0, 10, 0));
+		btnCompile.setHorizontalTextPosition(SwingConstants.LEADING);
+		btnCompile.setPreferredSize(new Dimension(110, 40));
 		btnCompile.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		panel_1.add(btnCompile);
 		
@@ -103,12 +106,12 @@ public class ComPortChooser extends JFrame {
 		
 		JLabel lblStatusUpload = new JLabel(Strings.uploadingStatus());
 		lblStatusUpload.setHorizontalAlignment(SwingConstants.LEFT);
-		lblStatusUpload.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblStatusUpload.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		panel_3.add(lblStatusUpload);
 		
 		JLabel lblOutputUpload = new JLabel(Strings.notUploaded());
 		lblOutputUpload.setHorizontalAlignment(SwingConstants.LEFT);
-		lblOutputUpload.setFont(new Font("Tahoma", Font.ITALIC, 13));
+		lblOutputUpload.setFont(new Font("Tahoma", Font.ITALIC, 11));
 		lblOutputUpload.setBorder(new EmptyBorder(0, 10, 0, 15));
 		panel_3.add(lblOutputUpload);
 		
@@ -118,13 +121,13 @@ public class ComPortChooser extends JFrame {
 		JLabel lblStatus = new JLabel(Strings.compilationStatus());
 		panel_4.add(lblStatus);
 		lblStatus.setHorizontalAlignment(SwingConstants.LEFT);
-		lblStatus.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblStatus.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		
 		JLabel lblOutputCompile = new JLabel(Strings.notCompiled());
 		panel_4.add(lblOutputCompile);
 		lblOutputCompile.setBorder(new EmptyBorder(0, 10, 0, 15));
 		lblOutputCompile.setHorizontalAlignment(SwingConstants.LEFT);
-		lblOutputCompile.setFont(new Font("Tahoma", Font.ITALIC, 13));
+		lblOutputCompile.setFont(new Font("Tahoma", Font.ITALIC, 11));
 		
 		
 		// upload action listener
@@ -140,16 +143,16 @@ public class ComPortChooser extends JFrame {
 
 						Compiler uploadingCompiler = new Compiler();
 
-						lblSet(lblOutputUpload, Strings.uploadingDots(), "Tahoma", Font.ITALIC, 13, Color.BLACK);
+						lblSet(lblOutputUpload, Strings.uploadingDots(), "Tahoma", Font.ITALIC, 11, Color.BLACK);
 						
 						uploadingCompiler.upload(portName);
 						
 						if (uploadingCompiler.getUploadingStatus() == 0) {
-							lblSet(lblOutputUpload, Strings.uploadingCompleted(), "Tahoma", Font.BOLD, 13, veryDarkGreen);
+							lblSet(lblOutputUpload, Strings.uploadingCompleted(), "Tahoma", Font.BOLD, 11, veryDarkGreen);
 
 						} else {
 							consoleOutput(Strings.uploadingError());
-							lblSet(lblOutputUpload, Strings.uploadingError(), "Tahoma", Font.BOLD, 13, Color.RED);
+							lblSet(lblOutputUpload, Strings.uploadingError(), "Tahoma", Font.BOLD, 11, Color.RED);
 						}
 
 						sharedResource.setData(true);
@@ -182,17 +185,16 @@ public class ComPortChooser extends JFrame {
 					// Operation 2 code here
 					sharedResource.setData(false);
 
-					lblSet(lblOutputCompile, Strings.compilationDots(), "Tahoma", Font.ITALIC, 13, Color.BLACK);
-					lblSet(lblOutputUpload, Strings.notUploaded(),"Tahoma", Font.ITALIC, 13, Color.BLACK);
+					lblSet(lblOutputCompile, Strings.compilationDots(), "Tahoma", Font.ITALIC, 11, Color.BLACK);
+					lblSet(lblOutputUpload, Strings.notUploaded(),"Tahoma", Font.ITALIC, 11, Color.BLACK);
 					compilation.compile();
 
 					if (compilation.getCompilationStatus() == 0) {
-						lblSet(lblOutputCompile, Strings.compilationCompleted(), "Tahoma", Font.BOLD, 13, veryDarkGreen);
+						lblSet(lblOutputCompile, Strings.compilationCompleted(), "Tahoma", Font.BOLD, 11, veryDarkGreen);
 						connectButton.setEnabled(true);
 						comPortComboBox.setEnabled(true);
 					} else {
-						consoleOutput(Strings.compilationError());
-						lblSet(lblOutputCompile, Strings.compilationError(), "Tahoma", Font.BOLD, 13, Color.RED);
+						lblSet(lblOutputCompile, Strings.compilationError(), "Tahoma", Font.BOLD, 11, Color.RED);
 					}
 					sharedResource.setData(true);
 					sharedResource.setCompilationStatus(compilation.getCompilationStatus());
