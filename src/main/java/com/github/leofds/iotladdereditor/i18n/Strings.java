@@ -216,6 +216,10 @@ public class Strings {
 	public static String newLibraryAvailable() { return bundle.getString("newLibraryAvailable"); }
 	public static String libraryNotInstalled() { return bundle.getString("libraryNotInstalled"); }
 	public static String successfullyUploadConsole() { return bundle.getString("successfullyUploadConsole"); }
+	public static String libraryUpdateSuccess() { return bundle.getString("libraryUpdateSuccess"); }
+	public static String libraryUpdateFalse() { return bundle.getString("libraryUpdateFalse"); }
+	public static String errorTryAgain() { return bundle.getString("errorTryAgain"); }
+	public static String processExitedWithCode() { return bundle.getString("processExitedWithCode"); }
 
 	
 }

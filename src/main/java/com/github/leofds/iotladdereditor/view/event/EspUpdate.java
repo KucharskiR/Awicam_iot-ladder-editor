@@ -22,6 +22,8 @@ import com.github.leofds.iotladdereditor.i18n.Strings;
 
 public class EspUpdate extends JFrame {
 	
+	private static String TEXT_IF_NO_VERSION = "-";
+	
 	private String installedCore;
 	private String lastAvailableCore;
 	private Boolean isUpdated;
@@ -35,8 +37,8 @@ public class EspUpdate extends JFrame {
 
 	public EspUpdate() {
 		
-		installedCore = "-";
-		lastAvailableCore = "-";
+		installedCore = TEXT_IF_NO_VERSION;
+		lastAvailableCore = TEXT_IF_NO_VERSION;
 		isUpdated = false;
 		isInstalled = false;
 		hasChanged = false;
@@ -72,16 +74,31 @@ public class EspUpdate extends JFrame {
 		String marks = new String();
 		marks = isInstalled && !isUpdated ? " !!!" : "";
 		
+		// Inastalled core label
 		JLabel lblESP32InstalledCore = new JLabel(Strings.installedEspLibrary() +": " + installedCore);
 		lblESP32InstalledCore.setHorizontalAlignment(SwingConstants.LEFT);
 		lblESP32InstalledCore.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		lblESP32InstalledCore.setBorder(new EmptyBorder(0, 10, 0, 15));
-		panel_4.add(lblESP32InstalledCore);
 		
+			if (lastAvailableCore.equals(TEXT_IF_NO_VERSION)) {
+				lblESP32InstalledCore.setText(Strings.installedEspLibrary() +": " + "not found");
+			} else {
+				lblESP32InstalledCore.setText(Strings.installedEspLibrary() +": " + installedCore);
+			}
+			panel_4.add(lblESP32InstalledCore);
+		
+		// Last core label
 		JLabel lblESP32LastCore = new JLabel(Strings.lastAvailableLibrary() +": " + lastAvailableCore + marks);
 		lblESP32LastCore.setHorizontalAlignment(SwingConstants.LEFT);
 		lblESP32LastCore.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		lblESP32LastCore.setBorder(new EmptyBorder(0, 10, 0, 15));
+		
+			if (lastAvailableCore.equals(TEXT_IF_NO_VERSION)) {
+				lblESP32LastCore.setText(Strings.lastAvailableLibrary() +": " +  "not found");
+			} else {
+				lblESP32LastCore.setText(Strings.lastAvailableLibrary() +": " +  lastAvailableCore);
+			}
+		
 		panel_3.add(lblESP32LastCore);
 		
 		panel_2.add(panel_4, BorderLayout.NORTH);
@@ -139,7 +156,7 @@ public class EspUpdate extends JFrame {
 
 						// Wait for the process to complete
 						int exitCode = process.waitFor();
-						consoleOutput("Process exited with code: " + exitCode);
+						consoleOutput(Strings.processExitedWithCode() + " "  + exitCode);
 
 						if (exitCode == 0)
 //							TODO: strings install
@@ -204,13 +221,13 @@ public class EspUpdate extends JFrame {
 
 						// Wait for the process to complete
 						int exitCode = process.waitFor();
-						consoleOutput("Process exited with code: " + exitCode);
+						consoleOutput(Strings.processExitedWithCode() + " "  + " "  + exitCode);
 
 						if (exitCode == 0)
 //							TODO: strings upgrade
-							consoleOutput("console upgrade succ");
+							consoleOutput(Strings.libraryUpdateSuccess());
 						else
-							consoleOutput("console upgrade erro");
+							consoleOutput(Strings.libraryUpdateFalse());
 
 					} catch (IOException | InterruptedException e1) {
 						e1.printStackTrace();
@@ -284,9 +301,14 @@ public class EspUpdate extends JFrame {
 			// Get the process output
 			BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 			String line;
+			
+			
 			String[] parts;
 			while ((line = reader.readLine()) != null) {
+				// Output the message from arduino-cli core list
+				consoleOutput(line);
 				if (line.contains("esp")) {
+
 					// Split the string using regular expression
 					parts = line.split("\\s+");
 					installedCore = parts[1];
@@ -295,7 +317,7 @@ public class EspUpdate extends JFrame {
 			}
 			
 			// Check if installed and available version is same
-			if(installedCore.equalsIgnoreCase(lastAvailableCore)) {
+			if (installedCore.equalsIgnoreCase(lastAvailableCore) && !installedCore.equals(TEXT_IF_NO_VERSION)) {
 				isUpdated = true;
 				hasChanged = true;
 			}
@@ -306,14 +328,12 @@ public class EspUpdate extends JFrame {
 			
 			// Wait for the process to complete
 			int exitCode = process.waitFor();
-			consoleOutput("Process exited with code: " + exitCode);
+			consoleOutput(Strings.processExitedWithCode() + " "  + exitCode);
 			
 			if (exitCode == 0)
-//				consoleOutput("\n************************* SUCCESSFULLY COMPILED!****************************\r\n"
-//						+ "Select the COM port and press the Upload button to send program to the device ");
 				consoleOutput("OK!");
 			else 
-				consoleOutput("ERROR! Try again");
+				consoleOutput(Strings.errorTryAgain());
 			
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
