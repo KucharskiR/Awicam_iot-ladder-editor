@@ -65,7 +65,7 @@ public class SerialCommunication {
 		
 		Thread serialReceiving = new Thread(() -> {
 			try {
-				System.out.println("Connecting...");
+				consoleOutput("Connecting...");
 
 				SerialPort comPort = SerialPort.getCommPort(portName);
 				comPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0);
@@ -81,31 +81,21 @@ public class SerialCommunication {
 
 					// Sending start command to ESP
 					outputStream.write(USB_COMMAND_RECEIVE_LD);
-					System.out.println("Command receive to esp");
+					consoleOutput("Command receive to esp");
 					
-//					int availableBytes = inputStream.available();
-//					byte[] bufferIn = new byte[availableBytes];
-//					int bytesRead = ByteBuffer.wrap(bufferIn).getInt();
-					
-//					TimeUnit.MILLISECONDS.sleep(2);
-
 					if (Arrays.equals(responseFromESP(inputStream), USB_ESP_OK)) {
 						
-						System.out.println("test");
-
 						// Define a buffer for receiving data
 						byte[] buffer = new byte[64];
 
 						int bytesRead;
 						
-						
 //						if (responseFromESP(inputStream) != null) {
 
 							// Read and write the file data
 							while ((bytesRead = inputStream.read(buffer)) != -1) {
-								System.out.println("Reading " + bytesRead + " bytes");
-								System.out.println(Arrays.toString(buffer));
-//						fileOutputStream.write(buffer, 0, bytesRead);
+								consoleOutput("Reading " + bytesRead + " bytes");
+								consoleOutput(Arrays.toString(buffer));
 								fileOutputStream.write(buffer, 0, bytesRead);
 							}
 							//TODO: obsługa błędów + odczyt ostatnich trzech bajtów (ESP OK)
@@ -122,7 +112,7 @@ public class SerialCommunication {
 					error(Error.ERROR_OPEN_SERIAL);
 					throw new IOException();
 				}
-				System.out.println("File received successfully.");
+				consoleOutput("File received successfully.");
 			} catch (Exception e) {
 				e.printStackTrace();
 				error(Error.ERROR_RECEIVING);
@@ -137,7 +127,7 @@ public class SerialCommunication {
 		
 		Thread send = new Thread(() -> {
 			try {
-				System.out.println("Connecting...");
+				consoleOutput("Connecting...");
 
 				SerialPort comPort = SerialPort.getCommPort(portName);
 				comPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0);
@@ -150,7 +140,7 @@ public class SerialCommunication {
 					InputStream inputStream = comPort.getInputStream();
 					OutputStream outputStream = comPort.getOutputStream();
 
-					System.out.println("File to send: " + file.toString());
+					consoleOutput("File to send: " + file.toString());
 
 					// Sending start command to ESP
 					outputStream.write(USB_COMMAND_SEND_LD);
@@ -167,10 +157,9 @@ public class SerialCommunication {
 							int len;
 							while ((len = fileInputStream.read(buffer)) > 0) {
 								try {
-									System.out.println("Sending " + len + " bytes");
+									consoleOutput("Sending " + len + " bytes");
 									outputStream.write(buffer, 0, len);
 								} catch (Exception e) {
-									// TODO: handle exception
 									error(Error.ERROR_SEND);
 								}
 
@@ -229,7 +218,7 @@ public class SerialCommunication {
 		try {
 			// Waiting loop for data from ESP
 			while (inputStream.available() == 0) {
-//				System.out.println(inputStream.available());
+//				consoleOutput(inputStream.available());
 				counter++;
 				if (counter > 15) {
 					if (System.currentTimeMillis() >= (startTime + TIMEOUT)) {
@@ -241,11 +230,11 @@ public class SerialCommunication {
 			}
 
 			int availableBytes = inputStream.available();
-			System.out.println("available bytes: " + availableBytes);
+			consoleOutput("available bytes: " + availableBytes);
 
 			byte[] bufferIn = new byte[availableBytes];
 			inputStream.read(bufferIn);
-			System.out.println(Arrays.toString(bufferIn));
+			consoleOutput(Arrays.toString(bufferIn));
 			
 			return bufferIn;
 			
@@ -257,34 +246,33 @@ public class SerialCommunication {
 	}
 
 	private void error(Error error) {
-		consoleOutput("error");
 		switch (error) {
 		case ERROR_SEND:
-			System.out.println("Sending error");
+			consoleOutput("Sending error");
 			break;
 		case ERROR_RECEIVING:
-			System.out.println("Receiving error");
+			consoleOutput("Receiving error");
 			break;
 		case ERROR_RECEIVING_OK:
-			System.out.println("Receiving OK from the device error");
+			consoleOutput("Receiving OK from the device error");
 			break;
 		case ERROR_SEND_TIME:
-			System.out.println("Wait time after sending packet error");
+			consoleOutput("Wait time after sending packet error");
 			break;
 		case ERROR_ESP_NOT_SEND_OK:
-			System.out.println("File sended but not received OK from the device");
+			consoleOutput("File sended but not received OK from the device");
 			break;
 		case ERROR_FROM_ESP:
-			System.out.println("ESP send an error");
+			consoleOutput("ESP send an error");
 			break;
 		case ERROR_OPEN_SERIAL:
-			System.out.println("Can not open serial port");
+			consoleOutput("Can not open serial port");
 			break;
 		case ERROR_WAITING_ESP:
-			System.out.println("Error during waiting for ESP response");
+			consoleOutput("Error during waiting for ESP response");
 			break;
 		case ERROR_RESPONSE_TIMEOUT:
-			System.out.println("Response from the device timeout");
+			consoleOutput("Response from the device timeout");
 			break;
 			
 		default:
@@ -293,16 +281,15 @@ public class SerialCommunication {
 	}
 	
 	private void success(Success success) {
-//		consoleOutput("success");
 		switch (success) {
 		case SUCCESS_SEND:
-			System.out.println("Succesfully sended");
+			consoleOutput("Succesfully sended");
 			break;
 		case SUCCESS_RECEIVED:
-			System.out.println("Succesfully received");
+			consoleOutput("Succesfully received");
 			break;
 		case SUCCESS_RECEIVED_OK:
-			System.out.println("Received OK from ESP!");
+			consoleOutput("Received OK from ESP!");
 			break;
 
 		default:

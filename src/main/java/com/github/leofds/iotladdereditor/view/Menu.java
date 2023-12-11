@@ -17,6 +17,7 @@
 package com.github.leofds.iotladdereditor.view;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.util.Locale;
@@ -63,6 +64,7 @@ public class Menu extends JMenuBar {
 		JMenuItem projectBuildRun = new JMenuItem(Strings.buildRun());
 		JMenuItem espUpdate = new JMenuItem(Strings.espUpdateMenuTitle());
 		JMenuItem projectChoose = new JMenuItem(Strings.chooseController());
+		JMenuItem importExportLadderProgram = new JMenuItem("Import/Export ladder");
 		JMenuItem projectProprerties = new JMenuItem(Strings.properties());
 		JMenu menuHelp = new JMenu(Strings.help());
 		helpLang = new JMenu(Strings.language());
@@ -95,6 +97,7 @@ public class Menu extends JMenuBar {
 		projectBuildRun.addActionListener(getProjectBuildRun());
 		espUpdate.addActionListener(getEspUpdateRun());
 		projectChoose.addActionListener(getProjectChoose());
+		importExportLadderProgram.addActionListener(getImportExportLdFile());
 		projectProprerties.addActionListener(getProjectProperties());
 		helpAbout.addActionListener(getHelpAbout());
 
@@ -143,6 +146,7 @@ public class Menu extends JMenuBar {
 		menuProject.add(projectBuildRun);
 		menuProject.add(espUpdate);
 		menuProject.add(projectChoose);
+		menuProject.add(importExportLadderProgram);
 		menuProject.addSeparator();
 		menuProject.add(projectProprerties);
 		menuHelp.add(helpLang);
@@ -152,6 +156,19 @@ public class Menu extends JMenuBar {
 		add(menuFile);
 		add(menuProject);
 		add(menuHelp);
+	}
+
+	private AbstractAction getImportExportLdFile() {
+		return new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO odczytanie/wysłanie pliku z/do ESP a następnie zapisanie do pliku
+				FileUtils.saveAsLadderProgramFromDevice();
+				
+			}
+		};
 	}
 
 	private AbstractAction getFileOpenAction() {
