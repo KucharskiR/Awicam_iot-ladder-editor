@@ -33,7 +33,7 @@ public class SerialCommunication {
 
 	public SerialCommunication(String portName, int baudRate) {
 		this.portName = portName; // Com port name
-		this.baudRate = 57600; // Baudrate value
+		this.baudRate = baudRate;
 	}
 
 //	public static void main(String[] args) {
@@ -81,7 +81,7 @@ public class SerialCommunication {
 
 					// Sending start command to ESP
 					outputStream.write(USB_COMMAND_RECEIVE_LD);
-					consoleOutput("Command receive to esp");
+					consoleOutput("Start command sent to ESP");
 					
 					if (Arrays.equals(responseFromESP(inputStream), USB_ESP_OK)) {
 						
@@ -209,7 +209,11 @@ public class SerialCommunication {
 		// Start thread
 		send.start();
 	}
-
+	
+	public void response() {
+		// TODO utworzyć funkcję która po wysłaniu informacji uzyska odpowiedz
+		
+	}
 
 	private byte[] responseFromESP(InputStream inputStream) {
 		long startTime = System.currentTimeMillis();
@@ -300,4 +304,5 @@ public class SerialCommunication {
 	private static void consoleOutput(String msg) {
 		Mediator.getInstance().outputConsoleMessage(msg);
 	}
+
 }

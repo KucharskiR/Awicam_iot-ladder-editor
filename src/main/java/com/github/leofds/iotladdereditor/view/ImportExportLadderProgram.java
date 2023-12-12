@@ -18,6 +18,9 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
 import com.fazecast.jSerialComm.SerialPort;
+import com.github.leofds.iotladdereditor.view.event.SerialCommunication;
+
+import java.awt.Color;
 
 public class ImportExportLadderProgram extends JFrame {
 
@@ -27,6 +30,10 @@ public class ImportExportLadderProgram extends JFrame {
 	private String exportStatus = "";
 	private String importStatus = "";
 	private String setStatus = "";
+	
+	private static Color green = new Color(0, 128, 0);
+	private static Color red = new Color(128, 0, 0);
+	private static Color black = new Color(0, 0, 0);
 
 	public ImportExportLadderProgram() {
 		setAlwaysOnTop(true);
@@ -53,59 +60,6 @@ public class ImportExportLadderProgram extends JFrame {
 		getContentPane().add(panel_2, BorderLayout.SOUTH);
 		panel_2.setLayout(new BorderLayout(0, 0));
 		
-		JPanel panel_3 = new JPanel();
-		panel_3.setBorder(new EmptyBorder(10, 10, 10, 10));
-		panel_2.add(panel_3);
-		panel_3.setLayout(new BorderLayout(0, 0));
-		
-		JPanel panel_up = new JPanel();
-		FlowLayout flowLayout_1 = (FlowLayout) panel_up.getLayout();
-		flowLayout_1.setAlignment(FlowLayout.LEFT);
-		panel_3.add(panel_up, BorderLayout.NORTH);
-				
-				JPanel panel_up_divide = new JPanel();
-				panel_up.add(panel_up_divide);
-				panel_up_divide.setLayout(new BorderLayout(0, 0));
-				
-						JButton btnExport = new JButton("Export");
-						btnExport.setEnabled(false);
-						panel_up_divide.add(btnExport, BorderLayout.SOUTH);
-						btnExport.setHorizontalTextPosition(SwingConstants.LEADING);
-						btnExport.setFont(new Font("Tahoma", Font.PLAIN, 14));
-						
-						JLabel lblExport = new JLabel("Export status:");
-						lblExport.setFont(new Font("Tahoma", Font.PLAIN, 14));
-						panel_up.add(lblExport);
-						
-						JLabel lblExportStatus = new JLabel("");
-						lblExportStatus.setFont(new Font("Tahoma", Font.PLAIN, 11));
-						lblExportStatus.setText(exportStatus);
-						panel_up.add(lblExportStatus);
-						
-		
-		JPanel panel_down = new JPanel();
-		FlowLayout flowLayout = (FlowLayout) panel_down.getLayout();
-		flowLayout.setAlignment(FlowLayout.LEFT);
-		panel_3.add(panel_down, BorderLayout.SOUTH);
-		
-				JButton btnImport = new JButton("Import");
-				btnImport.setEnabled(false);
-				panel_down.add(btnImport);
-				btnImport.setHorizontalTextPosition(SwingConstants.LEADING);
-				btnImport.setFont(new Font("Tahoma", Font.PLAIN, 14));
-				
-				JLabel lblImport = new JLabel("Import status:");
-				lblImport.setFont(new Font("Tahoma", Font.PLAIN, 14));
-				panel_down.add(lblImport);
-				
-				JLabel lblImportStatus = new JLabel("");
-				lblImportStatus.setFont(new Font("Tahoma", Font.PLAIN, 11));
-				lblImportStatus.setText(importStatus);
-				panel_down.add(lblImportStatus);
-				
-				JSeparator separator_1 = new JSeparator();
-				panel_2.add(separator_1, BorderLayout.NORTH);
-
 		JPanel panelSet = new JPanel();
 		panelSet.setBorder(new EmptyBorder(10, 10, 10, 10));
 		getContentPane().add(panelSet, BorderLayout.WEST);
@@ -126,10 +80,70 @@ public class ImportExportLadderProgram extends JFrame {
 		btnCheck.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				populateComPortComboBox(comboBoxCOM);
+	
 			}
 		});
 		btnCheck.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		panelSet.add(btnCheck);
+		
+		JPanel panel_3 = new JPanel();
+		panel_3.setBorder(new EmptyBorder(10, 10, 10, 10));
+		panel_2.add(panel_3);
+		panel_3.setLayout(new BorderLayout(0, 0));
+		
+		JPanel panel_up = new JPanel();
+		FlowLayout flowLayout_1 = (FlowLayout) panel_up.getLayout();
+		flowLayout_1.setAlignment(FlowLayout.LEFT);
+		panel_3.add(panel_up, BorderLayout.NORTH);
+				
+				JPanel panel_up_divide = new JPanel();
+				panel_up.add(panel_up_divide);
+				panel_up_divide.setLayout(new BorderLayout(0, 0));
+				
+						JButton btnExport = new JButton("Export");
+						panel_up_divide.add(btnExport, BorderLayout.SOUTH);
+						btnExport.setHorizontalTextPosition(SwingConstants.LEADING);
+						btnExport.setFont(new Font("Tahoma", Font.PLAIN, 14));
+						
+						JLabel lblExport = new JLabel("Export status:");
+						lblExport.setFont(new Font("Tahoma", Font.PLAIN, 14));
+						panel_up.add(lblExport);
+						
+						JLabel lblExportStatus = new JLabel("");
+						lblExportStatus.setFont(new Font("Tahoma", Font.PLAIN, 11));
+						lblExportStatus.setText(exportStatus);
+						panel_up.add(lblExportStatus);
+						
+		
+		JPanel panel_down = new JPanel();
+		FlowLayout flowLayout = (FlowLayout) panel_down.getLayout();
+		flowLayout.setAlignment(FlowLayout.LEFT);
+		panel_3.add(panel_down, BorderLayout.SOUTH);
+		
+				JButton btnImport = new JButton("Import");
+				btnImport.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent arg0) {
+						String selectedPort = (String) comboBoxCOM.getSelectedItem();
+						
+						SerialCommunication serial = new SerialCommunication(selectedPort, 57600);
+						serial.receive();
+					}
+				});
+				panel_down.add(btnImport);
+				btnImport.setHorizontalTextPosition(SwingConstants.LEADING);
+				btnImport.setFont(new Font("Tahoma", Font.PLAIN, 14));
+				
+				JLabel lblImport = new JLabel("Import status:");
+				lblImport.setFont(new Font("Tahoma", Font.PLAIN, 14));
+				panel_down.add(lblImport);
+				
+				JLabel lblImportStatus = new JLabel("");
+				lblImportStatus.setFont(new Font("Tahoma", Font.PLAIN, 11));
+				lblImportStatus.setText(importStatus);
+				panel_down.add(lblImportStatus);
+				
+				JSeparator separator_1 = new JSeparator();
+				panel_2.add(separator_1, BorderLayout.NORTH);
 		
 		JLabel lblStatus = new JLabel("");
 		lblStatus.setFont(new Font("Tahoma", Font.PLAIN, 14));
