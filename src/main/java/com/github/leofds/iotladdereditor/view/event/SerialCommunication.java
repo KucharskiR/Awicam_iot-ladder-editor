@@ -1,5 +1,6 @@
 package com.github.leofds.iotladdereditor.view.event;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -7,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import com.fazecast.jSerialComm.SerialPort;
@@ -30,6 +32,25 @@ public class SerialCommunication {
 	
 	private String portName;
 	private int baudRate;
+	
+	private String lastConsoleOutput = "";
+	private OutputStream outputStream;
+
+	public String getLastConsoleOutput() {
+		return lastConsoleOutput;
+	}
+
+	public void setLastConsoleOutput(String lastConsoleOutput) {
+		this.lastConsoleOutput = lastConsoleOutput;
+	}
+
+	public OutputStream getOutputStream() {
+		return outputStream;
+	}
+
+	public void setOutputStream(OutputStream outputStream) {
+		this.outputStream = outputStream;
+	}
 
 	public SerialCommunication(String portName, int baudRate) {
 		this.portName = portName; // Com port name
@@ -112,7 +133,7 @@ public class SerialCommunication {
 					error(Error.ERROR_OPEN_SERIAL);
 					throw new IOException();
 				}
-				consoleOutput("File received successfully.");
+				success(Success.SUCCESS_RECEIVED);
 			} catch (Exception e) {
 				e.printStackTrace();
 				error(Error.ERROR_RECEIVING);
@@ -120,6 +141,75 @@ public class SerialCommunication {
 		}); // End thread
 		
 		serialReceiving.start();
+	}
+	
+	public CompletableFuture<byte[]> receive(int inputCommand) {
+		/*
+		 * 
+		 * byte[] result = resultFuture.get(); // This will block until the result is available
+ 				Now you can use the 'result' variable
+ 				
+ 				byte[] bytes = receive(int inputCommand).get();
+		 */
+		
+		CompletableFuture<byte[]> resultFuture = new CompletableFuture<>();
+
+		Thread serialReceiving = new Thread(() -> {
+
+			try {
+				consoleOutput("Connecting...");
+
+				SerialPort comPort = SerialPort.getCommPort(portName);
+				comPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0);
+				comPort.setComPortParameters(baudRate, 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY);
+
+				if (comPort.openPort()) {
+					try (InputStream inputStream = comPort.getInputStream();
+							ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+							OutputStream outputStream = comPort.getOutputStream()) {
+
+						// Sending start command to ESP
+						outputStream.write(inputCommand);
+						consoleOutput("Start command sent to ESP");
+
+						if (Arrays.equals(responseFromESP(inputStream), USB_ESP_OK)) {
+							// Define a buffer for receiving data
+							byte[] buffer = new byte[64];
+							int bytesRead;
+
+							// Read and write the file data
+							while ((bytesRead = inputStream.read(buffer)) != -1) {
+								consoleOutput("Reading " + bytesRead + " bytes");
+								consoleOutput(Arrays.toString(buffer));
+								byteArrayOutputStream.write(buffer, 0, bytesRead);
+							}
+
+							// Retrieve the result bytes
+							byte[] bytes = byteArrayOutputStream.toByteArray();
+							resultFuture.complete(bytes);
+						} else {
+							error(Error.ERROR_ESP_NOT_SEND_OK);
+						}
+					} catch (IOException e) {
+						error(Error.ERROR_RECEIVING);
+						e.printStackTrace();
+					} finally {
+						// Close the streams and serial port
+						comPort.closePort();
+					}
+				} else {
+					error(Error.ERROR_ESP_NOT_SEND_OK);
+				}
+
+				success(Success.SUCCESS_RECEIVED);
+			} catch (Exception e) {
+				e.printStackTrace();
+				error(Error.ERROR_OPEN_SERIAL);
+			}
+		}); // End thread
+
+		serialReceiving.start();
+		return resultFuture;
 	}
 
 	public void send() {
@@ -210,10 +300,6 @@ public class SerialCommunication {
 		send.start();
 	}
 	
-	public void response() {
-		// TODO utworzyć funkcję która po wysłaniu informacji uzyska odpowiedz
-		
-	}
 
 	private byte[] responseFromESP(InputStream inputStream) {
 		long startTime = System.currentTimeMillis();
@@ -301,7 +387,8 @@ public class SerialCommunication {
 		}
 	}
 	
-	private static void consoleOutput(String msg) {
+	private void consoleOutput(String msg) {
+		lastConsoleOutput = msg;
 		Mediator.getInstance().outputConsoleMessage(msg);
 	}
 
