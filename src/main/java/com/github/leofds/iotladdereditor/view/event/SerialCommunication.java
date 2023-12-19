@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.fazecast.jSerialComm.SerialPort;
 import com.github.leofds.iotladdereditor.application.Mediator;
+import com.github.leofds.iotladdereditor.i18n.Strings;
 
 
 
@@ -32,29 +33,41 @@ public class SerialCommunication {
 	
 	private String portName;
 	private int baudRate;
+	private SerialPort comPort;
 	
-	private String lastConsoleOutput = "";
-	private OutputStream outputStream;
-
-	public String getLastConsoleOutput() {
-		return lastConsoleOutput;
-	}
-
-	public void setLastConsoleOutput(String lastConsoleOutput) {
-		this.lastConsoleOutput = lastConsoleOutput;
-	}
-
-	public OutputStream getOutputStream() {
-		return outputStream;
-	}
-
-	public void setOutputStream(OutputStream outputStream) {
-		this.outputStream = outputStream;
-	}
+//	private String lastConsoleOutput = "";
+//	private OutputStream outputStream;
+//
+//	public String getLastConsoleOutput() {
+//		return lastConsoleOutput;
+//	}
+//
+//	public void setLastConsoleOutput(String lastConsoleOutput) {
+//		this.lastConsoleOutput = lastConsoleOutput;
+//	}
+//
+//	public OutputStream getOutputStream() {
+//		return outputStream;
+//	}
+//
+//	public void setOutputStream(OutputStream outputStream) {
+//		this.outputStream = outputStream;
+//	}
 
 	public SerialCommunication(String portName, int baudRate) {
 		this.portName = portName; // Com port name
 		this.baudRate = baudRate;
+		
+		try {
+			this.comPort = SerialPort.getCommPort(portName);
+			comPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0);
+			comPort.setComPortParameters(baudRate, 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY);
+			consoleOutput(Strings.portConnected());
+			
+		} catch (Exception e) {
+			consoleOutput(Strings.portConnectingError() + " " + e.getMessage());
+			
+		}
 	}
 
 //	public static void main(String[] args) {
@@ -388,7 +401,7 @@ public class SerialCommunication {
 	}
 	
 	private void consoleOutput(String msg) {
-		lastConsoleOutput = msg;
+//		lastConsoleOutput = msg;
 		Mediator.getInstance().outputConsoleMessage(msg);
 	}
 
