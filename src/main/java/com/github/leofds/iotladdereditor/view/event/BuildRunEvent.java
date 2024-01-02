@@ -26,19 +26,20 @@ import com.github.leofds.iotladdereditor.application.Mediator;
 import com.github.leofds.iotladdereditor.compiler.Compiler;
 import com.github.leofds.iotladdereditor.i18n.Strings;
 import com.github.leofds.iotladdereditor.util.bars.CompileWaitingBar;
+import com.github.leofds.iotladdereditor.view.ESPUpload;
 import com.github.leofds.iotladdereditor.view.event.Subject.SubMsg;
 
 public class BuildRunEvent implements Observer {
 
 	private Subject subject;
 	private Compiler compilation;
-	private ComPortChooser comPortChooser;
+	private ESPUpload comPortChooser;
 
-	public ComPortChooser getComPortChooser() {
+	public ESPUpload getComPortChooser() {
 		return comPortChooser;
 	}
 
-	public void setComPortChooser(ComPortChooser comPortChooser) {
+	public void setComPortChooser(ESPUpload comPortChooser) {
 		this.comPortChooser = comPortChooser;
 	}
 
@@ -66,7 +67,7 @@ public class BuildRunEvent implements Observer {
 //				break;
 			case W1VC_ESP32_FREERTOS:
 //				Desktop.getDesktop().open(new File("out/plc/plc.ino"));
-				ComPortChooser comPortChooser = new ComPortChooser();
+				ESPUpload comPortChooser = new ESPUpload();
 				setComPortChooser(comPortChooser);
 				this.comPortChooser.setVisible(true);
 //				compilationConfirm();
@@ -195,6 +196,7 @@ public class BuildRunEvent implements Observer {
 				uploading(); // uploading method invoke
 			} else {
 				consoleOutput(Strings.compilationError());
+				compilation.setCompilationStatus(1);
 			}
 			sharedResource.setData(true);
 			sharedResource.setCompilationStatus(compilation.getCompilationStatus());

@@ -1,4 +1,4 @@
-package com.github.leofds.iotladdereditor.view.event;
+package com.github.leofds.iotladdereditor.view;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -22,7 +22,7 @@ import com.github.leofds.iotladdereditor.compiler.Compiler;
 import com.github.leofds.iotladdereditor.i18n.Strings;
 
 
-public class ComPortChooser extends JFrame {
+public class ESPUpload extends JFrame {
 	/**
 	 * 
 	 */
@@ -40,7 +40,7 @@ public class ComPortChooser extends JFrame {
 		return portName;
 	}
 
-	public ComPortChooser() {
+	public ESPUpload() {
 		setAlwaysOnTop(true);
 		this.uploadingStart = false;
 		this.portName = null;
@@ -49,7 +49,7 @@ public class ComPortChooser extends JFrame {
 		Color veryDarkGreen = new Color(0, 153 ,0);
 
 		setTitle("ESP Upload");
-		setSize(256, 191);
+		setSize(350, 191);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setLocationRelativeTo(null);
 

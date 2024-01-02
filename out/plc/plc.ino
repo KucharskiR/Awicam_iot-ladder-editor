@@ -57,25 +57,27 @@ void init(){
   LD_TIME.v = 0;
   refreshTime64bit();
 }
+
 void ladderDiagramTask(void* arg)
 {
-  while(1) 
-  {
-    readInputs();
-    vTaskDelay(1 / portTICK_PERIOD_MS);
     refreshTime64bit();
     rung001();
-    writeOutputs();
-  }
-}void setup()
+
+}
+
+void setup()
 {
   initController();
 
   init();
   initContext();
 
-  xTaskCreate(ladderDiagramTask, "ladderDiagramTask", 2048, NULL, configMAX_PRIORITIES - 2, NULL);
+ CreateLadderDiagramTask();
 }
-void loop() {
+
+
+void loop()
+{
+vTaskDelete(NULL);
 }
 

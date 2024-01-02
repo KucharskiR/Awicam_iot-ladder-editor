@@ -1180,12 +1180,13 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 		 */
 	}
 	private void addLadderDiagramTask(IR ir, SourceCode c) {
+		c.newLine();
 		c.add("void ladderDiagramTask(void* arg)\r\n"
 				+ "{\r\n"
-				+ "  while(1) \r\n"
-				+ "  {\r\n"
-				+ "    readInputs();\r\n"
-				+ "    vTaskDelay(1 / portTICK_PERIOD_MS);\r\n"
+//				+ "  while(1) \r\n"
+//				+ "  {\r\n"
+//				+ "    readInputs();\r\n"
+//				+ "    vTaskDelay(1 / portTICK_PERIOD_MS);\r\n"
 				+ "    refreshTime64bit();\r\n");
 		
 		// rung loop generator
@@ -1198,9 +1199,12 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 			}
 		}
 		//--------------------
-				c.add("    writeOutputs();\r\n"
-				+ "  }\r\n"
-				+ "}");		
+//				c.add(
+//			"    writeOutputs();\r\n"  
+//				+ "  }\r\n"
+//				+ "}");		
+				c.add("\r\n" + "}");
+				c.addl("\r\n");
 	}
 
 	private void addSetup( IR ir, SourceCode c) {
@@ -1211,9 +1215,11 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 				+ "  init();\r\n"
 				+ "  initContext();\r\n"
 				+ "\r\n"
-				+ "  xTaskCreate(ladderDiagramTask, \"ladderDiagramTask\", 2048, NULL, configMAX_PRIORITIES - 2, NULL);\r\n"
+//				+ "  xTaskCreate(ladderDiagramTask, \"ladderDiagramTask\", 2048, NULL, configMAX_PRIORITIES - 2, NULL);\r\n"
+				+ " CreateLadderDiagramTask();\r\n" 
 				+ "}"
 				);
+		c.addl("\r\n");
 				
 //		c.add("void setup()\r\n"
 //				+ "{\r\n"
@@ -1301,8 +1307,10 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 //	}
 	
 	private void addLoop(SourceCode c) {
-		c.newLine();
-		c.addl("void loop() {");
+//		c.newLine();
+		c.addl("void loop()");
+		c.addl("{");
+		c.addl("vTaskDelete(NULL);");
 		c.addl("}");
 		c.addl("");
 	}
