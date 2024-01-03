@@ -1,5 +1,6 @@
 #pragma once
 
+#define USE_LOGGER_USB
 //fpga size: 104161 bytes + RAM => 256K
 #define FIRMWARE_VERSION 1
 
@@ -11,6 +12,8 @@
 // #define W1VC1616R_BOARD
 #endif
 
+// Always send data to all 31 extension modules, only testing purpose
+// #define FORCE_SEND_TO_MAX_EXTENSION_MODULES
 
 #define DEBUG
 #define NO_DEBUG_UART
@@ -49,6 +52,7 @@
 
 //Temporary commands
 #define MULTI_IO_COMMAND_INTRODUCE 0x01
+#define MULTI_IO_COMMAND_SET_DIGIT 0x02
 
 //Temp lower board identification signatures
 #define LOWER_BOARD_TEST 0xcc
@@ -61,16 +65,17 @@
 /*-------------UART CONFIGURATION--------------*/
 /*---------------------------------------------*/
 // UART -> Extensions(BB)
-//Póki co uart1 zamiast uart0 bo na arduino cli nie dziala (coś jeszcze jakieś smieci wysyła)
+
+// Use loggerUSB to prevent sending log data via UART0
 #define UART_BB UART_NUM_0
 #define TXD_PIN (GPIO_NUM_21)
 #define RXD_PIN (GPIO_NUM_20)
 
 
 #define SEND_RESPONSE_WAIT 200
+#define INIT_ADDRESS                0x1F       //0b00011111
 
 // Masks
-#define INIT_ADDRESS                0x3E       //0b00111110
 #define ADDRESS_MASK                0x3E       //0b00111110
 #define RESPONSE_FLAG               0x80       //0b10000000
 #define REQUEST_RESPONSE_FLAG_MASK  0x80       //0b10000000
@@ -87,6 +92,139 @@
 #define ANALOG_READ_3 0x0D
 #define ANALOG_READ_4 0x0E
 
+/*---------------------------------------------*/
+/*--------------USB CONFIGURATION--------------*/
+/*---------------------------------------------*/
+//Commands from PC
+
+/*
+Command: <USB_COMMAND_WRITE_LD>
+Response: 0xff <USB_ESP_OK / USB_ESP_ERROR> 0xff
+See sequence diagram for detailed work
+*/
+#define USB_COMMAND_WRITE_LD 0x11
+
+/*
+Command: <USB_COMMAND_READ_LD>
+Response: 0xff <USB_ESP_OK / USB_ESP_ERROR> 0xff
+See sequence diagram for detailed work
+*/
+#define USB_COMMAND_READ_LD 0x12
+
+/*
+Command: <USB_COMMAND_WRITE_LD_END>
+Response: 0xff <USB_ESP_OK / USB_ESP_ERROR> 0xff
+See sequence diagram for detailed work
+*/
+#define USB_COMMAND_WRITE_LD_END 0xff
+
+/*
+Command: <USB_COMMAND_GET_EXTENSION_MODULES_COUNT>
+Response: <extensionModulesCount 1> 
+*/
+#define USB_COMMAND_GET_EXTENSION_MODULES_COUNT 0x1f
+
+/*
+Command: <USB_COMMAND_GET_DEVICE_INFO> <deviceIndeks>
+Response: <deviceType 1> <firmwareVersion 1> <numberOfAnalogInputs 1> <deviceInitTime 4>
+*/
+#define USB_COMMAND_GET_DEVICE_INFO 0x20 
+
+/*
+NOT IMPLEMENTED
+Command: <USB_COMMAND_GET_DEVICE_STATUS> <deviceIndeks>
+Response: <?> <timeError> <errorCode> ...
+*/
+#define USB_COMMAND_GET_DEVICE_STATUS 0x21 
+
+/*
+Command: <USB_COMMAND_GET_DIGITAL_OUTPUTS> <deviceIndeks>
+Response: <outputsLowByte 1> <outputsHighByte 1>
+*/
+#define USB_COMMAND_GET_DIGITAL_OUTPUTS 0x27
+
+/*
+Command: <USB_COMMAND_GET_DIGITAL_INPUTS> <deviceIndeks>
+Response: <inputsLowByte 1> <inputsHighByte 1>
+*/
+#define USB_COMMAND_GET_DIGITAL_INPUTS 0x28
+
+/*
+NOT TESTED
+Command: <USB_COMMAND_GET_DIGITAL_INPUTS> <deviceIndeks>
+Response: analog data
+*/
+#define USB_COMMAND_GET_ANALOG_INPUTS 0x29 
+
+/*
+Command: <USB_COMMAND_GET_DIGITAL_INPUTS_ALL>
+Response: <inputs[0] 2> <inputs[1] 2> ...
+Send data for all (controller + extension modules) devices
+*/
+#define USB_COMMAND_GET_DIGITAL_INPUTS_ALL 0x2a
+
+/*
+Command: <USB_COMMAND_GET_DIGITAL_OUTPUTS_ALL>
+Response: <outputs[0] 2> <outputs[1] 2> ...
+Send data for all (controller + extension modules) devices
+*/
+#define USB_COMMAND_GET_DIGITAL_OUTPUTS_ALL 0x2b
+
+/*
+Command: <USB_COMMAND_ECHO> <data <=63>
+Response: <data <=63>
+*/
+#define USB_COMMAND_ECHO 0x30 
+
+/*
+Command: <USB_COMMAND_GET_DEVICE_TEMPERATURE>
+Response: <rawTemperature 1>
+To calculate use formula: 0.4386 * rawTemperature - 27.88 [*C]
+*/
+#define USB_COMMAND_GET_DEVICE_TEMPERATURE 0x31
+
+/*
+Command: <USB_COMMAND_GET_DEVICE_TIME> 
+Response: <deviceTime 8>
+First low byte
+*/
+#define USB_COMMAND_GET_DEVICE_TIME 0x32
+
+/*
+Command: <USB_COMMAND_SET_NEUTRAL_MODE>
+Response: -
+Stop executing LD and sets outputs to low
+*/
+#define USB_COMMAND_SET_NEUTRAL_MODE 0x40 
+
+/*
+Command: <USB_COMMAND_UNSET_NEUTRAL_MODE>
+Response: -
+Resmue executing LD
+*/
+#define USB_COMMAND_UNSET_NEUTRAL_MODE 0x41 
+
+/*
+Command: <USB_COMMAND_GET_ERRORS>
+Response: <errorCounter 4> <sendErrors 1> <errorTime 4> <errorCode 4> ...
+Send last 5 errors
+*/
+#define USB_COMMAND_GET_ERRORS 0xf0
+
+//ESP responses to PC
+#define USB_ESP_READY_TO_RECEIVE_PACKET 0x15
+#define USB_ESP_ERROR 0x17
+#define USB_ESP_OK 0x16
+
+#define USB_MODE_IDLE 1
+#define USB_MODE_READ 2
+#define USB_MODE_WRITE 3
+#define USB_MODE_BEFORE_RECEIVE_LD_SAVE 10
+#define USB_MODE_RECEIVE_LD_SAVE 11
+#define USB_MODE_SEND_LD_SAVE 12
+#define USB_MODE_BEFORE_SEND_LD_SAVE 14
+#define USB_MODE_TEST 20
+
 
 /*---------------------------------------------*/
 /*---------------PIN DEFINITIONS---------------*/
@@ -96,13 +234,13 @@
 #define INPUT2_PIN (GPIO_NUM_1)
 #define INPUT3_PIN (GPIO_NUM_3)
 
-#ifndef TEST_UART_BB
-#define INPUT4_PIN (GPIO_NUM_0)
-#define INPUT5_PIN (GPIO_NUM_0)
-#else
+// #ifndef TEST_UART_BB
+// #define INPUT4_PIN (GPIO_NUM_0)
+// #define INPUT5_PIN (GPIO_NUM_0)
+// #else
 #define INPUT4_PIN (GPIO_NUM_4)
 #define INPUT5_PIN (GPIO_NUM_5)
-#endif
+// #endif
 
 #ifdef W1VC64R_BOARD
 #define INPUT6_PIN (GPIO_NUM_10)
@@ -110,8 +248,10 @@
 
 #define OUTPUT1_PIN (GPIO_NUM_6)
 #define OUTPUT2_PIN (GPIO_NUM_7)
-// Trzeba zrobić by pin GPIO 2 i 8 działało jako output i w spi
+
+// Also using in SPI
 #define OUTPUT3_PIN (GPIO_NUM_8)
+// Also using in SPI
 #define OUTPUT4_PIN (GPIO_NUM_2)
 
 /*---------------------------------------------*/
@@ -120,3 +260,36 @@
 
 #define AP_SSID "ESP-Controller"
 #define AP_PASS "password"
+
+
+
+/*---------------------------------------------*/
+/*------------------UTILITIES------------------*/
+/*---------------------------------------------*/
+#define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
+#define BYTE_TO_BINARY(byte)  \
+  ((byte) & 0x80 ? '1' : '0'), \
+  ((byte) & 0x40 ? '1' : '0'), \
+  ((byte) & 0x20 ? '1' : '0'), \
+  ((byte) & 0x10 ? '1' : '0'), \
+  ((byte) & 0x08 ? '1' : '0'), \
+  ((byte) & 0x04 ? '1' : '0'), \
+  ((byte) & 0x02 ? '1' : '0'), \
+  ((byte) & 0x01 ? '1' : '0')
+
+
+struct DigitalInputsStructure {
+  uint32_t  deviceInitTime;
+  uint8_t   deviceType;
+  uint8_t   firmwareVersion;
+  uint8_t   numberOfAnalogInputs;
+  uint32_t  lastDigitalInputUpdateTime;
+  uint16_t  digitalInputStates;
+  uint32_t  lastDigitalOutputUpdateTime;
+  uint16_t  digitalOutputStates;
+  uint32_t  aIUpdateTime[4];
+  uint16_t  aIValue[4];
+
+  uint8_t lowerBoardId;
+};
+

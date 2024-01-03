@@ -181,9 +181,9 @@ public class SerialCommunication {
 							ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 							OutputStream outputStream = comPort.getOutputStream()) {
 
-						// Sending start command to ESP
+						// Sending begin command to ESP
 						outputStream.write(inputCommand);
-						consoleOutput("Start command sent to ESP");
+						consoleOutput("Command sent to ESP");
 
 						if (Arrays.equals(responseFromESP(inputStream), USB_ESP_OK)) {
 							// Define a buffer for receiving data
@@ -311,6 +311,11 @@ public class SerialCommunication {
 		
 		// Start thread
 		send.start();
+	}
+	
+	public void send(File file) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 
