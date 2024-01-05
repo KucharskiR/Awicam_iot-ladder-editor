@@ -69,6 +69,17 @@ public class SerialCommunication {
 			
 		}
 	}
+	
+//	public enum EspCommands {
+//		INITIALIZING (0x11), IN_PROGRESS (0x11), COMPLETE (0x11); 
+//		
+//		private int value;
+//		
+//		private EspCommands(int value) {
+//			this.value = value;
+//		}
+//		
+//	};
 
 //	public static void main(String[] args) {
 //		// Create a Scanner object to read user input
@@ -95,7 +106,7 @@ public class SerialCommunication {
 //
 //	}
 	
-	public void receive() {
+	public void receive(File file) {
 		
 		Thread serialReceiving = new Thread(() -> {
 			try {
@@ -111,7 +122,7 @@ public class SerialCommunication {
 					OutputStream outputStream = comPort.getOutputStream();
 
 					// Create a FileOutputStream to save the received file
-					FileOutputStream fileOutputStream = new FileOutputStream("received_file.ld");
+					FileOutputStream fileOutputStream = new FileOutputStream(file.getAbsolutePath());
 
 					// Sending start command to ESP
 					outputStream.write(USB_COMMAND_RECEIVE_LD);
@@ -313,9 +324,90 @@ public class SerialCommunication {
 		send.start();
 	}
 	
-	public void send(File file) {
-		// TODO Auto-generated method stub
+	public void send(File fileIn) {
 		
+		Thread send = new Thread(() -> {
+			try {
+				consoleOutput("Connecting...");
+
+				SerialPort comPort = SerialPort.getCommPort(portName);
+				comPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0);
+				comPort.setComPortParameters(baudRate, 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY);
+
+				if (comPort.openPort()) {
+
+					FileInputStream fileInputStream = new FileInputStream(fileIn);
+					InputStream inputStream = comPort.getInputStream();
+					OutputStream outputStream = comPort.getOutputStream();
+
+					consoleOutput("File to send: " + fileIn.toString());
+
+					// Sending start command to ESP
+					outputStream.write(USB_COMMAND_SEND_LD);
+
+					// USB_ESP_OK
+					try {
+						
+						// If response from ESP is OK than go into sending file block
+						if (responseFromESP(inputStream) == USB_ESP_OK) {
+							success(Success.SUCCESS_RECEIVED_OK);
+
+							// Sending file procedure
+							byte[] buffer = new byte[64];
+							int len;
+							while ((len = fileInputStream.read(buffer)) > 0) {
+								try {
+									consoleOutput("Sending " + len + " bytes");
+									outputStream.write(buffer, 0, len);
+								} catch (Exception e) {
+									error(Error.ERROR_SEND);
+								}
+
+								TimeUnit.MILLISECONDS.sleep(5);
+							}
+
+							// Send END OF DATA
+							outputStream.write(END_OF_DATA);
+							
+							try {
+
+								byte[] resArr = responseFromESP(inputStream);
+								
+								if (Arrays.equals(resArr, USB_ESP_OK))
+									success(Success.SUCCESS_SEND);
+								else if (Arrays.equals(resArr, USB_ESP_ERROR))
+									error(Error.ERROR_FROM_ESP);
+								else
+									error(Error.ERROR_ESP_NOT_SEND_OK);
+								
+							} catch (Exception e) {
+								e.printStackTrace();
+								error(Error.ERROR_RECEIVING_OK);
+							}
+						} else
+							error(Error.ERROR_ESP_NOT_SEND_OK);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+						error(Error.ERROR_RECEIVING_OK);
+					}
+
+					// Close connection
+					fileInputStream.close();
+					outputStream.close();
+					comPort.closePort();
+
+				} else {
+					error(Error.ERROR_OPEN_SERIAL);
+					throw new IOException();
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				error(Error.ERROR_SEND);
+			}
+		}); // End of thread
+		
+		// Start thread
+		send.start();
 	}
 	
 
@@ -409,5 +501,6 @@ public class SerialCommunication {
 //		lastConsoleOutput = msg;
 		Mediator.getInstance().outputConsoleMessage(msg);
 	}
-
+	
 }
+
