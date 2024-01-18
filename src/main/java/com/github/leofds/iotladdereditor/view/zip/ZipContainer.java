@@ -164,20 +164,11 @@ public class ZipContainer {
 
 	}
 	
-	public void getZipFile() {
+	public File getZipFile() {
+		File file = new File(zipFilePath);    
+		return file;
 	}
 
-	public void receive() {
-		// TODO Auto-generated constructor stub
-		File file = new File(zipFilePath);      //  <------- write receive() function 
-		
-		
-	}
-
-	public void removeFile() {
-		// TODO Auto-generated constructor stub
-	}
-	
 	public static void extractFilesFromZip(ZipInputStream zipInputStream, File outputDirectory) throws IOException {
 		byte[] buffer = new byte[1024];
 		ZipEntry entry = zipInputStream.getNextEntry();

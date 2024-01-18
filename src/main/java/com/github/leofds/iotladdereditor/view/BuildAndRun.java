@@ -22,7 +22,7 @@ import com.github.leofds.iotladdereditor.view.event.SerialCommunication;
 
 import java.awt.Color;
 
-public class ImportExportLadderProgram extends JFrame {
+public class BuildAndRun extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 
@@ -35,7 +35,7 @@ public class ImportExportLadderProgram extends JFrame {
 	private static Color red = new Color(128, 0, 0);
 	private static Color black = new Color(0, 0, 0);
 
-	public ImportExportLadderProgram() {
+	public BuildAndRun() {
 		setAlwaysOnTop(true);
 		setTitle("Import/Export ladder program");
 		setSize(510, 230);

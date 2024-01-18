@@ -166,7 +166,7 @@ public class Menu extends JMenuBar {
 			public void actionPerformed(ActionEvent e) {
 				// TODO odczytanie/wysłanie pliku z/do ESP a następnie zapisanie do pliku
 //				FileUtils.saveAsLadderProgramFromDevice();
-				ImportExportLadderProgram importExportObj = new ImportExportLadderProgram();
+				BuildAndRun importExportObj = new BuildAndRun();
 				
 			}
 		};
