@@ -1,11 +1,13 @@
 package com.github.leofds.iotladdereditor.view;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.ArrayList;
 
 import javax.swing.JButton;
@@ -20,9 +22,7 @@ import javax.swing.border.EmptyBorder;
 import com.fazecast.jSerialComm.SerialPort;
 import com.github.leofds.iotladdereditor.view.event.SerialCommunication;
 
-import java.awt.Color;
-
-public class BuildAndRun extends JFrame {
+public class ImportExportLD extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 
@@ -35,7 +35,7 @@ public class BuildAndRun extends JFrame {
 	private static Color red = new Color(128, 0, 0);
 	private static Color black = new Color(0, 0, 0);
 
-	public BuildAndRun() {
+	public ImportExportLD() {
 		setAlwaysOnTop(true);
 		setTitle("Import/Export ladder program");
 		setSize(510, 230);
@@ -119,14 +119,14 @@ public class BuildAndRun extends JFrame {
 		FlowLayout flowLayout = (FlowLayout) panel_down.getLayout();
 		flowLayout.setAlignment(FlowLayout.LEFT);
 		panel_3.add(panel_down, BorderLayout.SOUTH);
-		
+		                              
 				JButton btnImport = new JButton("Import");
 				btnImport.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent arg0) {
 						String selectedPort = (String) comboBoxCOM.getSelectedItem();
-						
+						File file = new File();  // <----- add path to file to receive
 						SerialCommunication serial = new SerialCommunication(selectedPort, 57600);
-						serial.receive();
+						serial.receive(file);
 					}
 				});
 				panel_down.add(btnImport);
