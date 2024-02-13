@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -69,8 +70,6 @@ public class SerialCommunication {
 	private static final int USB_ERROR_NO_COMMAND = 0x03;
 	private static final int USB_ERROR_COMMAND_ERROR = 0x04;
 	
-	private static final int POLYNOMIAL = 0b00000111;
-
 //	private static final byte[] USB_ESP_OK = new byte[]{(byte) 0xff, (byte) 0x16, (byte) 0xff};  	<--- deprecated 05.02.2024  
 //	private static final byte[] USB_ESP_ERROR = new byte[]{(byte) 0xff, (byte) 0x17, (byte) 0xff}; 	<--- deprecated 05.02.2024
 
@@ -391,53 +390,84 @@ public class SerialCommunication {
 				comPort.setComPortParameters(baudRate, 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY);
 
 				if (comPort.openPort()) {
-
+					consoleOutput("Connected!");
+					
 					FileInputStream fileInputStream = new FileInputStream(fileIn);
 					InputStream inputStream = comPort.getInputStream();
 					OutputStream outputStream = comPort.getOutputStream();
 
 					consoleOutput("File to send: " + fileIn.toString());
 
-					// Sending start command to ESP
-					outputStream.write(USB_COMMAND_INIT_WRITE_LD);
-
-					// USB_ESP_OK
+					// Convert file size (in bytes) from long to 4 bytes array
+					byte[] fileSize = new byte[4];
+					fileSize = longTo4BytesInt(fileIn.length());
+					byte[] initComm = packetGen((byte)USB_COMMAND_INIT_WRITE_LD, fileSize);
+					// Sending init command to ESP
+					outputStream.write(initComm);
+					
 					try {
 
 						// If response from ESP is OK than go into sending file block
 						if (isEspResponseOk(responseFromESP(inputStream))) {
 							success(Success.SUCCESS_RECEIVED_OK);
+							consoleOutput("ESP response OK");
 							
-							// CRC
-							CRC tableDriven = new CRC(CRC.Parameters.CRC8);
+//							// CRC start
+//							CRC tableDriven = new CRC(CRC.Parameters.CRC8);
 
 							// Sending file procedure
-							byte[] buffer = new byte[64];
+							byte[] buffer = new byte[61];
+							@SuppressWarnings("unused")
 							int len;
 							while ((len = fileInputStream.read(buffer)) > 0) {
 								try {
-									int length = len +2;
-									long crc8 = tableDriven.calculateCRC(buffer);
-									byte command = (byte) USB_COMMAND_WRITE_LD;
-
-									/*  Build command
-									 *  
-									  Bits: 	   1         1    0<61   1
-									  Bytes:	<command><length><data><crc>
-									 */
-									byte[] sequence = new byte[length + 1];
-									sequence[0] = command;
-									sequence[1] = (byte) length;
+//									TODO: 13.02.2024 --> usunąć poniższy komentarz w przyszłości.
+//									Procedura przeniesiona do funkcji packetGen()
+//									Usunąć też CRC start powyżej 
+//									
+//									// data length (len) +1 byte for command and +1 byte for lenght info
+//									int length = len +2;
+//									byte command = (byte) USB_COMMAND_WRITE_LD;
+//
+//									/*  Build command
+//									 *  
+//									  Bits: 	   1         1    0<61   1
+//									  Bytes:	<command><length><data><crc>
+//									 */
+//									
+//									byte[] sequence = new byte[length];
+//									
+//									// Add <command> and <length>
+//									sequence[0] = command;
+//									sequence[1] = (byte) length;
+//									
+//									// Data adding loop
+//									int c = 0;
+//									for (c = 0; c <= buffer.length-1; c++) {
+//										sequence[c + 2] = buffer[c];
+//									}
+//									
+//									// Calculate CRC
+//									long crc8 = tableDriven.calculateCRC(sequence);
+//									// Copy sequence to Crc sequence and +1 byte for CRC
+//									byte[] sequenceCrc = new byte[length+1];
+//									System.arraycopy(sequence, 0, sequenceCrc, 0, sequence.length);
+//									// Add CRC on the end
+//									sequenceCrc[sequenceCrc.length-1] = (byte) crc8;
 									
-									int c = 0;
-									for (c = 0; c < len; c++) {
-										sequence[c + 2] = buffer[c];
+									// Packet generate
+									byte[] packet = packetGen((byte)USB_COMMAND_WRITE_LD, buffer);
+									
+									// Print
+									consoleOutput("Sending " + packet.length + " bytes");
+									outputStream.write(packet);
+									
+									// Check response from ESP
+									if(!isEspResponseOk(responseFromESP(inputStream))) {
+										error(Error.ERROR_SEND);
+										throw new Exception("Error send exception");
 									}
 									
-									sequence[c+1] = (byte) crc8;
-									
-									consoleOutput("Sending " + len + " bytes");
-									outputStream.write(buffer, 0, len);
 								} catch (Exception e) {
 									error(Error.ERROR_SEND);
 								}
@@ -446,8 +476,9 @@ public class SerialCommunication {
 							}
 
 							// Send END OF DATA
-							outputStream.write(USB_COMMAND_END_WRITE_LD);
-
+							byte[] packet = packetGen((byte)USB_COMMAND_END_WRITE_LD, null);
+							outputStream.write(packet);
+							
 							try {
 
 								byte[] resArr = responseFromESP(inputStream);
@@ -488,16 +519,78 @@ public class SerialCommunication {
 		// Start thread
 		send.start();
 	}
+	/*
+	 *
+	 * Packet structrue: <command><length><data><crc>
+	 * 
+	 */
 	
-	private String toBinaryString(int bits, String input) {
-		String paramBits = "%" + Integer.toString(bits) + "s";
-		return String.format(paramBits, input).replace(' ', '0');
+	private byte[] packetGen(byte command, byte[] data) {
+		// CRC start
+		CRC tableDriven = new CRC(CRC.Parameters.CRC8);
+		/*  Build command
+		 *  
+		  Bits: 	   1         1    0<61   1
+		  Bytes:	<command><length><data><crc>
+		 */
+		
+		// Whole packet byte[] declaration
+		int len = data.length + 2;
+		byte[] sequence = new byte[len];
+		
+		// Add <command> and <length>
+		sequence[0] = command;
+		sequence[1] = (byte) len;
+		
+		// Data adding loop
+		if (data != null) {
+			int c = 0;
+			for (c = 0; c <= data.length - 1; c++) {
+				sequence[c + 2] = data[c];
+			}
+		}
+		
+		// Calculate CRC
+		long crc8 = tableDriven.calculateCRC(sequence);
+		// Copy sequence to Crc sequence and +1 byte for CRC
+		byte[] sequenceCrc = new byte[len+1];
+		System.arraycopy(sequence, 0, sequenceCrc, 0, sequence.length);
+		// Add CRC on the end
+		sequenceCrc[sequenceCrc.length-1] = (byte) crc8;
+		
+		return sequenceCrc;
 	}
-
-	private boolean isEspResponseOk(byte[] rensponse) {
-		// TODO: utworzyć mechanizm zwracający true jesli esp odpowie że pakiet jest ok
-		// i false jeśli nie jest
-		return false;
+	/* Name:	longTo4BytesInt
+	 * 
+	 * Description:
+	 *	 Generate byte[] array (4 bytes size) from Long 
+	 *	 Long need to be less than 4294967295 
+	 *
+	 * return:
+	 * 	byte[]
+	 */
+	private static byte[] longTo4BytesInt(Long value) {
+		byte[] bytes = new byte[4];
+		
+		bytes[0] = (byte) (value & 0xFF);
+		bytes[1] = (byte) ((value >> 8) & 0xFF);
+		bytes[2] = (byte) ((value >> 16) & 0xFF);
+		bytes[3] = (byte) ((value >> 24) & 0xFF);
+		
+		return bytes;
+	}
+	
+	private static String toBinaryString(int bits, int input) {
+		
+		String val = Integer.toBinaryString(input);
+		String paramBits = "%" + Integer.toString(bits) + "s";
+		return String.format(paramBits, val).replace(' ', '0');
+	}
+	
+	private static boolean isEspResponseOk(byte[] rensponse) {
+		int c = (int) rensponse[0];
+		char[] arr = toBinaryString(8, c).toCharArray();
+		return Integer.parseInt(String.valueOf(arr[0])) == 0 ? true : false;
 	}
 
 	private byte[] responseFromESP(InputStream inputStream) {
@@ -588,6 +681,7 @@ public class SerialCommunication {
 
 	private void consoleOutput(String msg) {
 //		lastConsoleOutput = msg;
+		System.out.println(msg);
 		Mediator.getInstance().outputConsoleMessage(msg);
 	}
 
