@@ -37,7 +37,7 @@ public class ZipContainer {
 	private static final String passwordIv = "testawicam1234";
 	private static final String salt = "test";
 //	private static final String secretKey = "fNXDLNHs3/C~NI)b%udh^V-vChFt]XD?";	     TO DELETE
-	private static final String zipFilePath = System.getProperty("user.dir") + "/out/tempContainer.zip";
+	private static final String zipFilePath = System.getProperty("user.dir") + "/out/Container.zip";
 	private static final String sourceFolderPath = System.getProperty("user.dir") + "/out/container";
 	private File zipFile;
 	

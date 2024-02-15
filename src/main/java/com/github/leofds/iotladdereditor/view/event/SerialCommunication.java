@@ -7,13 +7,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.Arrays;
+import java.util.Scanner;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.codec.binary.Hex;
+
 import com.fazecast.jSerialComm.SerialPort;
-import com.github.leofds.iotladdereditor.application.Mediator;
 import com.github.leofds.iotladdereditor.i18n.Strings;
 import com.github.leofds.iotladdereditor.view.crc.CRC;
 
@@ -86,9 +88,9 @@ public class SerialCommunication {
 
 //	private static final byte[] END_OF_DATA = new byte[]{(byte) 0xff, (byte) 0xfe, (byte) 0xff};	<--- depracated 05.02.2024
 
-	private String portName;
-	private int baudRate;
 	private SerialPort comPort;
+	private InputStream inputStream;
+	private OutputStream outputStream;
 
 //	private String lastConsoleOutput = "";
 //	private OutputStream outputStream;
@@ -110,19 +112,21 @@ public class SerialCommunication {
 //	}
 
 	public SerialCommunication(String portName, int baudRate) {
-		this.portName = portName; // Com port name
-		this.baudRate = baudRate;
-
 		try {
 			this.comPort = SerialPort.getCommPort(portName);
 			comPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0);
 			comPort.setComPortParameters(baudRate, 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY);
+			this.inputStream = comPort.getInputStream();
+			this.outputStream = comPort.getOutputStream();
 			consoleOutput(Strings.portConnected());
 
 		} catch (Exception e) {
 			consoleOutput(Strings.portConnectingError() + " " + e.getMessage());
 
 		}
+	}
+	
+	public SerialCommunication() {
 	}
 
 //	public enum EspCommands {
@@ -136,40 +140,75 @@ public class SerialCommunication {
 //
 //	};
 
-//	public static void main(String[] args) {
-//		// Create a Scanner object to read user input
+	public static void main(String[] args) {
+		// Create a Scanner object to read user input
+
+		SerialCommunication serialConnection = new SerialCommunication("COM4", 115200);
+
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Choose:\n1-Sending \n"
+        		+ "2-Receiving \n"
+        		+ "3-Sending(testing)");
+        
+        // File path
+        String zipFilePath = System.getProperty("user.dir") + "/out/Container.zip";
+        // File
+        File file = new File(zipFilePath);
+
+        int input = scanner.nextInt();
+
+        switch (input) {
+		case 1:
+			serialConnection.send(file);
+//			byte[] data = new byte[] { 0x01, 0x41, (byte) 0xa0, 0x10, 0x41, (byte) 0xa0, 0x10, 0x41,
+//					(byte) 0xa0, 0x10 };
+//			long crc = CRC.calculateCRC(CRC.Parameters.CRC8, data);
+////			crc = longTo1Byte(crc);
 //
-//		SerialCommunication serialConnection = new SerialCommunication("COM4");
+//			System.out.printf("CRC: 0x%X\n", crc);
 //
-//        Scanner scanner = new Scanner(System.in);
-//
-//        System.out.print("Choose:\n1-Sending \n2-Receiving \n");
-//
-//        int input = scanner.nextInt();
-//
-//        switch (input) {
-//		case 1:
-//			serialConnection.send();
-//			break;
-//		case 2:
+//			SerialCommunication serial = new SerialCommunication();
+//			// byte[] data = Files.readAllBytes(file.toPath());
+////			byte[] packet = serial.packetGen((byte) USB_COMMAND_INIT_WRITE_LD, data);
+//			byte[] packet = serial.packetGen((byte) 0x01, data);
+//			System.out.println("Packet: " + Hex.encodeHexString(packet));
+
+			break;
+		case 2:
 //			serialConnection.receive();
-//			break;
-//
-//		default:
-//			break;
-//		}
-//
-//	}
+			break;
+		case 3:
+//			serialConnection.send(file);
+			byte[] data = new byte[] { 0x01, 0x41, (byte) 0xa0, 0x10, 0x41, (byte) 0xa0, 0x10, 0x41,
+					(byte) 0xa0, 0x10 };
+			long crc = CRC.calculateCRC(CRC.Parameters.CRC8, data);
+//			crc = longTo1Byte(crc);
+
+			System.out.printf("CRC: 0x%X\n", crc);
+
+			SerialCommunication serial = new SerialCommunication();
+			// byte[] data = Files.readAllBytes(file.toPath());
+//			byte[] packet = serial.packetGen((byte) USB_COMMAND_INIT_WRITE_LD, data);
+			byte[] packet = serial.packetGen((byte) 0x01, data);
+			System.out.println("Packet: " + Hex.encodeHexString(packet));
+
+			break;
+		default:
+			break;
+		}
+        scanner.close();
+	}
+
+	public SerialPort getComPort() {
+		return comPort;
+	}
 
 	public void receive(File file) {
 
 		Thread serialReceiving = new Thread(() -> {
 			try {
 				consoleOutput("Connecting...");
-
-				SerialPort comPort = SerialPort.getCommPort(portName);
-				comPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0);
-				comPort.setComPortParameters(baudRate, 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY);
 
 				if (comPort.openPort()) {
 
@@ -238,10 +277,6 @@ public class SerialCommunication {
 			try {
 				consoleOutput("Connecting...");
 
-				SerialPort comPort = SerialPort.getCommPort(portName);
-				comPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0);
-				comPort.setComPortParameters(baudRate, 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY);
-
 				if (comPort.openPort()) {
 					try (InputStream inputStream = comPort.getInputStream();
 							ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -291,220 +326,102 @@ public class SerialCommunication {
 		return resultFuture;
 	}
 
-	public void send() {
-		String fileName = System.getProperty("user.dir") + "/blink.ld";
-
-		Thread send = new Thread(() -> {
-			try {
-				consoleOutput("Connecting...");
-
-				SerialPort comPort = SerialPort.getCommPort(portName);
-				comPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0);
-				comPort.setComPortParameters(baudRate, 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY);
-
-				if (comPort.openPort()) {
-
-					File file = new File(fileName);
-					FileInputStream fileInputStream = new FileInputStream(file);
-					InputStream inputStream = comPort.getInputStream();
-					OutputStream outputStream = comPort.getOutputStream();
-
-					consoleOutput("File to send: " + file.toString());
-
-					// Sending start command to ESP
-					outputStream.write(USB_COMMAND_INIT_WRITE_LD);
-
-					// USB_ESP_OK
-					try {
-
-						// If response from ESP is OK than go into sending file block
-						if (isEspResponseOk(responseFromESP(inputStream))) {
-							success(Success.SUCCESS_RECEIVED_OK);
-
-							// Sending file procedure
-							byte[] buffer = new byte[64];
-							int len;
-							while ((len = fileInputStream.read(buffer)) > 0) {
-								try {
-									consoleOutput("Sending " + len + " bytes");
-									outputStream.write(buffer, 0, len);
-								} catch (Exception e) {
-									error(Error.ERROR_SEND);
-								}
-
-								TimeUnit.MILLISECONDS.sleep(5);
-							}
-
-							// Send END OF DATA
-							outputStream.write(USB_COMMAND_END_WRITE_LD);
-
-							try {
-
-								byte[] resArr = responseFromESP(inputStream);
-
-								if (isEspResponseOk(resArr))
-									success(Success.SUCCESS_SEND);
-								else if (!isEspResponseOk(resArr))
-									error(Error.ERROR_FROM_ESP);
-								else
-									error(Error.ERROR_ESP_NOT_SEND_OK);
-
-							} catch (Exception e) {
-								e.printStackTrace();
-								error(Error.ERROR_RECEIVING_OK);
-							}
-						} else
-							error(Error.ERROR_ESP_NOT_SEND_OK);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-						error(Error.ERROR_RECEIVING_OK);
-					}
-
-					// Close connection
-					fileInputStream.close();
-					outputStream.close();
-					comPort.closePort();
-
-				} else {
-					error(Error.ERROR_OPEN_SERIAL);
-					throw new IOException();
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-				error(Error.ERROR_SEND);
-			}
-		}); // End of thread
-
-		// Start thread
-		send.start();
-	}
-
 	public void send(File fileIn) {
 
 		Thread send = new Thread(() -> {
 			try {
 				consoleOutput("Connecting...");
 
-				SerialPort comPort = SerialPort.getCommPort(portName);
-				comPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0);
-				comPort.setComPortParameters(baudRate, 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY);
-
 				if (comPort.openPort()) {
 					consoleOutput("Connected!");
 					
 					FileInputStream fileInputStream = new FileInputStream(fileIn);
-					InputStream inputStream = comPort.getInputStream();
-					OutputStream outputStream = comPort.getOutputStream();
+					//TODO: usunać streamy --> przeniesione jako zmienne klasy
+//					InputStream inputStream = comPort.getInputStream();
+//					OutputStream outputStream = comPort.getOutputStream();
 
 					consoleOutput("File to send: " + fileIn.toString());
-
+// TODO: odebrać wszystko i wyczyścić bufor
+//					inputStream.read();
 					// Convert file size (in bytes) from long to 4 bytes array
 					byte[] fileSize = new byte[4];
-					fileSize = longTo4BytesInt(fileIn.length());
+					fileSize = longTo4Bytes(fileIn.length());
+					// Init packet
 					byte[] initComm = packetGen((byte)USB_COMMAND_INIT_WRITE_LD, fileSize);
 					// Sending init command to ESP
 					outputStream.write(initComm);
 					
-					try {
-
-						// If response from ESP is OK than go into sending file block
-						if (isEspResponseOk(responseFromESP(inputStream))) {
-							success(Success.SUCCESS_RECEIVED_OK);
-							consoleOutput("ESP response OK");
-							
-//							// CRC start
-//							CRC tableDriven = new CRC(CRC.Parameters.CRC8);
-
-							// Sending file procedure
-							byte[] buffer = new byte[61];
-							@SuppressWarnings("unused")
-							int len;
-							while ((len = fileInputStream.read(buffer)) > 0) {
-								try {
-//									TODO: 13.02.2024 --> usunąć poniższy komentarz w przyszłości.
-//									Procedura przeniesiona do funkcji packetGen()
-//									Usunąć też CRC start powyżej 
-//									
-//									// data length (len) +1 byte for command and +1 byte for lenght info
-//									int length = len +2;
-//									byte command = (byte) USB_COMMAND_WRITE_LD;
-//
-//									/*  Build command
-//									 *  
-//									  Bits: 	   1         1    0<61   1
-//									  Bytes:	<command><length><data><crc>
-//									 */
-//									
-//									byte[] sequence = new byte[length];
-//									
-//									// Add <command> and <length>
-//									sequence[0] = command;
-//									sequence[1] = (byte) length;
-//									
-//									// Data adding loop
-//									int c = 0;
-//									for (c = 0; c <= buffer.length-1; c++) {
-//										sequence[c + 2] = buffer[c];
-//									}
-//									
-//									// Calculate CRC
-//									long crc8 = tableDriven.calculateCRC(sequence);
-//									// Copy sequence to Crc sequence and +1 byte for CRC
-//									byte[] sequenceCrc = new byte[length+1];
-//									System.arraycopy(sequence, 0, sequenceCrc, 0, sequence.length);
-//									// Add CRC on the end
-//									sequenceCrc[sequenceCrc.length-1] = (byte) crc8;
-									
-									// Packet generate
-									byte[] packet = packetGen((byte)USB_COMMAND_WRITE_LD, buffer);
-									
-									// Print
-									consoleOutput("Sending " + packet.length + " bytes");
-									outputStream.write(packet);
-									
-									// Check response from ESP
-									if(!isEspResponseOk(responseFromESP(inputStream))) {
-										error(Error.ERROR_SEND);
-										throw new Exception("Error send exception");
-									}
-									
-								} catch (Exception e) {
-									error(Error.ERROR_SEND);
-								}
-
-								TimeUnit.MILLISECONDS.sleep(5);
-							}
-
-							// Send END OF DATA
-							byte[] packet = packetGen((byte)USB_COMMAND_END_WRITE_LD, null);
-							outputStream.write(packet);
-							
+					// If response from ESP is OK than go into sending file block
+					if (isEspResponseOk(responseFromESP(inputStream))) {
+						success(Success.SUCCESS_RECEIVED_OK);
+						consoleOutput("ESP response OK");
+						
+						// Sending file procedure
+						// 61 bytes buffer declaration
+						byte[] buffer = new byte[61];
+						@SuppressWarnings("unused")
+						int len;
+						while ((len = fileInputStream.read(buffer)) > 0) {
 							try {
-
-								byte[] resArr = responseFromESP(inputStream);
-
-								if (isEspResponseOk(resArr))
-									success(Success.SUCCESS_SEND);
-								else if (!isEspResponseOk(resArr))
-									error(Error.ERROR_FROM_ESP);
-								else
-									error(Error.ERROR_ESP_NOT_SEND_OK);
-
+								// Packet generate
+								byte[] packet = packetGen((byte)USB_COMMAND_WRITE_LD, buffer);
+								
+								// Print
+								consoleOutput("Packet length: " + packet.length + " bytes");
+								consoleOutput("Packet: " + Hex.encodeHexString(packet));
+								// Send
+								outputStream.write(packet);
+								
+								// Check response from ESP
+								if(!isEspResponseOk(responseFromESP(inputStream))) {
+									error(Error.ERROR_RECEIVING);
+									throw new Exception("Error receive exception");
+								}
+								
 							} catch (Exception e) {
-								e.printStackTrace();
-								error(Error.ERROR_RECEIVING_OK);
+								error(Error.ERROR_SEND);
 							}
-						} else
-							error(Error.ERROR_ESP_NOT_SEND_OK);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-						error(Error.ERROR_RECEIVING_OK);
+							// Wait after each packet 
+							TimeUnit.MILLISECONDS.sleep(1);
+						}
+						
+						// Close file input stream
+						fileInputStream.close();
+
+						// Send END OF DATA
+						byte[] packet = packetGen((byte)USB_COMMAND_END_WRITE_LD, null);
+						outputStream.write(packet);
+						
+						try {
+
+							byte[] resArr = responseFromESP(inputStream);
+
+							if (isEspResponseOk(resArr)) {
+								success(Success.SUCCESS_SEND);
+								// Close connection
+								closeCOM();
+							}
+							else if (!isEspResponseOk(resArr)) {
+								error(Error.ERROR_FROM_ESP);
+								closeCOM();
+							}
+							else {
+								error(Error.ERROR_ESP_NOT_SEND_OK);
+								closeCOM();
+							}
+
+						} catch (Exception e) {
+							e.printStackTrace();
+							error(Error.ERROR_RECEIVING_OK);
+							closeCOM();
+						}
+					} else {
+						error(Error.ERROR_ESP_NOT_SEND_OK);
+						closeCOM();
 					}
 
 					// Close connection
-					fileInputStream.close();
-					outputStream.close();
-					comPort.closePort();
+					closeCOM();
 
 				} else {
 					error(Error.ERROR_OPEN_SERIAL);
@@ -512,12 +429,32 @@ public class SerialCommunication {
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
-				error(Error.ERROR_SEND);
+				error(Error.ERROR_SEND );
+				// Print to console error from thread
+				consoleOutput(e.getMessage());
 			}
 		}); // End of thread
 
 		// Start thread
 		send.start();
+	}
+	
+	/* Name: closeCOM
+	 * 
+	 * Description:
+	 * 	Closing input and output streams and finally close COM port
+	 */
+	private synchronized void closeCOM() throws IOException {
+		this.inputStream.close();
+		this.outputStream.close();
+		this.comPort.clearBreak();
+		this.comPort.removeDataListener();
+//		this.comPort.setComPortTimeouts(SerialPort.TIMEOUT_NONBLOCKING, 0, 0);
+		this.comPort.clearRTS();
+		this.comPort.clearDTR();
+		this.comPort.closePort();
+		System.out.println("Last error code: " + comPort.getLastErrorCode() + ", " + comPort.getLastErrorLocation());
+		this.comPort = null;
 	}
 	/*
 	 *
@@ -526,8 +463,6 @@ public class SerialCommunication {
 	 */
 	
 	private byte[] packetGen(byte command, byte[] data) {
-		// CRC start
-		CRC tableDriven = new CRC(CRC.Parameters.CRC8);
 		/*  Build command
 		 *  
 		  Bits: 	   1         1    0<61   1
@@ -535,8 +470,8 @@ public class SerialCommunication {
 		 */
 		
 		// Whole packet byte[] declaration
-		int len = data.length + 2;
-		byte[] sequence = new byte[len];
+		int len = (data == null) ? 3 : data.length + 3;
+		byte[] sequence = new byte[len-1];
 		
 		// Add <command> and <length>
 		sequence[0] = command;
@@ -545,22 +480,44 @@ public class SerialCommunication {
 		// Data adding loop
 		if (data != null) {
 			int c = 0;
-			for (c = 0; c <= data.length - 1; c++) {
+			for (c = 0; c < data.length; c++) {
 				sequence[c + 2] = data[c];
 			}
 		}
 		
 		// Calculate CRC
-		long crc8 = tableDriven.calculateCRC(sequence);
-		// Copy sequence to Crc sequence and +1 byte for CRC
-		byte[] sequenceCrc = new byte[len+1];
+//		TODO: poniższy komentarz usunąć 
+//		System.out.println("Before crc: " + Hex.encodeHexString(sequence));
+		byte[] sequenceCrc = new byte[sequence.length+1];
+		// Copy arrays
 		System.arraycopy(sequence, 0, sequenceCrc, 0, sequence.length);
+		// Generate CRC
+		long crc8 = CRC.calculateCRC(CRC.Parameters.CRC8, sequence);
 		// Add CRC on the end
-		sequenceCrc[sequenceCrc.length-1] = (byte) crc8;
+		sequenceCrc[sequenceCrc.length-1] = (byte)crc8;
 		
 		return sequenceCrc;
 	}
-	/* Name:	longTo4BytesInt
+	/*
+	 * Name: dataPacket()
+	 * 
+	 * Description:
+	 * 	Retrieve <data> from packet received from the device
+	 * 
+	 * Return:
+	 * 	bytes array (byte[])
+	 */
+	
+	private byte[] dataPacket(byte[] data) {
+		int len = data.length - 3;
+		byte[] out = new byte[len];
+		
+		for (int i=0; i<len; i++) 
+			out[i] = data[i+2];
+		
+		return out;
+	}
+	/* Name:	longTo4Bytes
 	 * 
 	 * Description:
 	 *	 Generate byte[] array (4 bytes size) from Long 
@@ -569,7 +526,7 @@ public class SerialCommunication {
 	 * return:
 	 * 	byte[]
 	 */
-	private static byte[] longTo4BytesInt(Long value) {
+	private static byte[] longTo4Bytes(Long value) {
 		byte[] bytes = new byte[4];
 		
 		bytes[0] = (byte) (value & 0xFF);
@@ -580,17 +537,33 @@ public class SerialCommunication {
 		return bytes;
 	}
 	
+	@SuppressWarnings("unused")
+	private static byte longTo1Byte(Long value) {
+		byte bytes;
+		bytes = (byte) (value & 0xFF);
+		return bytes;
+	}
+	
+	@SuppressWarnings("unused")
+//	TODO: Prawdopodobnie już niepotrzebne ---> do usunięcia
 	private static String toBinaryString(int bits, int input) {
 		
 		String val = Integer.toBinaryString(input);
 		String paramBits = "%" + Integer.toString(bits) + "s";
 		return String.format(paramBits, val).replace(' ', '0');
 	}
-	
+	/* Name:	isEspResponseOk
+	 * 
+	 * Description:
+	 *	 Check most significiant bit.
+	 *	 0 --> packet OK
+	 *	 1 --> error 
+	 *
+	 * return:
+	 * 	boolean true(MSB=0) or false(MSB=1)
+	 */
 	private static boolean isEspResponseOk(byte[] rensponse) {
-		int c = (int) rensponse[0];
-		char[] arr = toBinaryString(8, c).toCharArray();
-		return Integer.parseInt(String.valueOf(arr[0])) == 0 ? true : false;
+		return (rensponse[0] & 0xFF) >> 7 == 0 ? true : false;
 	}
 
 	private byte[] responseFromESP(InputStream inputStream) {
@@ -612,12 +585,37 @@ public class SerialCommunication {
 			}
 
 			int availableBytes = inputStream.available();
-			consoleOutput("available bytes: " + availableBytes);
+			consoleOutput("Available bytes: " + availableBytes);
 
 			byte[] bufferIn = new byte[availableBytes];
 			inputStream.read(bufferIn);
-			consoleOutput(Arrays.toString(bufferIn));
+			// TODO: printowanie do usunięcia gdy wszystko będzie działać
+			consoleOutput("Response: " + Hex.encodeHexString(bufferIn));
+//			consoleOutput("MSB: " + isEspResponseOk(bufferIn));
+			
+			// Error handling from ESP device
+			if (!isEspResponseOk(bufferIn)) {
+				byte[] data = dataPacket(bufferIn);
+				int err = data[data.length - 1];
 
+				switch (err) {
+				case USB_ERROR_BAD_CRC:
+					consoleOutput("Device error-> Bad CRC");
+					break;
+				case USB_ERROR_BAD_LENGTH:
+					consoleOutput("Device error-> Bad packet length (bytes)");
+					break;
+				case USB_ERROR_NO_COMMAND:
+					consoleOutput("Device error-> No command in the packet");
+					break;
+				case USB_ERROR_COMMAND_ERROR:
+					consoleOutput("Device error-> Internal command error");
+					break;
+
+				default:
+					break;
+				}
+			}
 			return bufferIn;
 
 		} catch (IOException e) {
@@ -630,31 +628,31 @@ public class SerialCommunication {
 	private void error(Error error) {
 		switch (error) {
 		case ERROR_SEND:
-			consoleOutput("Sending error");
+			consoleOutput("Ladder info-> Sending thread error");
 			break;
 		case ERROR_RECEIVING:
-			consoleOutput("Receiving error");
+			consoleOutput("Ladder info-> Receiving error");
 			break;
 		case ERROR_RECEIVING_OK:
-			consoleOutput("Receiving OK from the device error");
+			consoleOutput("Ladder info-> Device not sent OK response");
 			break;
 		case ERROR_SEND_TIME:
-			consoleOutput("Wait time after sending packet error");
+			consoleOutput("Ladder info-> Wait time after sending packet error");
 			break;
 		case ERROR_ESP_NOT_SEND_OK:
-			consoleOutput("File sended but not received OK from the device");
+			consoleOutput("Ladder info-> File sended but not received OK from the device");
 			break;
 		case ERROR_FROM_ESP:
-			consoleOutput("ESP send an error");
+			consoleOutput("Ladder info-> ESP sent an error");
 			break;
 		case ERROR_OPEN_SERIAL:
-			consoleOutput("Can not open serial port");
+			consoleOutput("Ladder info-> Can not open serial port");
 			break;
 		case ERROR_WAITING_ESP:
-			consoleOutput("Error during waiting for ESP response");
+			consoleOutput("Ladder info-> Error during waiting for ESP response");
 			break;
 		case ERROR_RESPONSE_TIMEOUT:
-			consoleOutput("Response from the device timeout");
+			consoleOutput("Ladder info-> Response from the device timeout");
 			break;
 
 		default:
@@ -682,7 +680,8 @@ public class SerialCommunication {
 	private void consoleOutput(String msg) {
 //		lastConsoleOutput = msg;
 		System.out.println(msg);
-		Mediator.getInstance().outputConsoleMessage(msg);
+//		TODO: mediator output przywrócić po skończeniu
+//		Mediator.getInstance().outputConsoleMessage(msg);
 	}
 
 }

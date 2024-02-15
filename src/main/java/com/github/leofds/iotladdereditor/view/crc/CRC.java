@@ -71,7 +71,7 @@ public class CRC
      private boolean reflectOut;   // Refout indicates whether output bytes should be reflected
      private long init; // Init is initial value for CRC calculation
      private long finalXor; // Xor is a value for final xor to be applied before returning result
-
+     
      public Parameters(int width, long polynomial, long init, boolean reflectIn, boolean reflectOut, long finalXor)
      {
          this.width = width;
