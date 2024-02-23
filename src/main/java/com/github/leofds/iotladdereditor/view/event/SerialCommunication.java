@@ -111,22 +111,43 @@ public class SerialCommunication {
 //		this.outputStream = outputStream;
 //	}
 
-	public SerialCommunication(String portName, int baudRate) {
+	public SerialCommunication() {
+		
+	}
+	
+	public void start(String portName, int baudRate) {
 		try {
+			consoleOutput(Strings.connecting() + "...");
 			this.comPort = SerialPort.getCommPort(portName);
 			comPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0);
 			comPort.setComPortParameters(baudRate, 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY);
 			this.inputStream = comPort.getInputStream();
 			this.outputStream = comPort.getOutputStream();
-			consoleOutput(Strings.portConnected());
+			// Print Connected on port 
+			consoleOutput(Strings.portConnected() + portName);
 
 		} catch (Exception e) {
+			// Print connection error to the console
 			consoleOutput(Strings.portConnectingError() + " " + e.getMessage());
 
 		}
 	}
-	
-	public SerialCommunication() {
+	/* Name: closeCOM
+	 * 
+	 * Description:
+	 * 	Closing input and output streams and finally close COM port
+	 */
+	private synchronized void closeCOM() throws IOException {
+		this.inputStream.close();
+		this.outputStream.close();
+		this.comPort.clearBreak();
+		this.comPort.removeDataListener();
+//		this.comPort.setComPortTimeouts(SerialPort.TIMEOUT_NONBLOCKING, 0, 0);
+		this.comPort.clearRTS();
+		this.comPort.clearDTR();
+		this.comPort.closePort();
+		System.out.println("Last error code: " + comPort.getLastErrorCode() + ", " + comPort.getLastErrorLocation());
+		this.comPort = null;
 	}
 
 //	public enum EspCommands {
@@ -143,7 +164,8 @@ public class SerialCommunication {
 	public static void main(String[] args) {
 		// Create a Scanner object to read user input
 
-		SerialCommunication serialConnection = new SerialCommunication("COM4", 115200);
+		SerialCommunication serial = new SerialCommunication();
+		serial.start("COM4", 115200);
 
         Scanner scanner = new Scanner(System.in);
 
@@ -160,7 +182,7 @@ public class SerialCommunication {
 
         switch (input) {
 		case 1:
-			serialConnection.send(file);
+			serial.send(file);
 //			byte[] data = new byte[] { 0x01, 0x41, (byte) 0xa0, 0x10, 0x41, (byte) 0xa0, 0x10, 0x41,
 //					(byte) 0xa0, 0x10 };
 //			long crc = CRC.calculateCRC(CRC.Parameters.CRC8, data);
@@ -187,7 +209,6 @@ public class SerialCommunication {
 
 			System.out.printf("CRC: 0x%X\n", crc);
 
-			SerialCommunication serial = new SerialCommunication();
 			// byte[] data = Files.readAllBytes(file.toPath());
 //			byte[] packet = serial.packetGen((byte) USB_COMMAND_INIT_WRITE_LD, data);
 			byte[] packet = serial.packetGen((byte) 0x01, data);
@@ -325,22 +346,130 @@ public class SerialCommunication {
 		serialReceiving.start();
 		return resultFuture;
 	}
+	
 
-	public void send(File fileIn) {
-
-		Thread send = new Thread(() -> {
+	public void receive2(File fileIn) {
+		Thread receive = new Thread(() -> {
 			try {
-				consoleOutput("Connecting...");
 
 				if (comPort.openPort()) {
-					consoleOutput("Connected!");
 					
 					FileInputStream fileInputStream = new FileInputStream(fileIn);
 					//TODO: usunać streamy --> przeniesione jako zmienne klasy
 //					InputStream inputStream = comPort.getInputStream();
 //					OutputStream outputStream = comPort.getOutputStream();
 
-					consoleOutput("File to send: " + fileIn.toString());
+					consoleOutput(Strings.fileToSend() + " " + fileIn.toString());
+// TODO: odebrać wszystko i wyczyścić bufor
+//					inputStream.read();
+					// Convert file size (in bytes) from long to 4 bytes array
+					byte[] fileSize = new byte[4];
+					fileSize = longTo4Bytes(fileIn.length());
+					// Init packet
+					byte[] initComm = packetGen((byte)USB_COMMAND_INIT_WRITE_LD, fileSize);
+					// Sending init command to ESP
+					outputStream.write(initComm);
+					
+					// If response from ESP is OK than go into sending file block
+					if (isEspResponseOk(responseFromESP(inputStream))) {
+						success(Success.SUCCESS_RECEIVED_OK);
+						consoleOutput("ESP response OK");
+						
+						// Sending file procedure
+						// 61 bytes buffer declaration
+						byte[] buffer = new byte[61];
+						@SuppressWarnings("unused")
+						int len;
+						while ((len = fileInputStream.read(buffer)) > 0) {
+							try {
+								// Packet generate
+								byte[] packet = packetGen((byte)USB_COMMAND_WRITE_LD, buffer);
+								
+								// Print
+								consoleOutput("Packet length: " + packet.length + " bytes");
+								consoleOutput("Packet: " + Hex.encodeHexString(packet));
+								// Send
+								outputStream.write(packet);
+								
+								// Check response from ESP
+								if(!isEspResponseOk(responseFromESP(inputStream))) {
+									error(Error.ERROR_RECEIVING);
+									throw new Exception("Error receive exception");
+								}
+								
+							} catch (Exception e) {
+								error(Error.ERROR_SEND);
+							}
+							// Wait after each packet 
+							TimeUnit.MILLISECONDS.sleep(1);
+						}
+						
+						// Close file input stream
+						fileInputStream.close();
+
+						// Send END OF DATA
+						byte[] packet = packetGen((byte)USB_COMMAND_END_WRITE_LD, null);
+						outputStream.write(packet);
+						
+						try {
+
+							byte[] resArr = responseFromESP(inputStream);
+
+							if (isEspResponseOk(resArr)) {
+								success(Success.SUCCESS_SEND);
+								// Close connection
+								closeCOM();
+							}
+							else if (!isEspResponseOk(resArr)) {
+								error(Error.ERROR_FROM_ESP);
+								closeCOM();
+							}
+							else {
+								error(Error.ERROR_ESP_NOT_SEND_OK);
+								closeCOM();
+							}
+
+						} catch (Exception e) {
+							e.printStackTrace();
+							error(Error.ERROR_RECEIVING_OK);
+							closeCOM();
+						}
+					} else {
+						error(Error.ERROR_ESP_NOT_SEND_OK);
+						closeCOM();
+					}
+
+					// Close connection
+					closeCOM();
+
+				} else {
+					error(Error.ERROR_OPEN_SERIAL);
+					throw new IOException();
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				error(Error.ERROR_SEND );
+				// Print to console error from thread
+				consoleOutput(e.getMessage());
+			}
+		}); // End of thread
+
+		// Start thread
+		receive.start();
+	}
+	
+	public void send(File fileIn) {
+		Thread send = new Thread(() -> {
+			try {
+
+				if (comPort.openPort()) {
+					
+					FileInputStream fileInputStream = new FileInputStream(fileIn);
+					//TODO: usunać streamy --> przeniesione jako zmienne klasy
+//					InputStream inputStream = comPort.getInputStream();
+//					OutputStream outputStream = comPort.getOutputStream();
+
+					consoleOutput(Strings.fileToSend() + " " + fileIn.toString());
 // TODO: odebrać wszystko i wyczyścić bufor
 //					inputStream.read();
 					// Convert file size (in bytes) from long to 4 bytes array
@@ -439,23 +568,6 @@ public class SerialCommunication {
 		send.start();
 	}
 	
-	/* Name: closeCOM
-	 * 
-	 * Description:
-	 * 	Closing input and output streams and finally close COM port
-	 */
-	private synchronized void closeCOM() throws IOException {
-		this.inputStream.close();
-		this.outputStream.close();
-		this.comPort.clearBreak();
-		this.comPort.removeDataListener();
-//		this.comPort.setComPortTimeouts(SerialPort.TIMEOUT_NONBLOCKING, 0, 0);
-		this.comPort.clearRTS();
-		this.comPort.clearDTR();
-		this.comPort.closePort();
-		System.out.println("Last error code: " + comPort.getLastErrorCode() + ", " + comPort.getLastErrorLocation());
-		this.comPort = null;
-	}
 	/*
 	 *
 	 * Packet structrue: <command><length><data><crc>
