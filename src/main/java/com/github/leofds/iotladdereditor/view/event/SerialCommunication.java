@@ -7,7 +7,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.Arrays;
 import java.util.Scanner;
 import java.util.concurrent.CompletableFuture;
@@ -348,113 +347,90 @@ public class SerialCommunication {
 	}
 	
 
-	public void receive2(File fileIn) {
+	public void receive2(File fileOut) {
+
 		Thread receive = new Thread(() -> {
 			try {
 
 				if (comPort.openPort()) {
-					
-					FileInputStream fileInputStream = new FileInputStream(fileIn);
-					//TODO: usunać streamy --> przeniesione jako zmienne klasy
-//					InputStream inputStream = comPort.getInputStream();
-//					OutputStream outputStream = comPort.getOutputStream();
 
-					consoleOutput(Strings.fileToSend() + " " + fileIn.toString());
-// TODO: odebrać wszystko i wyczyścić bufor
-//					inputStream.read();
-					// Convert file size (in bytes) from long to 4 bytes array
-					byte[] fileSize = new byte[4];
-					fileSize = longTo4Bytes(fileIn.length());
-					// Init packet
-					byte[] initComm = packetGen((byte)USB_COMMAND_INIT_WRITE_LD, fileSize);
-					// Sending init command to ESP
+					// Create a FileOutputStream to save the received file
+					FileOutputStream fileOutputStream = new FileOutputStream(fileOut.getAbsolutePath());
+
+					// Sending start command to ESP
+					byte[] initComm = packetGen((byte)USB_COMMAND_INIT_READ_LD, null);
 					outputStream.write(initComm);
 					
-					// If response from ESP is OK than go into sending file block
-					if (isEspResponseOk(responseFromESP(inputStream))) {
+					// Get response from ESP
+					byte[] resp = responseFromESP(inputStream);
+					
+					// Get length of file (that will be send) in bytes from response
+					int length = (int)resp[1];
+
+					if (isEspResponseOk(resp)) {
 						success(Success.SUCCESS_RECEIVED_OK);
 						consoleOutput("ESP response OK");
-						
-						// Sending file procedure
-						// 61 bytes buffer declaration
-						byte[] buffer = new byte[61];
-						@SuppressWarnings("unused")
-						int len;
-						while ((len = fileInputStream.read(buffer)) > 0) {
-							try {
-								// Packet generate
-								byte[] packet = packetGen((byte)USB_COMMAND_WRITE_LD, buffer);
-								
-								// Print
-								consoleOutput("Packet length: " + packet.length + " bytes");
-								consoleOutput("Packet: " + Hex.encodeHexString(packet));
-								// Send
-								outputStream.write(packet);
-								
-								// Check response from ESP
-								if(!isEspResponseOk(responseFromESP(inputStream))) {
-									error(Error.ERROR_RECEIVING);
-									throw new Exception("Error receive exception");
+
+						int lenCnt = 0;
+						// Read and write the file data
+						do {
+							// Send command for next chunk
+							byte[] next = packetGen((byte) USB_COMMAND_READ_LD, null);
+							outputStream.write(next);
+
+							byte[] read = responseFromESP(inputStream);
+
+							if (isEspResponseOk(read) && isCRCOk(read)) {
+								// Get <data> from read bytes and write to output stream
+								byte[] write = dataPacket(read);
+								fileOutputStream.write(write, 0, write.length);
+
+								// Sum data bytes to be compared to lenght
+								lenCnt += write.length;
+							} else {
+								// TODO: obsłużyć błąd jeśli esp nie odpowiedziało OK lub CRC nie jest ok
+								break;
+							}
+
+							// Check that the number of bytes received equals the number of bytes expected
+							// (var length)
+							if (lenCnt >= length) {
+								// If sum sent bytes = length send end command
+								byte[] end = packetGen((byte) USB_COMMAND_END_READ_LD, null);
+								outputStream.write(end);
+
+								if (!isEspResponseOk(responseFromESP(inputStream))) {
+									// TODO: dodać obługę błędu
+									break;
+								} else {
+									break;
 								}
-								
-							} catch (Exception e) {
-								error(Error.ERROR_SEND);
-							}
-							// Wait after each packet 
-							TimeUnit.MILLISECONDS.sleep(1);
-						}
-						
-						// Close file input stream
-						fileInputStream.close();
-
-						// Send END OF DATA
-						byte[] packet = packetGen((byte)USB_COMMAND_END_WRITE_LD, null);
-						outputStream.write(packet);
-						
-						try {
-
-							byte[] resArr = responseFromESP(inputStream);
-
-							if (isEspResponseOk(resArr)) {
-								success(Success.SUCCESS_SEND);
-								// Close connection
-								closeCOM();
-							}
-							else if (!isEspResponseOk(resArr)) {
-								error(Error.ERROR_FROM_ESP);
-								closeCOM();
-							}
-							else {
-								error(Error.ERROR_ESP_NOT_SEND_OK);
-								closeCOM();
 							}
 
-						} catch (Exception e) {
-							e.printStackTrace();
-							error(Error.ERROR_RECEIVING_OK);
-							closeCOM();
-						}
-					} else {
+						} while (true);
+
+						// Close file output stream
+						fileOutputStream.close();
+
+					} else
 						error(Error.ERROR_ESP_NOT_SEND_OK);
-						closeCOM();
-					}
 
-					// Close connection
-					closeCOM();
-
+					// TODO: Prawdopodobnie do usunięcia, zamknięcię streamów przesunięte do closeCOM()
+					// Close the streams and serial port
+//					fileOutputStream.close();
+//					inputStream.close();
+//					comPort.closePort();
 				} else {
 					error(Error.ERROR_OPEN_SERIAL);
 					throw new IOException();
 				}
+				success(Success.SUCCESS_RECEIVED);
 			} catch (Exception e) {
 				e.printStackTrace();
-				error(Error.ERROR_SEND );
-				// Print to console error from thread
-				consoleOutput(e.getMessage());
+				error(Error.ERROR_RECEIVING);
 			}
-		}); // End of thread
+		}); // End thread
 
-		// Start thread
 		receive.start();
 	}
 	
@@ -577,7 +553,7 @@ public class SerialCommunication {
 	private byte[] packetGen(byte command, byte[] data) {
 		/*  Build command
 		 *  
-		  Bits: 	   1         1    0<61   1
+		  Bytes: 	   1         1    0<61   1
 		  Bytes:	<command><length><data><crc>
 		 */
 		
@@ -610,6 +586,7 @@ public class SerialCommunication {
 		
 		return sequenceCrc;
 	}
+	
 	/*
 	 * Name: dataPacket()
 	 * 
@@ -619,7 +596,6 @@ public class SerialCommunication {
 	 * Return:
 	 * 	bytes array (byte[])
 	 */
-	
 	private byte[] dataPacket(byte[] data) {
 		int len = data.length - 3;
 		byte[] out = new byte[len];
@@ -629,6 +605,7 @@ public class SerialCommunication {
 		
 		return out;
 	}
+	
 	/* Name:	longTo4Bytes
 	 * 
 	 * Description:
@@ -664,6 +641,19 @@ public class SerialCommunication {
 		String paramBits = "%" + Integer.toString(bits) + "s";
 		return String.format(paramBits, val).replace(' ', '0');
 	}
+	
+	/* Name:	isCRCOk
+	 * 
+	 * Description:
+	 *	 Check is CRC ok
+	 *
+	 * return:
+	 * 	boolean 
+	 */
+	private static boolean isCRCOk(byte[] data) {
+		return (CRC.calculateCRC(CRC.Parameters.CRC8, data) == 0) ? true : false ;
+	}
+	
 	/* Name:	isEspResponseOk
 	 * 
 	 * Description:
