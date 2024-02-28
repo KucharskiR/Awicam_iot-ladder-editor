@@ -223,12 +223,13 @@ public class SerialCommunication {
 		default:
 			break;
 		}
-//        	try {
-//        		serial.closeCOM();
-//        	} catch (IOException e) {
-//        		// TODO Auto-generated catch block
-//        		e.printStackTrace();
-//        	}
+        	try {
+        		Thread.sleep(80);
+        		serial.closeCOM();
+        	} catch (Exception e) {
+        		// TODO Auto-generated catch block
+        		e.printStackTrace();
+        	}
         scanner.close();
 	}
 
@@ -357,219 +358,211 @@ public class SerialCommunication {
 	
 
 	public void receive2(File fileOut) {
+		try {
+			if (comPort.openPort()) {
 
-		Thread receive = new Thread(() -> {
-			try {
+				// Create a FileOutputStream to save the received file
+				FileOutputStream fileOutputStream = new FileOutputStream(fileOut.getAbsolutePath());
 
-				if (comPort.openPort()) {
+				// Sending start command to ESP
+				byte[] initComm = packetGen((byte) USB_COMMAND_INIT_READ_LD, null);
+				outputStream.write(initComm);
 
-					// Create a FileOutputStream to save the received file
-					FileOutputStream fileOutputStream = new FileOutputStream(fileOut.getAbsolutePath());
+				// Get response from ESP
+				byte[] resp = responseFromESP(inputStream);
 
-					// Sending start command to ESP
-					byte[] initComm = packetGen((byte)USB_COMMAND_INIT_READ_LD, null);
-					outputStream.write(initComm);
-					
-					// Get response from ESP
-					byte[] resp = responseFromESP(inputStream);
-					
-					// Get length of file (that will be send) in bytes from response
-					long fileLen = convertToLong(littleEndian(dataPacket(resp)));
-					System.out.println("File len: " + fileLen);
+				// Get length of file (that will be send) in bytes from response
+				long fileLen = convertToLong(littleEndian(dataPacket(resp)));
+				System.out.println("File len: " + fileLen);
 
-					if (isEspResponseOk(resp)) {
-						success(Success.SUCCESS_RECEIVED_OK);
-						consoleOutput("ESP response OK");
+				if (isEspResponseOk(resp)) {
+					success(Success.SUCCESS_RECEIVED_OK);
+					consoleOutput("ESP response OK");
 
-						long lenCnt = 0;
-						// Read and write the file data
-						do {
-							// Send command for next chunk
-							byte[] next = packetGen((byte) USB_COMMAND_READ_LD, null);
-							outputStream.write(next);
+					long lenCnt = 0;
+					// Read and write the file data
+					do {
+						// Send command for next chunk
+						byte[] next = packetGen((byte) USB_COMMAND_READ_LD, null);
+						outputStream.write(next);
 
-							byte[] read = responseFromESP(inputStream);
+						byte[] read = responseFromESP(inputStream);
 
-							if (isEspResponseOk(read) && isCRCOk(read)) {
-								// Get <data> from read bytes and write to output stream
-								byte[] write = dataPacket(read);
-								
-								if (write.equals(null))
-									break;
-								
-								fileOutputStream.write(write, 0, write.length);
-								
-								// Sum data bytes to be compared to lenght
-								lenCnt += write.length;
+						if (isEspResponseOk(read) && isCRCOk(read)) {
+							// Get <data> from read bytes and write to output stream
+							byte[] write = dataPacket(read);
+
+							if (write.equals(null))
+								break;
+
+							fileOutputStream.write(write, 0, write.length);
+
+							// Sum data bytes to be compared to lenght
+							lenCnt += write.length;
+						} else {
+							// Not correct CRC info
+							if (!isCRCOk(read)) {
+								consoleOutput("Ladder info-> CRC not correct");
+								break;
 							} else {
-								// Not correct CRC info
-								if (!isCRCOk(read)) {
-									consoleOutput("Ladder info-> CRC not correct");
-									break;
-								} else {
+								error(Error.ERROR_RECEIVING_OK);
+								break;
+							}
+						}
+
+						// Check that the number of bytes received equals the number of bytes expected
+						// (var length)
+						if (lenCnt >= fileLen) {
+							if (lenCnt == fileLen) {
+								// If sum sent bytes = length send end command
+								byte[] end = packetGen((byte) USB_COMMAND_END_READ_LD, null);
+								outputStream.write(end);
+
+								if (!isEspResponseOk(responseFromESP(inputStream))) {
 									error(Error.ERROR_RECEIVING_OK);
 									break;
-								}
-							}
-
-							// Check that the number of bytes received equals the number of bytes expected
-							// (var length)
-							if (lenCnt >= fileLen) {
-								if (lenCnt == fileLen) {
-									// If sum sent bytes = length send end command
-									byte[] end = packetGen((byte) USB_COMMAND_END_READ_LD, null);
-									outputStream.write(end);
-
-									if (!isEspResponseOk(responseFromESP(inputStream))) {
-										error(Error.ERROR_RECEIVING_OK);
-										break;
-									} else {
-										consoleOutput("File received!");
-										break;
-									}
 								} else {
-									// Size not correct
-									consoleOutput("Ladder info-> Size of received file not correct");
+									consoleOutput("File received!");
 									break;
 								}
+							} else {
+								// Size not correct
+								consoleOutput("Ladder info-> Size of received file not correct");
+								break;
 							}
+						}
 
-						} while (lenCnt <= fileLen);
+					} while (lenCnt <= fileLen);
 
-						// Close file output stream
-						fileOutputStream.close();
+					// Close file output stream
+					fileOutputStream.close();
 
-					} else
-						error(Error.ERROR_ESP_NOT_SEND_OK);
+				} else
+					error(Error.ERROR_ESP_NOT_SEND_OK);
 
-					// TODO: Prawdopodobnie do usunięcia, zamknięcię streamów przesunięte do closeCOM()
-					// Close the streams and serial port
+				// TODO: Prawdopodobnie do usunięcia, zamknięcię streamów przesunięte do
+				// closeCOM()
+				// Close the streams and serial port
 //					fileOutputStream.close();
 //					inputStream.close();
 //					comPort.closePort();
-				} else {
-					error(Error.ERROR_OPEN_SERIAL);
-					throw new IOException();
-				}
-				// TODO: trzeba gdzieś to przesunąć w inne miejsce
-//				success(Success.SUCCESS_RECEIVED);
-			} catch (Exception e) {
-				e.printStackTrace();
-				error(Error.ERROR_RECEIVING);
+			} else {
+				error(Error.ERROR_OPEN_SERIAL);
+				throw new IOException();
 			}
-		}); // End thread
-
-		receive.start();
+			// TODO: trzeba gdzieś to przesunąć w inne miejsce
+//				success(Success.SUCCESS_RECEIVED);
+		} catch (Exception e) {
+			e.printStackTrace();
+			error(Error.ERROR_RECEIVING);
+		}
 	}
 	
 	public void send(File fileIn) {
-		Thread send = new Thread(() -> {
-			try {
+		try {
 
-				if (comPort.openPort()) {
-					
-					FileInputStream fileInputStream = new FileInputStream(fileIn);
-					//TODO: usunać streamy --> przeniesione jako zmienne klasy
-//					InputStream inputStream = comPort.getInputStream();
-//					OutputStream outputStream = comPort.getOutputStream();
+			if (comPort.openPort()) {
 
-					consoleOutput(Strings.fileToSend() + " " + fileIn.toString());
-// TODO: odebrać wszystko i wyczyścić bufor
-//					inputStream.read();
-					// Convert file size (in bytes) from long to 4 bytes array
-					byte[] fileSize = new byte[4];
-					fileSize = longTo4Bytes(fileIn.length());
-					// Init packet
-					byte[] initComm = packetGen((byte)USB_COMMAND_INIT_WRITE_LD, fileSize);
-					// Sending init command to ESP
-					outputStream.write(initComm);
-					
-					// If response from ESP is OK than go into sending file block
-					if (isEspResponseOk(responseFromESP(inputStream))) {
-						success(Success.SUCCESS_RECEIVED_OK);
-						consoleOutput("ESP response OK");
-						
-						// Sending file procedure
-						// 61 bytes buffer declaration
-						byte[] buffer = new byte[61];
-						@SuppressWarnings("unused")
-						int len;
-						while ((len = fileInputStream.read(buffer)) > 0) {
-							try {
-								// Packet generate
-								byte[] packet = packetGen((byte)USB_COMMAND_WRITE_LD, buffer);
-								
-								// Print
-								consoleOutput("Packet length: " + packet.length + " bytes");
-								consoleOutput("Packet: " + Hex.encodeHexString(packet));
-								// Send
-								outputStream.write(packet);
-								
-								// Check response from ESP
-								if(!isEspResponseOk(responseFromESP(inputStream))) {
-									error(Error.ERROR_RECEIVING);
-									throw new Exception("Error receive exception");
-								}
-								
-							} catch (Exception e) {
-								error(Error.ERROR_SEND);
-							}
-							// Wait after each packet 
-							TimeUnit.MILLISECONDS.sleep(1);
-						}
-						
-						// Close file input stream
-						fileInputStream.close();
+				FileInputStream fileInputStream = new FileInputStream(fileIn);
 
-						// Send END OF DATA
-						byte[] packet = packetGen((byte)USB_COMMAND_END_WRITE_LD, null);
-						outputStream.write(packet);
-						
+				consoleOutput(Strings.fileToSend() + " " + fileIn.toString());
+				
+				// Clear buffor 
+				consoleOutput("Ladder info-> Clearing device buffor...");
+				@SuppressWarnings("unused")
+				byte [] clear = responseFromESP(inputStream);
+				clear = null;
+				
+				// Convert file size (in bytes) from long to 4 bytes array
+				byte[] fileSize = new byte[4];
+				fileSize = longTo4Bytes(fileIn.length());
+				
+				// Init packet
+				byte[] initComm = packetGen((byte) USB_COMMAND_INIT_WRITE_LD, fileSize);
+				
+				// Sending init command to ESP
+				outputStream.write(initComm);
+
+				// If response from ESP is OK than go into sending file block
+				if (isEspResponseOk(responseFromESP(inputStream))) {
+					success(Success.SUCCESS_RECEIVED_OK);
+					consoleOutput("ESP response OK");
+
+					// Sending file procedure
+					// 61 bytes buffer declaration
+					byte[] buffer = new byte[61];
+					@SuppressWarnings("unused")
+					int len;
+					while ((len = fileInputStream.read(buffer)) > 0) {
 						try {
+							// Packet generate
+							byte[] packet = packetGen((byte) USB_COMMAND_WRITE_LD, buffer);
 
-							byte[] resArr = responseFromESP(inputStream);
+							// Print
+							consoleOutput("Packet length: " + packet.length + " bytes");
+							consoleOutput("Packet: " + Hex.encodeHexString(packet));
+							// Send
+							outputStream.write(packet);
 
-							if (isEspResponseOk(resArr)) {
-								success(Success.SUCCESS_SEND);
-								// Close connection
-								closeCOM();
-							}
-							else if (!isEspResponseOk(resArr)) {
-								error(Error.ERROR_FROM_ESP);
-								closeCOM();
-							}
-							else {
-								error(Error.ERROR_ESP_NOT_SEND_OK);
-								closeCOM();
+							// Check response from ESP
+							if (!isEspResponseOk(responseFromESP(inputStream))) {
+								error(Error.ERROR_RECEIVING);
+								throw new Exception("Error receive exception");
 							}
 
 						} catch (Exception e) {
-							e.printStackTrace();
-							error(Error.ERROR_RECEIVING_OK);
-							closeCOM();
+							error(Error.ERROR_SEND);
 						}
-					} else {
-						error(Error.ERROR_ESP_NOT_SEND_OK);
-						closeCOM();
+						// Wait after each packet
+						TimeUnit.MILLISECONDS.sleep(1);
 					}
 
-					// Close connection
-					closeCOM();
+					// Close file input stream
+					fileInputStream.close();
 
+					// Send END OF DATA
+					byte[] packet = packetGen((byte) USB_COMMAND_END_WRITE_LD, null);
+					outputStream.write(packet);
+
+					try {
+
+						byte[] resArr = responseFromESP(inputStream);
+
+						if (isEspResponseOk(resArr)) {
+							success(Success.SUCCESS_SEND);
+							// Close connection
+							closeCOM();
+						} else if (!isEspResponseOk(resArr)) {
+							error(Error.ERROR_FROM_ESP);
+							closeCOM();
+						} else {
+							error(Error.ERROR_ESP_NOT_SEND_OK);
+							closeCOM();
+						}
+
+					} catch (Exception e) {
+						e.printStackTrace();
+						error(Error.ERROR_RECEIVING_OK);
+						closeCOM();
+					}
 				} else {
-					error(Error.ERROR_OPEN_SERIAL);
-					throw new IOException();
+					error(Error.ERROR_ESP_NOT_SEND_OK);
+					closeCOM();
 				}
-			} catch (Exception e) {
-				e.printStackTrace();
-				error(Error.ERROR_SEND );
-				// Print to console error from thread
-				consoleOutput(e.getMessage());
-			}
-		}); // End of thread
 
-		// Start thread
-		send.start();
+				// Close connection
+				closeCOM();
+
+			} else {
+				error(Error.ERROR_OPEN_SERIAL);
+				throw new IOException();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			error(Error.ERROR_SEND);
+			// Print to console error from thread
+			consoleOutput(e.getMessage());
+		}
 	}
 	
 	/*
