@@ -136,17 +136,19 @@ public class SerialCommunication {
 	 * Description:
 	 * 	Closing input and output streams and finally close COM port
 	 */
-	private synchronized void closeCOM() throws IOException {
-		this.inputStream.close();
-		this.outputStream.close();
-		this.comPort.clearBreak();
-		this.comPort.removeDataListener();
+	private void closeCOM() throws IOException {
+		synchronized (this) {
+			this.inputStream.close();
+			this.outputStream.close();
+			this.comPort.clearBreak();
+			this.comPort.removeDataListener();
 //		this.comPort.setComPortTimeouts(SerialPort.TIMEOUT_NONBLOCKING, 0, 0);
-		this.comPort.clearRTS();
-		this.comPort.clearDTR();
-		this.comPort.closePort();
-		System.out.println("Last error code: " + comPort.getLastErrorCode() + ", " + comPort.getLastErrorLocation());
-		this.comPort = null;
+			this.comPort.clearRTS();
+			this.comPort.clearDTR();
+			this.comPort.closePort();
+			System.out.println("Last error code: " + comPort.getLastErrorCode() + ", " + comPort.getLastErrorLocation());
+			this.comPort = null;
+		}
 	}
 
 //	public enum EspCommands {
@@ -172,16 +174,20 @@ public class SerialCommunication {
         		+ "2-Receiving \n"
         		+ "3-Sending(testing)");
         
-        // File path
+        // File path send
         String zipFilePath = System.getProperty("user.dir") + "/out/Container.zip";
-        // File
-        File file = new File(zipFilePath);
+        // File path to receivee
+        String fileRecPath = System.getProperty("user.dir") + "/out/ContainerRec.zip";
+        // File send
+        File fileSend = new File(zipFilePath);
+        // File receive
+        File fileReceive = new File(fileRecPath);
 
         int input = scanner.nextInt();
 
         switch (input) {
 		case 1:
-			serial.send(file);
+			serial.send(fileSend);
 //			byte[] data = new byte[] { 0x01, 0x41, (byte) 0xa0, 0x10, 0x41, (byte) 0xa0, 0x10, 0x41,
 //					(byte) 0xa0, 0x10 };
 //			long crc = CRC.calculateCRC(CRC.Parameters.CRC8, data);
@@ -197,7 +203,7 @@ public class SerialCommunication {
 
 			break;
 		case 2:
-//			serialConnection.receive();
+				serial.receive2(fileReceive);
 			break;
 		case 3:
 //			serialConnection.send(file);
@@ -217,6 +223,12 @@ public class SerialCommunication {
 		default:
 			break;
 		}
+//        	try {
+//        		serial.closeCOM();
+//        	} catch (IOException e) {
+//        		// TODO Auto-generated catch block
+//        		e.printStackTrace();
+//        	}
         scanner.close();
 	}
 
@@ -257,9 +269,6 @@ public class SerialCommunication {
 							consoleOutput(Arrays.toString(buffer));
 							fileOutputStream.write(buffer, 0, bytesRead);
 						}
-						// TODO: obsługa błędów + odczyt ostatnich trzech bajtów (ESP OK)
-//						}
-
 					} else
 						error(Error.ERROR_ESP_NOT_SEND_OK);
 
@@ -365,13 +374,14 @@ public class SerialCommunication {
 					byte[] resp = responseFromESP(inputStream);
 					
 					// Get length of file (that will be send) in bytes from response
-					int length = (int)resp[1];
+					long fileLen = convertToLong(littleEndian(dataPacket(resp)));
+					System.out.println("File len: " + fileLen);
 
 					if (isEspResponseOk(resp)) {
 						success(Success.SUCCESS_RECEIVED_OK);
 						consoleOutput("ESP response OK");
 
-						int lenCnt = 0;
+						long lenCnt = 0;
 						// Read and write the file data
 						do {
 							// Send command for next chunk
@@ -383,31 +393,48 @@ public class SerialCommunication {
 							if (isEspResponseOk(read) && isCRCOk(read)) {
 								// Get <data> from read bytes and write to output stream
 								byte[] write = dataPacket(read);
+								
+								if (write.equals(null))
+									break;
+								
 								fileOutputStream.write(write, 0, write.length);
-
+								
 								// Sum data bytes to be compared to lenght
 								lenCnt += write.length;
 							} else {
-								// TODO: obsłużyć błąd jeśli esp nie odpowiedziało OK lub CRC nie jest ok
-								break;
-							}
-
-							// Check that the number of bytes received equals the number of bytes expected
-							// (var length)
-							if (lenCnt >= length) {
-								// If sum sent bytes = length send end command
-								byte[] end = packetGen((byte) USB_COMMAND_END_READ_LD, null);
-								outputStream.write(end);
-
-								if (!isEspResponseOk(responseFromESP(inputStream))) {
-									// TODO: dodać obługę błędu
+								// Not correct CRC info
+								if (!isCRCOk(read)) {
+									consoleOutput("Ladder info-> CRC not correct");
 									break;
 								} else {
+									error(Error.ERROR_RECEIVING_OK);
 									break;
 								}
 							}
 
-						} while (true);
+							// Check that the number of bytes received equals the number of bytes expected
+							// (var length)
+							if (lenCnt >= fileLen) {
+								if (lenCnt == fileLen) {
+									// If sum sent bytes = length send end command
+									byte[] end = packetGen((byte) USB_COMMAND_END_READ_LD, null);
+									outputStream.write(end);
+
+									if (!isEspResponseOk(responseFromESP(inputStream))) {
+										error(Error.ERROR_RECEIVING_OK);
+										break;
+									} else {
+										consoleOutput("File received!");
+										break;
+									}
+								} else {
+									// Size not correct
+									consoleOutput("Ladder info-> Size of received file not correct");
+									break;
+								}
+							}
+
+						} while (lenCnt <= fileLen);
 
 						// Close file output stream
 						fileOutputStream.close();
@@ -424,7 +451,8 @@ public class SerialCommunication {
 					error(Error.ERROR_OPEN_SERIAL);
 					throw new IOException();
 				}
-				success(Success.SUCCESS_RECEIVED);
+				// TODO: trzeba gdzieś to przesunąć w inne miejsce
+//				success(Success.SUCCESS_RECEIVED);
 			} catch (Exception e) {
 				e.printStackTrace();
 				error(Error.ERROR_RECEIVING);
@@ -606,6 +634,47 @@ public class SerialCommunication {
 		return out;
 	}
 	
+	/*
+	 * Name: littleEndian()
+	 * 
+	 * Description:
+	 * 	Swap byte arrays (convert endians)
+	 * 
+	 * Return:
+	 * 	bytes array (byte[])
+	 */
+	private static byte[] littleEndian(byte[] data) {
+		int c = data.length - 1;
+		byte[] out = new byte[data.length];
+
+		for (byte b : data) {
+			out[c] = b;
+			c--;
+		}
+		return out;
+	}
+	
+	/* Name:	convertToLong
+	 * 
+	 * Description:
+	 *	 A utility function that return long value from a byte array 
+	 *
+	 * return:
+	 * 	long
+	 */
+	static long convertToLong(byte[] bytes) {
+		long value = 0l;
+
+		// Iterating through for loop
+		for (byte b : bytes) {
+			// Shifting previous value 8 bits to right and
+			// add it with next value
+			value = (value << 8) + (b & 255);
+		}
+
+		return value;
+	}
+
 	/* Name:	longTo4Bytes
 	 * 
 	 * Description:
@@ -693,7 +762,6 @@ public class SerialCommunication {
 			inputStream.read(bufferIn);
 			// TODO: printowanie do usunięcia gdy wszystko będzie działać
 			consoleOutput("Response: " + Hex.encodeHexString(bufferIn));
-//			consoleOutput("MSB: " + isEspResponseOk(bufferIn));
 			
 			// Error handling from ESP device
 			if (!isEspResponseOk(bufferIn)) {
@@ -733,7 +801,7 @@ public class SerialCommunication {
 			consoleOutput("Ladder info-> Sending thread error");
 			break;
 		case ERROR_RECEIVING:
-			consoleOutput("Ladder info-> Receiving error");
+			consoleOutput("Ladder info-> Receiving function error");
 			break;
 		case ERROR_RECEIVING_OK:
 			consoleOutput("Ladder info-> Device not sent OK response");
