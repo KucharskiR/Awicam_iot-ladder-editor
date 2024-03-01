@@ -124,9 +124,11 @@ public class ImportExportLD extends JFrame {
 				btnImport.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent arg0) {
 						String selectedPort = (String) comboBoxCOM.getSelectedItem();
-						File file = new File();  // <----- add path to file to receive
-						SerialCommunication serial = new SerialCommunication(selectedPort, 57600);
-						serial.receive(file);
+						String fileRecPath = System.getProperty("user.dir") + "/out/ContainerRec.zip";
+						File fileReceive = new File(fileRecPath);
+						SerialCommunication serial = new SerialCommunication();
+						serial.start(selectedPort, 115200);
+						serial.receive(fileReceive);
 					}
 				});
 				panel_down.add(btnImport);
