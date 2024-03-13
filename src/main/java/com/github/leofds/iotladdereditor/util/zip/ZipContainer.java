@@ -1,4 +1,4 @@
-package com.github.leofds.iotladdereditor.view.zip;
+package com.github.leofds.iotladdereditor.util.zip;
 
 import java.io.File;
 import java.io.FileInputStream;

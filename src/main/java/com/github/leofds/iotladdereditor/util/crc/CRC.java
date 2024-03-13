@@ -1,4 +1,4 @@
-package com.github.leofds.iotladdereditor.view.crc;
+package com.github.leofds.iotladdereditor.util.crc;
 
 //Copyright 2016, S&K Software Development Ltd.
 //Use of this source code is governed by a BSD-style
