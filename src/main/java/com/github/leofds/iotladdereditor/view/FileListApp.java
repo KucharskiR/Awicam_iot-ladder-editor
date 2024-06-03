@@ -312,9 +312,30 @@ public class FileListApp extends javax.swing.JFrame {
 		renderTable();
 	}                                            
 
-    private void buttonDeleteActionPerformed(java.awt.event.ActionEvent evt) {                                             
-        // TODO add your handling code here:
-    }                                            
+	private void buttonDeleteActionPerformed(java.awt.event.ActionEvent evt) {
+		
+		// Validate is any row selected
+		if (!jTable1.getSelectionModel().isSelectionEmpty()) {
+			// Get filename from selected row and second column (index column =1 )
+			String fileName = (String) jTable1.getValueAt(jTable1.getSelectedRow(), 1);
+			System.out.println(fileName);
+			
+			// Check is fileName string object in table list
+			if (tableListFiles.contains(fileName))
+				// If true delete object
+				tableListFiles.remove(fileName);
+			
+			// Get file from filesList by fileName to add to the stack
+			File toStackFile = filesList.get(fileName);
+			
+			// Add stack element
+			stack.add(new StackEl(fileName, 1, toStackFile));
+			
+			// Remove filneName object from filesList
+			filesList.remove(fileName);
+			renderTable();
+		}
+	}
 
     private void buttonUndoActionPerformed(java.awt.event.ActionEvent evt) {                                           
     	if (!stack.isEmpty()) {
