@@ -1,9 +1,11 @@
 package com.github.leofds.iotladdereditor.view;
 
+import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 
 import javax.swing.JFileChooser;
@@ -13,12 +15,16 @@ import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 
+import com.github.leofds.iotladdereditor.util.zip.ZipContainer;
+import com.github.leofds.iotladdereditor.view.event.SerialCommunication;
+
 public class FileListApp extends javax.swing.JFrame {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	private ZipContainer container = new ZipContainer();
 
 	public FileListApp() {
 		initComponents();
@@ -105,6 +111,11 @@ public class FileListApp extends javax.swing.JFrame {
 
         buttonExport.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         buttonExport.setText("Export Files to Device");
+        buttonExport.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonExportActionPerformed(evt);
+            }
+        });
 
         buttonAddFile.setText("Add file");
         buttonAddFile.addActionListener(new java.awt.event.ActionListener() {
@@ -122,7 +133,12 @@ public class FileListApp extends javax.swing.JFrame {
 
         buttonImport.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         buttonImport.setText("Import Files from Device");
-
+        buttonImport.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+            	buttonImportActionPerformed(evt);
+            }
+        });
+      
         buttonUndo.setText("Undo");
         buttonUndo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -227,7 +243,47 @@ public class FileListApp extends javax.swing.JFrame {
 		
     }
     
-    // Buttons actions
+	// Buttons actions
+	private void buttonExportActionPerformed(ActionEvent evt) {
+		try {
+			// Loop over HashMap list with files
+			for (Map.Entry<String, File> entry : filesList.entrySet()) {
+				container.addFile(entry.getValue());
+			}
+			// Pack container to .zip with AES
+			container.pack();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		SerialCommunication connection = new SerialCommunication();
+
+		// Start connection
+		connection.start("port name here", 9600); // TODO: port name here
+		// Send to the device
+		connection.send(container.getZipFile());
+
+	}
+	
+	private void buttonImportActionPerformed(ActionEvent evt) {
+		SerialCommunication connection = new SerialCommunication();
+
+		// Start connection
+		connection.start("port name here", 9600); // TODO: port name here
+		
+		// Check the Container.zip really exists
+		if (!container.getZipFile().exists()) {
+			File createdContainer = new File(ZipContainer.getZipfilepath());
+			// Receive .zip file from the device
+			connection.receive(createdContainer);
+		} else {
+			// Receive .zip file from the device
+			connection.receive(container.getZipFile());
+		}
+
+	}
+    
 	private void buttonAddFileActionPerformed(java.awt.event.ActionEvent evt) {
 		JFileChooser fileChooser = new JFileChooser();
 

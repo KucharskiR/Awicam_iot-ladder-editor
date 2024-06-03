@@ -45,7 +45,6 @@ public class ZipContainer {
 
 
 	public ZipContainer() {
-		// TODO Auto-generated constructor stub
 		fileList.clear();
 		
 		File folder = new File(sourceFolderPath);
@@ -72,6 +71,11 @@ public class ZipContainer {
 	    System.out.print("Hello World");
 	  }
 	
+	
+
+	public static String getZipfilepath() {
+		return zipFilePath;
+	}
 
 	public List<File> getFileList() {
 		// Clear list
