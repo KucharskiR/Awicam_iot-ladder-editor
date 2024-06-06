@@ -133,7 +133,7 @@ public class SerialCommunication {
 	 * Description:
 	 * 	Closing input and output streams and finally close COM port
 	 */
-	private void closeCOM() throws IOException {
+	public void closeCOM() throws IOException {
 		synchronized (this) {
 			this.inputStream.close();
 			this.outputStream.close();
@@ -159,32 +159,52 @@ public class SerialCommunication {
 //
 //	};
 
-	public static void main(String[] args) {
-		// Create a Scanner object to read user input
-
-		SerialCommunication serial = new SerialCommunication();
-		serial.start("COM4", 115200);
-
-        Scanner scanner = new Scanner(System.in);
-
-        System.out.print("Choose:\n1-Sending \n"
-        		+ "2-Receiving \n"
-        		+ "3-Sending(testing)");
-        
-        // File path send
-        String zipFilePath = System.getProperty("user.dir") + "/out/Container.zip";
-        // File path to receivee
-        String fileRecPath = System.getProperty("user.dir") + "/out/ContainerRec.zip";
-        // File send
-        File fileSend = new File(zipFilePath);
-        // File receive
-        File fileReceive = new File(fileRecPath);
-
-        int input = scanner.nextInt();
-
-        switch (input) {
-		case 1:
-			serial.send(fileSend);
+	// TODO: usunąć main jeśli nie będzie już potrzebny
+//	public static void main(String[] args) {
+//		// Create a Scanner object to read user input
+//
+//		SerialCommunication serial = new SerialCommunication();
+//		serial.start("COM4", 115200);
+//
+//        Scanner scanner = new Scanner(System.in);
+//
+//        System.out.print("Choose:\n1-Sending \n"
+//        		+ "2-Receiving \n"
+//        		+ "3-Sending(testing)");
+//        
+//        // File path send
+//        String zipFilePath = System.getProperty("user.dir") + "/out/Container.zip";
+//        // File path to receivee
+//        String fileRecPath = System.getProperty("user.dir") + "/out/ContainerRec.zip";
+//        // File send
+//        File fileSend = new File(zipFilePath);
+//        // File receive
+//        File fileReceive = new File(fileRecPath);
+//
+//        int input = scanner.nextInt();
+//
+//        switch (input) {
+//		case 1:
+//			serial.send(fileSend);
+////			byte[] data = new byte[] { 0x01, 0x41, (byte) 0xa0, 0x10, 0x41, (byte) 0xa0, 0x10, 0x41,
+////					(byte) 0xa0, 0x10 };
+////			long crc = CRC.calculateCRC(CRC.Parameters.CRC8, data);
+//////			crc = longTo1Byte(crc);
+////
+////			System.out.printf("CRC: 0x%X\n", crc);
+////
+////			SerialCommunication serial = new SerialCommunication();
+////			// byte[] data = Files.readAllBytes(file.toPath());
+//////			byte[] packet = serial.packetGen((byte) USB_COMMAND_INIT_WRITE_LD, data);
+////			byte[] packet = serial.packetGen((byte) 0x01, data);
+////			System.out.println("Packet: " + Hex.encodeHexString(packet));
+//
+//			break;
+//		case 2:
+//				serial.receive(fileReceive);
+//			break;
+//		case 3:
+////			serialConnection.send(file);
 //			byte[] data = new byte[] { 0x01, 0x41, (byte) 0xa0, 0x10, 0x41, (byte) 0xa0, 0x10, 0x41,
 //					(byte) 0xa0, 0x10 };
 //			long crc = CRC.calculateCRC(CRC.Parameters.CRC8, data);
@@ -192,43 +212,24 @@ public class SerialCommunication {
 //
 //			System.out.printf("CRC: 0x%X\n", crc);
 //
-//			SerialCommunication serial = new SerialCommunication();
 //			// byte[] data = Files.readAllBytes(file.toPath());
 ////			byte[] packet = serial.packetGen((byte) USB_COMMAND_INIT_WRITE_LD, data);
 //			byte[] packet = serial.packetGen((byte) 0x01, data);
 //			System.out.println("Packet: " + Hex.encodeHexString(packet));
-
-			break;
-		case 2:
-				serial.receive(fileReceive);
-			break;
-		case 3:
-//			serialConnection.send(file);
-			byte[] data = new byte[] { 0x01, 0x41, (byte) 0xa0, 0x10, 0x41, (byte) 0xa0, 0x10, 0x41,
-					(byte) 0xa0, 0x10 };
-			long crc = CRC.calculateCRC(CRC.Parameters.CRC8, data);
-//			crc = longTo1Byte(crc);
-
-			System.out.printf("CRC: 0x%X\n", crc);
-
-			// byte[] data = Files.readAllBytes(file.toPath());
-//			byte[] packet = serial.packetGen((byte) USB_COMMAND_INIT_WRITE_LD, data);
-			byte[] packet = serial.packetGen((byte) 0x01, data);
-			System.out.println("Packet: " + Hex.encodeHexString(packet));
-
-			break;
-		default:
-			break;
-		}
-        	try {
-        		Thread.sleep(80);
-        		serial.closeCOM();
-        	} catch (Exception e) {
-        		// TODO Auto-generated catch block
-        		e.printStackTrace();
-        	}
-        scanner.close();
-	}
+//
+//			break;
+//		default:
+//			break;
+//		}
+//        	try {
+//        		Thread.sleep(80);
+//        		serial.closeCOM();
+//        	} catch (Exception e) {
+//        		// TODO Auto-generated catch block
+//        		e.printStackTrace();
+//        	}
+//        scanner.close();
+//	}
 
 	public SerialPort getComPort() {
 		return comPort;
@@ -240,6 +241,9 @@ public class SerialCommunication {
 
 				// Create a FileOutputStream to save the received file
 				FileOutputStream fileOutputStream = new FileOutputStream(fileOut.getAbsolutePath());
+				
+				// Flush device buffer
+				while (inputStream.read() != -1);
 
 				// Sending start command to ESP
 				byte[] initComm = packetGen((byte) USB_COMMAND_INIT_READ_LD, null);
@@ -251,7 +255,7 @@ public class SerialCommunication {
 				// Get length of file (that will be send) in bytes from response
 				long fileLen = convertToLong(littleEndian(dataPacket(resp)));
 				System.out.println("File len: " + fileLen);
-
+				
 				if (isEspResponseOk(resp)) {
 					success(Success.SUCCESS_RECEIVED_OK);
 					consoleOutput("ESP response OK");
@@ -276,6 +280,7 @@ public class SerialCommunication {
 
 							// Sum data bytes to be compared to lenght
 							lenCnt += write.length;
+							System.out.println("lenCnt = " + lenCnt);
 						} else {
 							// Not correct CRC info
 							if (!isCRCOk(read)) {

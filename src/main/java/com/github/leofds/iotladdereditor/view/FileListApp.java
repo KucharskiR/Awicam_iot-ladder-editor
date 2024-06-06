@@ -2,6 +2,7 @@ package com.github.leofds.iotladdereditor.view;
 
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,10 +34,13 @@ public class FileListApp extends javax.swing.JFrame {
 	}
 
 	private JFrame frame;
+	private String pathToContainerDir = System.getProperty("user.dir") + "\\out\\container";
 	private List<String> tableListFiles = new ArrayList<String>();
 //	private DefaultListModel<String> listModel = new DefaultListModel<String>();
 	private HashMap<String, File> filesList = new HashMap<String, File>();
 	private Stack<StackEl> stack;
+	private static String comPort = "COM3";
+	private static SerialCommunication connection = new SerialCommunication();
 
 //    /**
 //     * @wbp.parser.entryPoint
@@ -47,6 +51,12 @@ public class FileListApp extends javax.swing.JFrame {
 				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 			} catch (Exception e) {
 				e.printStackTrace();
+			}
+			
+			try {
+				connection.start(comPort, 9600);
+			} catch (Exception e) {
+				System.out.println(e.getMessage());
 			}
 			new FileListApp().setVisible(true);
 		});
@@ -211,9 +221,8 @@ public class FileListApp extends javax.swing.JFrame {
                     .addComponent(buttonClose))
                 .addGap(9, 9, 9))
         );
-
+        
         pack();
-        addSampleFiles();
     }// </editor-fold>           
     
     // Rendering table
@@ -229,18 +238,50 @@ public class FileListApp extends javax.swing.JFrame {
 		}
     }
     
-    // Add sample files on begining
-    private void addSampleFiles() {
-        // Add sample files to list
-		String path = System.getProperty("user.dir");
-		File file = new File(path, "ladder.pref");
-		
-//		listModel.addElement(file.getName());
-		tableListFiles.add(file.getName());
-		filesList.put(file.getName(), file);
-		
-		renderTable();
-		
+    // Scan files in container dir
+    private void scanContainerDir() {
+    	String path = pathToContainerDir;
+    	
+    	File containerDir = new File(path);
+    	File[] filesInDir = containerDir.listFiles();
+    	
+    	if (filesInDir != null) {
+    		for (File file : filesInDir) {
+    			System.out.println(file.getName());
+    			tableListFiles.add(file.getName());
+    			filesList.put(file.getName(), file);
+    		}
+    	} else {
+    		System.out.println("Empty dir");
+    	}
+    	renderTable();
+    }
+    
+    // Scan files in container dir
+    private void scanAndDeleteFilesInContainerDir() {
+    	String path = pathToContainerDir;
+    	
+    	File containerDir = new File(path);
+    	File[] filesInDir = containerDir.listFiles();
+    	
+    	if (filesInDir != null) {
+    		for (File file : filesInDir) {
+    			System.out.println(file.getName());
+    			file.delete();
+    		}
+    	} else {
+    		System.out.println("Empty dir");
+    	}
+    	
+    	// File from path to Container.zip
+    	File deleteContainer = new File(ZipContainer.getZipfilepath());
+    	
+    	// If Container.zip exists delete it
+    	if (deleteContainer.exists())
+    		deleteContainer.delete();
+    	
+    	// Refresh table
+    	renderTable();
     }
     
 	// Buttons actions
@@ -257,31 +298,40 @@ public class FileListApp extends javax.swing.JFrame {
 			e.printStackTrace();
 		}
 
-		SerialCommunication connection = new SerialCommunication();
-
-		// Start connection
-		connection.start("port name here", 9600); // TODO: port name here
 		// Send to the device
 		connection.send(container.getZipFile());
 
 	}
 	
 	private void buttonImportActionPerformed(ActionEvent evt) {
-		SerialCommunication connection = new SerialCommunication();
-
-		// Start connection
-		connection.start("port name here", 9600); // TODO: port name here
+		// Scan and delete files in container dir first
+		scanAndDeleteFilesInContainerDir();
 		
-		// Check the Container.zip really exists
-		if (!container.getZipFile().exists()) {
-			File createdContainer = new File(ZipContainer.getZipfilepath());
-			// Receive .zip file from the device
-			connection.receive(createdContainer);
-		} else {
-			// Receive .zip file from the device
-			connection.receive(container.getZipFile());
+		// Receive .zip file from the device
+		connection.receive(container.getZipFile());
+		
+		// TODO: usunąć jeśli okaże się jednak nie potrzebne
+//		// Check the Container.zip really exists
+//		if (!container.getZipFile().exists()) {
+//			File createdContainer = new File(ZipContainer.getZipfilepath());
+//			// Receive .zip file from the device
+//			connection.receive(createdContainer);
+//		} else {
+//			// Receive .zip file from the device
+//			connection.receive(container.getZipFile());
+//		}
+		
+		// Try to unpack Container.zip
+		try {
+			// Unpack
+			container.unpack();
+			// Scan container dir files
+			scanContainerDir();
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
 		}
-
+		
 	}
     
 	private void buttonAddFileActionPerformed(java.awt.event.ActionEvent evt) {
@@ -371,7 +421,16 @@ public class FileListApp extends javax.swing.JFrame {
 		}
     }   
     
-    private void buttonCloseActionPerformed(java.awt.event.ActionEvent evt) {                                            
+    private void buttonCloseActionPerformed(java.awt.event.ActionEvent evt) {    
+    	
+    	// TODO: usunąć close connection w przyszłości ponieważ connection będzie globalne dla całej aplikacji
+    	try {
+    		// Try to close COM connection
+			connection.closeCOM();
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.out.println(e.getMessage());
+		}
         this.dispose();
     }                                           
 

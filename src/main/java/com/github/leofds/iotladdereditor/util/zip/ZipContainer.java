@@ -52,24 +52,25 @@ public class ZipContainer {
 			folder.mkdirs();
 	}
 	
-	public static void main(String[] args){
-		File file = new File(System.getProperty("user.dir") + "/ladder.pref");
-		ZipContainer container = new ZipContainer();
-		
-		try {
-			container.addFile(file);
-			container.pack();
-			System.out.println("Waiting");
-			Thread.sleep(5000);
-			System.out.println("End waiting");
-			container.unpack();
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-	    System.out.print("Hello World");
-	  }
+	// TODO: usunąć main
+//	public static void main(String[] args){
+//		File file = new File(System.getProperty("user.dir") + "/ladder.pref");
+//		ZipContainer container = new ZipContainer();
+//		
+//		try {
+//			container.addFile(file);
+//			container.pack();
+//			System.out.println("Waiting");
+//			Thread.sleep(5000);
+//			System.out.println("End waiting");
+//			container.unpack();
+//			
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		
+//	    System.out.print("Hello World");
+//	  }
 	
 	
 
@@ -142,7 +143,7 @@ public class ZipContainer {
 		this.zipFile.delete();
 	}
 	
-	private void unpack() throws Exception {
+	public void unpack() throws Exception {
 		// Create Cipher instance
 		Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
 
