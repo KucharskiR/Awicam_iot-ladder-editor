@@ -172,6 +172,7 @@ public class ZipContainer {
 	public File getZipFile() {
 		File file = new File(zipFilePath);    
 		return file;
+//		return zipFile;
 	}
 
 	public static void extractFilesFromZip(ZipInputStream zipInputStream, File outputDirectory) throws IOException {

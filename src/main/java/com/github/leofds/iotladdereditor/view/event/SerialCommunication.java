@@ -6,7 +6,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.codec.binary.Hex;
@@ -244,7 +243,7 @@ public class SerialCommunication {
 				
 				// Flush device buffer
 				while (inputStream.read() != -1);
-
+				
 				// Sending start command to ESP
 				byte[] initComm = packetGen((byte) USB_COMMAND_INIT_READ_LD, null);
 				outputStream.write(initComm);
@@ -278,7 +277,7 @@ public class SerialCommunication {
 
 							fileOutputStream.write(write, 0, write.length);
 
-							// Sum data bytes to be compared to lenght
+							// Sum data bytes to be compared to length
 							lenCnt += write.length;
 							System.out.println("lenCnt = " + lenCnt);
 						} else {
@@ -324,12 +323,6 @@ public class SerialCommunication {
 					return -1;
 				}
 
-				// TODO: Prawdopodobnie do usunięcia, zamknięcię streamów przesunięte do
-				// closeCOM()
-				// Close the streams and serial port
-//					fileOutputStream.close();
-//					inputStream.close();
-//					comPort.closePort();
 			} else {
 				error(Error.ERROR_OPEN_SERIAL);
 				throw new IOException();
@@ -343,6 +336,14 @@ public class SerialCommunication {
 		}
 		return 0;
 	}
+	
+	/*
+	 * Description:
+	 * 	Send File object (fileIn) to the device
+	 * 
+	 * Return: 
+	 * 	0 if successfully sent, -1 if error occur
+	 */
 	
 	public int send(File fileIn) {
 		try {

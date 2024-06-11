@@ -29,6 +29,8 @@ public class FileListApp extends javax.swing.JFrame {
 
 	public FileListApp() {
 		initComponents();
+		// Scan container dir
+		scanContainerDir();
 		// Inicjalizacja stosu do cofania
         stack = new Stack<>();
 	}
@@ -245,6 +247,10 @@ public class FileListApp extends javax.swing.JFrame {
     	File containerDir = new File(path);
     	File[] filesInDir = containerDir.listFiles();
     	
+    	// Clear lists
+    	tableListFiles.clear();
+    	filesList.clear();
+    	
     	if (filesInDir != null) {
     		for (File file : filesInDir) {
     			System.out.println(file.getName());
@@ -297,29 +303,36 @@ public class FileListApp extends javax.swing.JFrame {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
+		
 		// Send to the device
-		connection.send(container.getZipFile());
+		if (connection.send(container.getZipFile()) != -1) {
+			// If file sent successfully clear container dir from files and delete Container.zip
+			scanAndDeleteFilesInContainerDir();
+			consoleOutput("Ladder info-> File sent to the device!");
+		} else {
+			consoleOutput("Ladder info-> Sending file error. Please try again");
+		}
 
 	}
 	
 	private void buttonImportActionPerformed(ActionEvent evt) {
 		// Scan and delete files in container dir first
-		scanAndDeleteFilesInContainerDir();
+//		scanAndDeleteFilesInContainerDir();
+		scanContainerDir();
 		
 		// Receive .zip file from the device
-		connection.receive(container.getZipFile());
+//		connection.receive(container.getZipFile());
 		
 		// TODO: usunąć jeśli okaże się jednak nie potrzebne
-//		// Check the Container.zip really exists
-//		if (!container.getZipFile().exists()) {
-//			File createdContainer = new File(ZipContainer.getZipfilepath());
-//			// Receive .zip file from the device
-//			connection.receive(createdContainer);
-//		} else {
-//			// Receive .zip file from the device
-//			connection.receive(container.getZipFile());
-//		}
+		// Check the Container.zip really exists
+		if (!container.getZipFile().exists()) {
+			File createdContainer = new File(ZipContainer.getZipfilepath());
+			// Receive .zip file from the device
+			connection.receive(createdContainer);
+		} else {
+			// Receive .zip file from the device
+			connection.receive(container.getZipFile());
+		}
 		
 		// Try to unpack Container.zip
 		try {
@@ -331,7 +344,6 @@ public class FileListApp extends javax.swing.JFrame {
 			System.out.println(e.getMessage());
 			e.printStackTrace();
 		}
-		
 	}
     
 	private void buttonAddFileActionPerformed(java.awt.event.ActionEvent evt) {
@@ -395,8 +407,6 @@ public class FileListApp extends javax.swing.JFrame {
 			// Choose operation according to stack element type
 			switch (lastStack.getType()) {
 			case 0:
-				// Usuń plik z listy
-//				listModel.removeElement(lastStack.getName());
 				
 				// Remove from fileList
 				if (tableListFiles.contains(lastStack.getName()))
@@ -407,7 +417,6 @@ public class FileListApp extends javax.swing.JFrame {
 				break;
 			case 1:
 				// Dodaj plik do listy
-//				listModel.addElement(lastStack.getName());
 				tableListFiles.add(lastStack.getName());
 				filesList.put(lastStack.getName(), null);
 				renderTable();
@@ -436,7 +445,14 @@ public class FileListApp extends javax.swing.JFrame {
 
     private void buttonOpenActionPerformed(java.awt.event.ActionEvent evt) {                                           
         // TODO add your handling code here:
-    }     
+    }    
+    
+    private void consoleOutput(String msg) {
+//		lastConsoleOutput = msg;
+		System.out.println(msg);
+//		TODO: mediator output przywrócić po skończeniu
+//		Mediator.getInstance().outputConsoleMessage(msg);
+	}
 
 	// Stack element class
 	class StackEl {
