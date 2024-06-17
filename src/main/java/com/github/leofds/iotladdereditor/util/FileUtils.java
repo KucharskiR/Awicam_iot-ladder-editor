@@ -242,6 +242,45 @@ public class FileUtils {
 		return false;
 	}
 	
+	public static boolean saveAsLadderProgramFromDevice(){
+		Mediator me = Mediator.getInstance();
+		try{
+			FileFilter filtroTexto = new FileNameExtensionFilter( Strings.ladderProgramExtension(), "ld");
+			JFileChooser fc = new JFileChooser();
+			fc.setCurrentDirectory(new File("").getCanonicalFile());
+			fc.addChoosableFileFilter(filtroTexto);
+			fc.setFileFilter(filtroTexto);
+			fc.setAcceptAllFileFilterUsed(false);
+			int opcao = fc.showSaveDialog(null);
+			if (opcao == JFileChooser.APPROVE_OPTION){
+				
+				File file = fc.getSelectedFile();
+				String absolutPath = fc.getSelectedFile().getAbsolutePath()+".ld";
+				
+				int index = file.getName().lastIndexOf(".");					
+				if(index > -1){
+					String extension = file.getName().substring(index);
+					if(extension.equalsIgnoreCase(".ld")){
+						absolutPath = fc.getSelectedFile().getAbsolutePath();
+					}else{
+						me.outputDialogMessage(Strings.theExtensionMustBe());
+						return false;
+					}
+				}
+				
+				if(checkOverwriteFile(absolutPath)) {
+					Preferences.put(Preferences.LADDER_FILE_NAME, absolutPath);
+					writeProgramFile(absolutPath);
+				}
+				return true;
+			}
+		} catch (Exception e2) {
+			e2.printStackTrace();
+			me.outputDialogMessage( Strings.errorSavingFile() );
+		}
+		return false;
+	}
+	
 	public static void newLadderProgram(){
 		confirmSave();
 		Mediator me = Mediator.getInstance();

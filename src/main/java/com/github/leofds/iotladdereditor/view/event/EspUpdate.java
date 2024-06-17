@@ -224,7 +224,6 @@ public class EspUpdate extends JFrame {
 						consoleOutput(Strings.processExitedWithCode() + " "  + " "  + exitCode);
 
 						if (exitCode == 0)
-//							TODO: strings upgrade
 							consoleOutput(Strings.libraryUpdateSuccess());
 						else
 							consoleOutput(Strings.libraryUpdateFalse());

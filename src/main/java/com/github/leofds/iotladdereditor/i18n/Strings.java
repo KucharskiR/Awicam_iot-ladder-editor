@@ -220,6 +220,9 @@ public class Strings {
 	public static String libraryUpdateFalse() { return bundle.getString("libraryUpdateFalse"); }
 	public static String errorTryAgain() { return bundle.getString("errorTryAgain"); }
 	public static String processExitedWithCode() { return bundle.getString("processExitedWithCode"); }
+	public static String portConnected() { return bundle.getString("portConnected"); }
+	public static String portConnectingError() { return bundle.getString("portConnectingError"); }
+	public static String fileToSend() { return bundle.getString("fileToSend"); }
 
 	
 }
