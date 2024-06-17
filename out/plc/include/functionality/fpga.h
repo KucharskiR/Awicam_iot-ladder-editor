@@ -68,10 +68,13 @@ Sterownik Ethernet MAC - ADR=2 (11):
 #include "../includes.h"
 #include "../defines.h"
 #include "filesystem.h"
+#include "esp32/rom/crc.h"
+
+extern ControllerStatus controllerStatus;
 
 spi_device_handle_t fpga;
 
-spi_bus_config_t spi_conifg = {//Default MSB
+spi_bus_config_t spi_conifg = {//Default MSb
     .mosi_io_num = FPGA_SPI_MOSI,
     .miso_io_num = FPGA_SPI_MISO,
     .sclk_io_num = FPGA_SPI_CLK,
@@ -127,7 +130,7 @@ inline void programFPGA()
   #endif
 
   // gpio_reset_pin(FPGA_SPI_CLK);
-  
+  // Programming needs other device interface
   spi_device_interface_config_t device_conifg = {
     .command_bits = 0,
     .address_bits = 0,
@@ -244,33 +247,43 @@ inline void programFPGA()
   #endif
 }
 
-// Read inputs states
-// @return recived byte
+// Read inputs states from fpga
+// @param data drive 4 outputs on fpga 4 MSbs are reserved
+// @return received byte (inputs from fpga)
 inline uint8_t readInputsFPGA(uint8_t data)
 {
   uint8_t toSend = 0x80 | (0x0f & data); 
-  uint8_t recived;
+  uint8_t received;
 
   spi_transaction_t transaction = {
     .cmd = toSend,
     .length = 1*8,
     .rxlength = 8,
     // .tx_buffer = &toSend,
-    .rx_buffer = &recived,
+    .rx_buffer = &received,
   };
 
+  //Set to spi
+  REG_SET_BITS(GPIO_FUNC2_OUT_SEL_CFG_REG, FSPICLK_OUT_IDX, 0x000000ff);
+  REG_SET_BITS(GPIO_FUNC8_OUT_SEL_CFG_REG, FSPICS0_OUT_IDX, 0x000000ff);
 
   ESP_ERROR_CHECK(spi_device_transmit(fpga, &transaction));
 
-  // ESP_LOGI("FPGA_SPI", "send: " BYTE_TO_BINARY_PATTERN "  recived: " BYTE_TO_BINARY_PATTERN "",
-  // BYTE_TO_BINARY(toSend), BYTE_TO_BINARY(recived));
+  //Set to drive gpio 
+  REG_SET_BITS(GPIO_FUNC2_OUT_SEL_CFG_REG, 128, 0x000000ff);
+  REG_SET_BITS(GPIO_FUNC8_OUT_SEL_CFG_REG, 128, 0x000000ff);
 
-  return recived;
+  // ESP_LOGI("FPGA_SPI", "send: " BYTE_TO_BINARY_PATTERN "  received: " BYTE_TO_BINARY_PATTERN "",
+  // BYTE_TO_BINARY(toSend), BYTE_TO_BINARY(received));
+
+  return received;
 }
 
+// Set outputs on FPGA
+// @param data outputs to be set on fpga, 2 MSbs are reserved
 inline void writeOutputsFPGA(uint16_t data)
 {
-  uint8_t toSend0 = 0x3f & (data >> 8) ;
+  uint8_t toSend0 = 0x3f & (data >> 8);
   uint8_t toSend1 = 0x00ff & data;
 
   spi_transaction_t transaction = {
@@ -280,230 +293,677 @@ inline void writeOutputsFPGA(uint16_t data)
     .rx_buffer = nullptr,
   };
 
+  //Set to spi
+  REG_SET_BITS(GPIO_FUNC2_OUT_SEL_CFG_REG, FSPICLK_OUT_IDX, 0x000000ff);
+  REG_SET_BITS(GPIO_FUNC8_OUT_SEL_CFG_REG, FSPICS0_OUT_IDX, 0x000000ff);
+
   ESP_ERROR_CHECK(spi_device_transmit(fpga, &transaction));
 
+  //Set to drive gpio 
+  REG_SET_BITS(GPIO_FUNC2_OUT_SEL_CFG_REG, 128, 0x000000ff);
+  REG_SET_BITS(GPIO_FUNC8_OUT_SEL_CFG_REG, 128, 0x000000ff);
   // ESP_LOGI("FPGA_SPI", "send: " BYTE_TO_BINARY_PATTERN " " BYTE_TO_BINARY_PATTERN "",
   // BYTE_TO_BINARY(toSend[0]), BYTE_TO_BINARY(toSend[1]));
 }
 
-
-//-----------------------------------
-//--------------Testing--------------
-//-----------------------------------
-
-// Etap 1 wysyła 14 bitów i ustawia o=z
-void writeFPGAstage1(uint16_t data)
+uint8_t reflectByte(uint8_t data)
 {
-  uint8_t dataa = 0x00ff & data;
-  uint8_t cmd = 0x3f & (data>> 8) ;
+    uint32_t tmp = 0;
 
-  spi_transaction_t transaction = {
-    .cmd = cmd,
-    .length = 1*8,
-    .tx_buffer = &dataa,
-    .rx_buffer = nullptr,
-  };
+    for (uint8_t i = 0; i < 8; i++)
+    {
+      tmp = tmp << 1;
+      tmp |= data & 0x01;
+      data = data >> 1;
+    }
 
-  spi_device_transmit(fpga, &transaction);
-
-  ESP_LOGI("FPGA_SPI", "send: " BYTE_TO_BINARY_PATTERN " " BYTE_TO_BINARY_PATTERN "",
-  BYTE_TO_BINARY(cmd), BYTE_TO_BINARY(dataa));
+    return tmp;
 }
 
-// Etap 2 wysłanie bajtu i odebranie bajtu
-// >1>0> 0>0> AB>AA>A9>A8 <B7<B6<B5<B4<B3<B2<B1<B0.
-//  K A PORT
-void writeFPGAstage2(uint8_t data)
+// Soft CRC-8
+// @param data data to calculate CRC-8
+uint8_t checkCRC(uint32_t data)
+{
+    const uint8_t packetSize = 32; // 24 data + 8 crc
+    const uint32_t divisior = 0x07000000;
+
+    for (uint8_t i = 0; i < packetSize - 8; i++)
+    {
+        if ((data & 0x80000000) != 0)
+        {
+            data = uint32_t((data << 1) ^ divisior);
+            //data ^= divisior;
+        }
+        else
+          data = data << 1;
+    }
+
+  // ESP_LOGI("CRC", "Remainder: %d", data);
+
+  return data>>=24;
+}
+
+// Check CRC-8, using ESPIDF API
+// @param crc
+inline uint8_t checkCRC(uint8_t crc, const uint8_t * buf, uint32_t len)
+{
+  uint8_t crcTemp = 0;
+  crcTemp = ~crc8_le(~0, buf, 3);
+  return crcTemp ^ crc;
+}
+
+// Check CRC-8, using ESPIDF API
+// @param buf buffer with CRC
+// @param len length of buffer with CRC
+// @return if 0 then CRC is good
+inline uint8_t checkCRC(const uint8_t * buf, uint32_t len)
+{
+  uint8_t crcTemp = 0;
+  crcTemp = ~crc8_le(~0, buf, len);
+  return crcTemp;
+}
+
+// Generate CRC-8, using ESPIDF API
+// @param buf buffer to start calculate crc
+// @param len buffer length in byte
+// @return CRC-8 value
+uint8_t genCRC(const uint8_t * buf, uint32_t len)
+{
+  return ~crc8_be(~0, buf, len);
+}
+
+// Write 1 bytes and read 3 bytes from FPGA. This function generates table with received data.
+// @param data Data to be send
+// @param received Pointer to table, function save in it received data
+// @return CRC reminder, if equals 0 packet is good
+inline uint8_t readExtFPGA(uint8_t data, uint8_t* received)
 {
   uint8_t toSend = 0x80 | (0x0f & data); 
-  uint8_t recived;
 
   spi_transaction_t transaction = {
     .cmd = toSend,
-    .length = 1*8,
-    .rxlength = 8,
-    // .tx_buffer = &toSend,
-    .rx_buffer = &recived,
+    .length = 4*8,
+    .rxlength = 3*8,
+    .rx_buffer = received,
   };
+  
+  REG_SET_BITS(GPIO_FUNC2_OUT_SEL_CFG_REG, FSPICLK_OUT_IDX, 0x000000ff);
+  REG_SET_BITS(GPIO_FUNC8_OUT_SEL_CFG_REG, FSPICS0_OUT_IDX, 0x000000ff);
+  
+  ESP_ERROR_CHECK(spi_device_transmit(fpga, &transaction));
+  
+  REG_SET_BITS(GPIO_FUNC2_OUT_SEL_CFG_REG, 128, 0x000000ff);
+  REG_SET_BITS(GPIO_FUNC8_OUT_SEL_CFG_REG, 128, 0x000000ff);
+
+  uint8_t crcdata[4];
+  crcdata[0] = toSend;
+  crcdata[1] = received[0];
+  crcdata[2] = received[1];
+  crcdata[3] = received[2];
 
 
-  spi_device_transmit(fpga, &transaction);
+  // ESP_LOGI("FPGA", "Send:     %d, \t 0x%x, "  BYTE_TO_BINARY_PATTERN "", toSend, toSend, BYTE_TO_BINARY(toSend));
+  // ESP_LOGI("FPGA", "Received: %d, \t 0x%x, " BYTE_TO_BINARY_PATTERN "", received[0], received[0], BYTE_TO_BINARY(received[0]));
+  // ESP_LOGI("FPGA", "Received: %d, \t 0x%x, " BYTE_TO_BINARY_PATTERN "", received[1], received[1], BYTE_TO_BINARY(received[1]));
+  // ESP_LOGI("FPGA", "Received: %d, \t 0x%x, " BYTE_TO_BINARY_PATTERN "", received[2], received[2], BYTE_TO_BINARY(received[2]));
 
-  ESP_LOGI("FPGA_SPI", "send: " BYTE_TO_BINARY_PATTERN "  recived: " BYTE_TO_BINARY_PATTERN "",
-  BYTE_TO_BINARY(toSend), BYTE_TO_BINARY(recived));
+  // uint32_t dataToCheckPrepared = 
+  // (reflectByte(toSend)<<24) | 
+  // (reflectByte(received[0])<<16) | 
+  // (reflectByte(received[1])<<8) | 
+  // reflectByte(received[2]); 
+
+  // ESP_LOGI("TEST", "Soft CRC status: %d", checkCRC(dataToCheckPrepared));
+  // ESP_LOGI("TEST", "Hard CRC status: %d", checkCRC(crcdata[3], crcdata, 3));
+  ESP_LOGI("TEST", "Hard CRC status: %d", checkCRC(crcdata, 4));
+  
+  return checkCRC(crcdata, 4);
 }
 
-// Etap 3      
-// data -> AD AC 
-// >1>0>0>1>SD>SC>AD>AC <SA<C6<C5<C4<C3<C2<C1<C0
-//Nie testowane
-void writeFPGAstage3(uint8_t data, uint8_t i2c)
+// Write 4 bytes
+// @param toSend array of 4 elements with data to send
+// @note toSend[3] should be empty, crc is generate inside 
+// @note toSend[0] 2 MSbs are reserved, inside is proper validation
+inline void writeExtFPGA(uint8_t* toSend)
 {
-  uint8_t toSend = 0x90 | ((0x03 & i2c)<<2) | (0x03 & data); 
-  uint8_t recived;
+  toSend[0] = 0x3f & toSend[0];
+  toSend[3] = (genCRC(toSend, 3));
+
+  // ESP_LOGI("FPGA", "FPGA Send: %x %x %x %x", toSend[0], toSend[1], toSend[2], toSend[3]);
+
+  spi_transaction_t transaction = {
+    .cmd = toSend[0],
+    .length = 3*8,
+    .tx_buffer = toSend + 1,
+    .rx_buffer = nullptr,
+  };
+  
+  REG_SET_BITS(GPIO_FUNC2_OUT_SEL_CFG_REG, FSPICLK_OUT_IDX, 0x000000ff);
+  REG_SET_BITS(GPIO_FUNC8_OUT_SEL_CFG_REG, FSPICS0_OUT_IDX, 0x000000ff);
+  
+  ESP_ERROR_CHECK(spi_device_transmit(fpga, &transaction));
+
+  REG_SET_BITS(GPIO_FUNC2_OUT_SEL_CFG_REG, 128, 0x000000ff);
+  REG_SET_BITS(GPIO_FUNC8_OUT_SEL_CFG_REG, 128, 0x000000ff);
+}
+
+// Receive data using `readExtFPGA`, then check received data 
+// if data is good set flag `CONTROL_FLAG_FPGA_CONNECTED` in `controllerStatus`
+inline void checkFPGAId()
+{
+  uint8_t received[3] = {0};
+
+  if(readExtFPGA(0, received) == 0)
+  {
+    if(received[1] != 0xff)
+    {
+      ESP_LOGI("FPGA", "FPGA programmed properly!");
+      controllerStatus.controlFlags |= CONTROL_FLAG_FPGA_CONNECTED;
+    }
+  }
+  else
+  {
+    ESP_LOGE("CRC", "BAD CRC!");
+  }
+}
+
+// Write encapsulated I2C data
+// @param data additional send data, only 2 LSbs
+// @param i2c_data set I2C SDA state, only 1 LSb 
+// @param i2c_clk set I2C CLK state, only 1LSb
+// @param receivedData additional received data (port c)
+// @return received I2C state
+// @note For more info chcek fpga readme
+inline uint8_t writeRawI2CFPGA(uint8_t data, uint8_t i2c_data, uint8_t i2c_clk, uint8_t* receivedData)
+{
+  uint8_t toSend = 0x90 | ((0x03 & data)<<2) | ((0x01 & i2c_data)<<1) | (0x01 & i2c_clk); 
+  uint8_t received;
 
   spi_transaction_t transaction = {
     .cmd = toSend,
-    .length = 1*8,
+    .length = 1 * 8,
     .rxlength = 8,
     // .tx_buffer = &toSend,
-    .rx_buffer = &recived,
+    .rx_buffer = &received,
   };
 
+  //Set to spi
+  REG_SET_BITS(GPIO_FUNC2_OUT_SEL_CFG_REG, FSPICLK_OUT_IDX, 0x000000ff);
+  REG_SET_BITS(GPIO_FUNC8_OUT_SEL_CFG_REG, FSPICS0_OUT_IDX, 0x000000ff);
 
-  spi_device_transmit(fpga, &transaction);
+  ESP_ERROR_CHECK(spi_device_transmit(fpga, &transaction));
+
+  //Set to drive gpio 
+  REG_SET_BITS(GPIO_FUNC2_OUT_SEL_CFG_REG, 128, 0x000000ff);
+  REG_SET_BITS(GPIO_FUNC8_OUT_SEL_CFG_REG, 128, 0x000000ff);
+
+  // ESP_LOGI("FPGA_SPI", "send: " BYTE_TO_BINARY_PATTERN "  received: " BYTE_TO_BINARY_PATTERN "",
+  // BYTE_TO_BINARY(toSend), BYTE_TO_BINARY(received));
+  if(receivedData)
+    *receivedData = received & 0x7f;
+
+  return received >> 7;
+}
+
+// Write one byte to I2C device connected to FPGA, blocking funtion - waits to write all data
+// @param data write additional data
+// @param i2cByte write byte to I2C device
+// @param flags set flags to define if this byte is first/middle/last, use one of FPGA_FLAG_I2C_*
+// @note First byte must have flag: FPGA_FLAG_I2C_FIRST_BYTE, last byte must have flag: FPGA_FLAG_I2C_LAST_BYTE
+// @note Testing purpose, use writeByteI2CFPGA
+inline void writeRawByteI2CFPGA(uint8_t data, uint8_t i2cByte, uint8_t flags = 0)
+{
+  //Set to spi
+  REG_SET_BITS(GPIO_FUNC2_OUT_SEL_CFG_REG, FSPICLK_OUT_IDX, 0x000000ff);
+  REG_SET_BITS(GPIO_FUNC8_OUT_SEL_CFG_REG, FSPICS0_OUT_IDX, 0x000000ff);
+
+  uint8_t toSend = 0;
+  uint8_t received = 0;
+  const uint8_t constSend = 0x90 | ((0x03 & data)<<2);
+
+  spi_transaction_t transaction = {
+    .cmd = toSend,
+    .length = 1 * 8,
+    .rxlength = 8,
+    // .tx_buffer = &toSend,
+    .rx_buffer = &received,
+  };
+
+  // write init
+  if(flags & FPGA_FLAG_I2C_FIRST_BYTE)
+  {
+    transaction.cmd = constSend | 1; 
+    ESP_ERROR_CHECK(spi_device_transmit(fpga, &transaction));
+  }
+
+  transaction.cmd = constSend; 
+  ESP_ERROR_CHECK(spi_device_transmit(fpga, &transaction));
+
+  // write data
+  for (uint8_t i = 0; i < 8; i++)
+  {
+    uint8_t i2cBit = 0x01 & (i2cByte>>(7-i));
+
+    transaction.cmd = constSend | (i2cBit<<1);
+    ESP_ERROR_CHECK(spi_device_transmit(fpga, &transaction));
+    //small delay
+    // ets_delay_us(10);
+    transaction.cmd = constSend | (i2cBit<<1) | 1;
+    ESP_ERROR_CHECK(spi_device_transmit(fpga, &transaction));
+    //small delay
+    // ets_delay_us(5);
+    transaction.cmd = constSend | (i2cBit<<1);
+    ESP_ERROR_CHECK(spi_device_transmit(fpga, &transaction));
+    //small delay
+    // ets_delay_us(10);
+    
+    // i2cByte = i2cByte >> 1;
+  }
+  
+  // wait for ACK
+  transaction.cmd = constSend | 2; 
+  ESP_ERROR_CHECK(spi_device_transmit(fpga, &transaction));
+
+  transaction.cmd = constSend | 3; 
+  ESP_ERROR_CHECK(spi_device_transmit(fpga, &transaction));
+
+  transaction.cmd = constSend | 2; 
+  ESP_ERROR_CHECK(spi_device_transmit(fpga, &transaction));
+
+  // set default state
+  transaction.cmd = constSend | 2;
+  ESP_ERROR_CHECK(spi_device_transmit(fpga, &transaction));
+  
+  if(flags & FPGA_FLAG_I2C_LAST_BYTE)
+  {
+    transaction.cmd = constSend ;
+    ESP_ERROR_CHECK(spi_device_transmit(fpga, &transaction));
+
+    transaction.cmd = constSend | 1;
+    ESP_ERROR_CHECK(spi_device_transmit(fpga, &transaction));
+
+    transaction.cmd = constSend | 3;
+    ESP_ERROR_CHECK(spi_device_transmit(fpga, &transaction));
+  }
+
+  //Set to drive gpio 
+  REG_SET_BITS(GPIO_FUNC2_OUT_SEL_CFG_REG, 128, 0x000000ff);
+  REG_SET_BITS(GPIO_FUNC8_OUT_SEL_CFG_REG, 128, 0x000000ff);
+}
+
+// Read one byte from I2C device connected to FPGA, blocking funtion - waits to read all data
+// @param data write additional data
+// @param flags set flags to define if this byte is first/middle/last, use one of FPGA_FLAG_I2C_*
+// @return received byte from I2C device
+// @note First byte must be written to device not red, last byte must have flag: FPGA_FLAG_I2C_LAST_BYTE
+// @note Testing purpose, use readByteI2CFPGA
+inline uint8_t readRawByteI2CFPGA(uint8_t data, uint8_t flags = 0)
+{
+  //Set to spi
+  REG_SET_BITS(GPIO_FUNC2_OUT_SEL_CFG_REG, FSPICLK_OUT_IDX, 0x000000ff);
+  REG_SET_BITS(GPIO_FUNC8_OUT_SEL_CFG_REG, FSPICS0_OUT_IDX, 0x000000ff);
+
+  uint8_t toSend = 0;
+  uint8_t received = 0;
+  uint8_t i2cReceived = 0;
+  const uint8_t constSend = 0x90 | ((0x03 & data)<<2);
+
+  spi_transaction_t transaction = {
+    .cmd = toSend,
+    .length = 1 * 8,
+    .rxlength = 8,
+    // .tx_buffer = &toSend,
+    .rx_buffer = &received,
+  };
+
+  // send init
+  if(flags & FPGA_FLAG_I2C_FIRST_BYTE)
+  {
+    transaction.cmd = constSend | 1; 
+    ESP_ERROR_CHECK(spi_device_transmit(fpga, &transaction));
+  }
+
+  transaction.cmd = constSend; 
+  ESP_ERROR_CHECK(spi_device_transmit(fpga, &transaction));
+
+  // read data
+  for (uint8_t i = 0; i < 8; i++)
+  {
+    transaction.cmd = constSend | 2;
+    ESP_ERROR_CHECK(spi_device_transmit(fpga, &transaction));
+    //small delay
+    // ets_delay_us(10);
+    transaction.cmd = constSend | 3;
+    ESP_ERROR_CHECK(spi_device_transmit(fpga, &transaction));
+    i2cReceived = (i2cReceived << 1) | (received >> 7);
+    //small delay
+    // ets_delay_us(5);
+    transaction.cmd = constSend | 2;
+    ESP_ERROR_CHECK(spi_device_transmit(fpga, &transaction));
+    //small delay
+    // ets_delay_us(10);
+  }
+  
+  // set ACK
+  transaction.cmd = constSend; 
+  ESP_ERROR_CHECK(spi_device_transmit(fpga, &transaction));
+
+  transaction.cmd = constSend | 1; 
+  ESP_ERROR_CHECK(spi_device_transmit(fpga, &transaction));
+
+  transaction.cmd = constSend; 
+  ESP_ERROR_CHECK(spi_device_transmit(fpga, &transaction));
+
+  // set default state
+  transaction.cmd = constSend | 2;
+  ESP_ERROR_CHECK(spi_device_transmit(fpga, &transaction));
 
 
-  ESP_LOGI("FPGA_SPI", "send: " BYTE_TO_BINARY_PATTERN "  recived: " BYTE_TO_BINARY_PATTERN "",
-  BYTE_TO_BINARY(toSend), BYTE_TO_BINARY(recived));
+  if(flags & FPGA_FLAG_I2C_LAST_BYTE)
+  {
+    transaction.cmd = constSend ;
+    ESP_ERROR_CHECK(spi_device_transmit(fpga, &transaction));
+
+    transaction.cmd = constSend | 1;
+    ESP_ERROR_CHECK(spi_device_transmit(fpga, &transaction));
+
+    transaction.cmd = constSend | 3;
+    ESP_ERROR_CHECK(spi_device_transmit(fpga, &transaction));
+  }
+
+  //Set to drive gpio 
+  REG_SET_BITS(GPIO_FUNC2_OUT_SEL_CFG_REG, 128, 0x000000ff);
+  REG_SET_BITS(GPIO_FUNC8_OUT_SEL_CFG_REG, 128, 0x000000ff);
+
+  return i2cReceived;
 }
 
 
-//Not work
-void writeFPGAi2c(uint8_t sendData, uint8_t reciveData, uint8_t numOfSend, uint8_t numOfRecive)
+
+// Queue contain data to write from fpga to the I2C device
+struct QueueDataI2C
 {
-  /*
-  Default: 
-  SDA->1 SCL->1
+  uint8_t bytesOfData[FPGA_MAX_I2C_QUEUE_SIZE] = { 0 };
+  uint8_t bytesOfFlags[FPGA_MAX_I2C_QUEUE_SIZE] = { 0 };
+
+  uint8_t queueCounterData = 0;
+  uint8_t enqueueIndex = 0;
+  uint8_t dequeueIndex = 0;
+
+  // @return 0 on success
+  uint8_t enqueue(uint8_t data, uint8_t flags)
+  {
+    if(queueCounterData == FPGA_MAX_I2C_QUEUE_SIZE)
+      return 1;
+
+    bytesOfData[enqueueIndex] = data;
+    bytesOfFlags[enqueueIndex] = flags;
+
+    enqueueIndex++;
+    queueCounterData++;
+    // enqueueIndex = enqueueIndex % FPGA_MAX_I2C_QUEUE_SIZE;//which is faster?
+    if(enqueueIndex == FPGA_MAX_I2C_QUEUE_SIZE)
+      enqueueIndex = 0;
+
+    return 0;
+  }
+
+  // @return 0 on success
+  uint8_t dequeue(uint8_t* data, uint8_t* flags)
+  {
+    if(queueCounterData == 0)
+      return 1;
+    
+    *data = bytesOfData[dequeueIndex];
+    *flags = bytesOfFlags[dequeueIndex];
+
+    queueCounterData--;
+    dequeueIndex++;
+    // dequeueIndex = enqueueIndex % FPGA_MAX_I2C_QUEUE_SIZE;//which is faster?
+    if(dequeueIndex == FPGA_MAX_I2C_QUEUE_SIZE)
+      dequeueIndex = 0;
+
+    return 0;
+  }
+} queueDataI2C;
+
+// Queue contain data to write to fpga
+struct QueueRawDataToWriteTPGA
+{
+  uint8_t bytesOfData[FPGA_MAX_QUEUE_SIZE] = { 0 };
+  uint8_t bytesOfFlags[FPGA_MAX_QUEUE_SIZE] = { 0 };
+
+  uint8_t queueCounterData = 0;
+  uint8_t enqueueIndex = 0;
+  uint8_t dequeueIndex = 0;
+
+  // @return 0 on success
+  uint8_t enqueue(uint8_t data, uint8_t flags = 0)
+  {
+    if(queueCounterData == FPGA_MAX_QUEUE_SIZE)
+      return 1;
+
+    bytesOfData[enqueueIndex] = data;
+    bytesOfFlags[enqueueIndex] = flags;
+
+    enqueueIndex++;
+    queueCounterData++;
+    // enqueueIndex = enqueueIndex % FPGA_MAX_I2C_QUEUE_SIZE;//which is faster?
+    if(enqueueIndex == FPGA_MAX_QUEUE_SIZE)
+      enqueueIndex = 0;
+
+    return 0;
+  }
+
+  // @return 0 on success
+  uint8_t dequeue(uint8_t* data, uint8_t* flags)
+  {
+    if(queueCounterData == 0)
+      return 1;
+    
+    *data = bytesOfData[dequeueIndex];
+    *flags = bytesOfFlags[dequeueIndex];
+
+    queueCounterData--;
+    dequeueIndex++;
+    // dequeueIndex = enqueueIndex % FPGA_MAX_I2C_QUEUE_SIZE;//which is faster?
+    if(dequeueIndex == FPGA_MAX_QUEUE_SIZE)
+      dequeueIndex = 0;
+
+    return 0;
+  }
+} queueRawDataToWriteTPGA;
+
+// TODO change to queue?
+uint8_t receivedDataFPGA = 0;
+uint8_t receivedByteFlag = 0; //Temp
+
+// Add write byte to queue, this is no bloking function
+// @param toSend byte to be send
+// @param flags set flags to define if this byte is first/middle/last, use one of FPGA_FLAG_I2C_*
+inline void writeByteI2CFPGA(uint8_t toSend, uint8_t flags)
+{
+  queueDataI2C.enqueue(toSend, flags);
+}
+
+// Add read byte to queue, this is no bloking function
+// @param flags set flags to define if this byte is middle/last, use one of FPGA_FLAG_I2C_*
+inline void readByteI2CFPGA(uint8_t flags)
+{
+  queueDataI2C.enqueue(0xff, flags | FPGA_FLAG_I2C_RECEIVE_BYTES);
+}
+
+// Change byte from queue with data fpga<->I2C_device to bytes to write to fpga
+// @param additionalData only 2 LSb, additional bits wich drive 2 outputs on fpga 
+void generateI2CPacketsToWriteFPGA(uint8_t additionalData = 0)
+{
+  uint8_t i2cByte;
+  uint8_t flags = 0;
+  queueDataI2C.dequeue(&i2cByte, &flags);
+  uint8_t sendFlags=0; 
   
-  one bit:
-  SDA->x SCL->0
-  SDA->x SCL->1
-  SDA->y SCL->0
+  const uint8_t constSend = 0x90 | ((0x03 & additionalData)<<2);
+
+  if(flags & FPGA_FLAG_I2C_RECEIVE_BYTES)
+  {
+    sendFlags = FPGA_FLAG_RECEIVE_BIT;
+  }
+
+  if(flags & FPGA_FLAG_I2C_FIRST_BYTE)
+  {
+    queueRawDataToWriteTPGA.enqueue(constSend | 1);
+  }
+
+  for (uint8_t i = 0; i < 8; i++)
+  {
+    uint8_t i2cBit = 0x01 & (i2cByte>>(7-i));
+
+    queueRawDataToWriteTPGA.enqueue(constSend | (i2cBit<<1));
+    if(i == 7 && (sendFlags & FPGA_FLAG_RECEIVE_BIT)) // last bit
+      sendFlags |= FPGA_FLAG_RECEIVE_LAST_BIT;
+    queueRawDataToWriteTPGA.enqueue(constSend | (i2cBit<<1) | 1, sendFlags);
+
+    queueRawDataToWriteTPGA.enqueue(constSend | (i2cBit<<1));
+  }
+
+  // set ACK
+  if(flags & FPGA_FLAG_I2C_RECEIVE_BYTES)
+  {
+    queueRawDataToWriteTPGA.enqueue(constSend );
+    queueRawDataToWriteTPGA.enqueue(constSend | 1);
+    queueRawDataToWriteTPGA.enqueue(constSend);
+  }
+  else // wait for ACK
+  {
+    queueRawDataToWriteTPGA.enqueue(constSend | 2);
+    queueRawDataToWriteTPGA.enqueue(constSend | 3, FPGA_FLAG_ACK_BIT);
+    queueRawDataToWriteTPGA.enqueue(constSend | 2);
+  }
+
+  // set default state
+  queueRawDataToWriteTPGA.enqueue(constSend | 2);
+
+  if(flags & FPGA_FLAG_I2C_LAST_BYTE)
+  {
+    queueRawDataToWriteTPGA.enqueue(constSend);
+    queueRawDataToWriteTPGA.enqueue(constSend | 1);
+    queueRawDataToWriteTPGA.enqueue(constSend | 3);
+  }
+}
+
+// If can write data to fpga
+// @param additionalData only 2 LSb, additional bits wich drive 2 outputs on fpga 
+void processSendFPGA(uint8_t additionalData)
+{
+  if(queueRawDataToWriteTPGA.queueCounterData == 0)
+  {
+    if(queueDataI2C.queueCounterData > 0)
+      generateI2CPacketsToWriteFPGA(additionalData);
+    return;
+  }
   
-  
-  */
   uint8_t toSend;
-  uint8_t recived;
+  uint8_t received;
+  uint8_t flags;
 
+  queueRawDataToWriteTPGA.dequeue(&toSend, &flags);
   spi_transaction_t transaction = {
-    .length = 2*8,
+    .cmd = toSend,
+    .length = 1 * 8,
     .rxlength = 8,
-    .tx_buffer = &toSend,
-    .rx_buffer = &recived,
-  };
-
-
-  for (uint8_t i = 0; i < numOfSend; i++)
-  {
-    toSend = 0x90 | ((0x01 & (sendData>>(8-numOfSend)))<<2); //| (0x03 & data)
-    toSend = 0x90 | ((0x01 & (sendData>>(8-numOfSend)))<<2) | 0x04; //| (0x03 & data)
-    spi_device_transmit(fpga, &transaction);
-  }
-  for (uint8_t i = 0; i < numOfRecive; i++)
-  {
-    toSend = 0x98; //| (0x03 & data)
-    toSend = 0x9c; //| (0x03 & data)
-    spi_device_transmit(fpga, &transaction);
-    reciveData = reciveData>>1 | recived & 0x80;
-  }
-  for (uint8_t i = 0; i < numOfRecive; i++)
-  {
-    toSend = 0x98; //| (0x03 & data)
-    toSend = 0x9c; //| (0x03 & data)
-    spi_device_transmit(fpga, &transaction);
-    reciveData = reciveData>>1 | recived & 0x80;
-  }
-
-  toSend = 0x9c;
-  spi_device_transmit(fpga, &transaction);
-
-  ESP_LOGI("FPGA_SPI", "I2C send: " BYTE_TO_BINARY_PATTERN "  recived: " BYTE_TO_BINARY_PATTERN "",
-  BYTE_TO_BINARY(sendData), BYTE_TO_BINARY(reciveData));
-}
-
-void writeFPGAstage4(uint8_t data)
-{
-  uint32_t toSend = 0x80 | (0x0f & data); 
-  // uint8_t recived[3] ={0};
-  uint32_t recived = 0;
-
-  spi_transaction_t transaction = {
-    .cmd = (uint16_t)toSend, //Bez bitow danych i z tx_buffer nie dziala tak jak powinno
-    .length = 4 * 8, //Nie jestem pewien czy dobrze
-    .rxlength = 3 * 8,
     // .tx_buffer = &toSend,
-    .rx_buffer = &recived,
+    .rx_buffer = &received,
   };
 
-  spi_device_transmit(fpga, &transaction);
+  // ESP_LOGI("QUEUE_FPGA", "Data in FPGA queue(%d):", queueRawDataToWriteTPGA.queueCounterData);
+  // for (uint8_t i = 0; i < queueRawDataToWriteTPGA.queueCounterData; i++)
+  // {
+  //   ESP_LOGI("QUEUE_FPGA", "en: 0x%x de: 0x%x data: 0x%x", 
+  //           queueRawDataToWriteTPGA.enqueueIndex, 
+  //           queueRawDataToWriteTPGA.dequeueIndex, 
+  //           queueRawDataToWriteTPGA.bytesToWrite[(queueRawDataToWriteTPGA.dequeueIndex + i) % FPGA_MAX_I2C_QUEUE_SIZE]
+  //           );
+  // }
+  //ESP_LOGI("QUEUE_FPGA", "to send: %x, flags: %x", toSend, flags);
 
-  ESP_LOGI("FPGA_SPI", "send: " BYTE_TO_BINARY_PATTERN "  recived: " BYTE_TO_BINARY_PATTERN " " BYTE_TO_BINARY_PATTERN " " BYTE_TO_BINARY_PATTERN " ",
-  BYTE_TO_BINARY(toSend), BYTE_TO_BINARY(recived), BYTE_TO_BINARY(recived>>8), BYTE_TO_BINARY(recived>>16));
-}
+  //Set to spi
+  REG_SET_BITS(GPIO_FUNC2_OUT_SEL_CFG_REG, FSPICLK_OUT_IDX, 0x000000ff);
+  REG_SET_BITS(GPIO_FUNC8_OUT_SEL_CFG_REG, FSPICS0_OUT_IDX, 0x000000ff);
 
-//Send to EEPROM
-// void testFPGAi2c()
-// {
-  // START
-  // Clk: 1 Data: falling
-// }
+  ESP_ERROR_CHECK(spi_device_transmit(fpga, &transaction));
+  //Set to drive gpio 
+  REG_SET_BITS(GPIO_FUNC2_OUT_SEL_CFG_REG, 128, 0x000000ff);
+  REG_SET_BITS(GPIO_FUNC8_OUT_SEL_CFG_REG, 128, 0x000000ff);
 
-void testFPGA()
-{
-  spi_bus_initialize(SPI2_HOST, &spi_conifg, SPI_DMA_DISABLED);
-  spi_bus_add_device(SPI2_HOST, &fpga_conifg, &fpga);
-
-  uint8_t dataToSend2 = 0x00;
-    uint16_t buff = 0b0000000000000100;
-
-  while(1)
+  if(flags & FPGA_FLAG_RECEIVE_BIT)
   {
-    // writeFPGAstage2(0b01010101);
-    // writeFPGAstage4(0xff);
-    // Test stage 1
-    ESP_LOGI("TEST_FPGA", "Test stage 1");
-    
-    // for(int i = 0; i < 32; i++)
-    // {
-    //   if(buff != 0b0010000000000000)
-    //     buff = buff << 1;  
-    //   else
-    //     buff = 0b00000000000000100;
+    receivedDataFPGA = (receivedDataFPGA << 1) | (received >> 7);
+    if(flags & FPGA_FLAG_RECEIVE_LAST_BIT)
+    {
+      // TODO set proper flag
+      receivedByteFlag = 1;
+      ESP_LOGI("QUEUE_FPGA", "received: %x", receivedDataFPGA);
+    }
+  }
 
-      // buff=0xcccc;
-      // writeFPGAstage1(buff);
-
-    //   vTaskDelay(100 / portTICK_PERIOD_MS);
-    // }
-
-    
-    // Test stage 2
-    // writeFPGAstage1(0xffff);
-    // ESP_LOGI("TEST_FPGA", "Test stage 2");
-    dataToSend2 = 0b00001100;
-    // for(uint8_t i = 0; i < 16; i++)
-    // {
-      writeFPGAstage2(dataToSend2);
-    //   // dataToSend2 = dataToSend2 + 1;
-    //   vTaskDelay(100 / portTICK_PERIOD_MS);
-    // }
-
-
-//     // Test stage 3
-//     // Clk:  0b10 0001 0010 0100 1001 0111
-//     // Data: 0b10 1000 0111 1110 0011 1000
-//     //                       | <- tu chyba mozna zmienic 
-//     writeFPGAstage1(0xffff);
-//     dataToSend2 = 1;
-//     ESP_LOGI("TEST_FPGA", "Test stage 3");
-//     uint32_t i2cClk =  0b110101010101010101010101011;
-//     uint32_t i2cData = 0b110100000111111100001111001;
-//     for(uint8_t i = 0; i < 27; i++)
-//     {
-//       writeFPGAstage3(dataToSend2, ((i2cData & 0x01)<<1) | (i2cClk & 0x01));
-//       dataToSend2 = ~dataToSend2;
-// //      i2cData = ~(0x01 & i2cData) | 0xfe & i2cData;
-//       i2cClk = i2cClk>>1;
-//       i2cData = i2cData>>1;
-
-//       // vTaskDelay(100 / portTICK_PERIOD_MS);
-//     }
-    //Test stage 4
-
-
-    vTaskDelay(5 / portTICK_PERIOD_MS);
+  if(flags & FPGA_FLAG_ACK_BIT)
+  {
+    if(received & 0x80)
+    {
+      // TODO add to errors No ACK
+      ESP_LOGE("QUEUE_FPGA", "No ACK");
+    }
   }
 }
 
+// Testing
 
+uint8_t bufCounter = 0;
+TickType_t buf = 0;
+TickType_t buf2 = 0;
+
+void testWriteI2C()
+{
+    if(xTaskGetTickCount() - buf2 > 5000)
+    {
+      writeByteI2CFPGA(0x08, FPGA_FLAG_I2C_FIRST_BYTE);
+      if(bufCounter % 2 == 0)
+        writeByteI2CFPGA('q', FPGA_FLAG_I2C_LAST_BYTE);
+      else
+        writeByteI2CFPGA('a', FPGA_FLAG_I2C_LAST_BYTE);
+
+      ESP_LOGI("QUEUE_I2C", "Led changed");
+
+      bufCounter++;
+      buf2 = xTaskGetTickCount();
+    }
+}
+
+void testReadI2C()
+{
+  if(xTaskGetTickCount() - buf > 10000)
+    {
+      // writeByteI2CFPGA(0x08, FPGA_FLAG_I2C_FIRST_BYTE);
+      // if(bufCounter % 2 == 0)
+      //   writeByteI2CFPGA('q', FPGA_FLAG_I2C_LAST_BYTE);
+      // else
+      //   writeByteI2CFPGA('a', FPGA_FLAG_I2C_LAST_BYTE);
+      writeByteI2CFPGA(0x09, FPGA_FLAG_I2C_FIRST_BYTE);
+      readByteI2CFPGA(FPGA_FLAG_I2C_LAST_BYTE);
+
+
+        ESP_LOGI("QUEUE_I2C", "Data in I2C queue(%d):", queueDataI2C.queueCounterData);
+        for (uint8_t i = 0; i < queueDataI2C.queueCounterData; i++)
+        {
+          ESP_LOGI("QUEUE_I2C", "en: 0x%x de: 0x%x data: 0x%x flags: 0x%x", 
+                  queueDataI2C.enqueueIndex, 
+                  queueDataI2C.dequeueIndex, 
+                  queueDataI2C.bytesOfData[(queueDataI2C.dequeueIndex + i) % FPGA_MAX_I2C_QUEUE_SIZE],
+                  queueDataI2C.bytesOfFlags[(queueDataI2C.dequeueIndex + i) % FPGA_MAX_I2C_QUEUE_SIZE]
+                  );
+        }
+        
+      // bufCounter++;
+      buf = xTaskGetTickCount();
+    }
+}

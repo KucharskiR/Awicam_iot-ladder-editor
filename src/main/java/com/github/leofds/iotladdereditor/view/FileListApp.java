@@ -70,7 +70,6 @@ public class FileListApp extends javax.swing.JFrame {
     private javax.swing.JButton buttonDelete;
     private javax.swing.JButton buttonExport;
     private javax.swing.JButton buttonImport;
-    private javax.swing.JButton buttonOpen;
     private javax.swing.JButton buttonUndo;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable jTable1;
@@ -88,7 +87,6 @@ public class FileListApp extends javax.swing.JFrame {
         buttonImport = new javax.swing.JButton();
         buttonUndo = new javax.swing.JButton();
         buttonClose = new javax.swing.JButton();
-        buttonOpen = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -165,13 +163,6 @@ public class FileListApp extends javax.swing.JFrame {
             }
         });
 
-        buttonOpen.setText("Open");
-        buttonOpen.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                buttonOpenActionPerformed(evt);
-            }
-        });
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -183,8 +174,7 @@ public class FileListApp extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(buttonAddFile)
                     .addComponent(buttonDelete)
-                    .addComponent(buttonUndo)
-                    .addComponent(buttonOpen))
+                    .addComponent(buttonUndo))
                 .addGap(19, 19, 19))
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -211,9 +201,7 @@ public class FileListApp extends javax.swing.JFrame {
                         .addComponent(buttonDelete)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(buttonUndo)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(buttonOpen)
-                        .addGap(125, 125, 125))
+                        .addGap(154, 154, 154))
                     .addGroup(layout.createSequentialGroup()
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
@@ -320,10 +308,6 @@ public class FileListApp extends javax.swing.JFrame {
 //		scanAndDeleteFilesInContainerDir();
 		scanContainerDir();
 		
-		// Receive .zip file from the device
-//		connection.receive(container.getZipFile());
-		
-		// TODO: usunąć jeśli okaże się jednak nie potrzebne
 		// Check the Container.zip really exists
 		if (!container.getZipFile().exists()) {
 			File createdContainer = new File(ZipContainer.getZipfilepath());
@@ -443,10 +427,6 @@ public class FileListApp extends javax.swing.JFrame {
         this.dispose();
     }                                           
 
-    private void buttonOpenActionPerformed(java.awt.event.ActionEvent evt) {                                           
-        // TODO add your handling code here:
-    }    
-    
     private void consoleOutput(String msg) {
 //		lastConsoleOutput = msg;
 		System.out.println(msg);

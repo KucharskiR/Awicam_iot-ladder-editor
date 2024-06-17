@@ -438,9 +438,9 @@ inline void initExtensionModules()
   timer_set_counter_value(TIMER_GROUP_0, TIMER_0, 0); 
   timer_set_alarm_value(TIMER_GROUP_0, TIMER_0, 8000); //not sure value is good
   timer_enable_intr(TIMER_GROUP_0, TIMER_0);
-  timer_isr_callback_add(TIMER_GROUP_0, TIMER_0, noUARTReceivedInterrupt, NULL, ESP_INTR_FLAG_IRAM);
+  // timer_isr_callback_add(TIMER_GROUP_0, TIMER_0, noUARTReceivedInterrupt, NULL, ESP_INTR_FLAG_IRAM);
   ESP_LOGI(TASK_TAG, "Interrupt started");
-  timer_start(TIMER_GROUP_0, TIMER_0);
+  // timer_start(TIMER_GROUP_0, TIMER_0);
   
 
 
@@ -452,7 +452,7 @@ inline void initExtensionModules()
     #else
     SendInitCommand();
     #endif
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
+    vTaskDelay(100 / portTICK_PERIOD_MS); //Temp
     if(boardsNumber != 0)
       break;
   }

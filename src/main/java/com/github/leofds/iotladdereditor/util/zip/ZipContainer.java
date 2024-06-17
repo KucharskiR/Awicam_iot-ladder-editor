@@ -171,6 +171,12 @@ public class ZipContainer {
 	
 	public File getZipFile() {
 		File file = new File(zipFilePath);    
+		try {
+			file.createNewFile();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return file;
 //		return zipFile;
 	}

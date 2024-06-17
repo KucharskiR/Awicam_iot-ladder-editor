@@ -1,3 +1,4 @@
+#include <memory>
 #include "includes.h"
 #include "defines.h"
 #include "functionality/multiio.h"
@@ -10,10 +11,13 @@
 
 #include "ladder2pin.h"
 
+#define CreateLadderDiagramTask() xTaskCreate(ladderDiagramTask, "ladderDiagramTask", 2048*8, NULL, configMAX_PRIORITIES - 2, NULL)
+
 // Initialize global variables
 volatile uint8_t boardsNumber = 0;
 DigitalInputsStructure inputs[32] = {0};
 ControllerStatus controllerStatus;
+
 
 /*---------------------------------------------*/
 /*------------Initialize controller------------*/
@@ -25,8 +29,6 @@ void initController(void)
 /*------- Configure USB -------*/
  initUSB();
   
-  
-  vTaskDelay(1000 / portTICK_PERIOD_MS);
   #ifdef DEBUG
   static const char *TASK_TAG = "MAIN_TASK";
 	ESP_LOGI(TASK_TAG, "---------MAIN-------- \n");
@@ -112,6 +114,8 @@ void initController(void)
 /*-------- Progam FPGA ---------*/
   #if defined(W1VC128R_BOARD) || defined(W1VC1616R_BOARD)
   programFPGA();
+  checkFPGAId();
+  writeRawI2CFPGA(0,1,1, nullptr); // set default value, TODO: maybe invert in vhdl to be default high state?
   #endif
 
 /*----- Init MultiIO ------*/
@@ -160,7 +164,7 @@ void initController(void)
 
   //  receiveLDSave();
   
-  controllerStatus.controlFlags = CONTROL_FLAG_RUN_LD_PROGRAMM;
+  controllerStatus.controlFlags |= CONTROL_FLAG_RUN_LD_PROGRAMM;
   inputs[0].deviceInitTime = xTaskGetTickCount();
 }
 
@@ -177,20 +181,15 @@ inline void readInputs()
     // SPI -> FPGA
     // Only if TOP board has 12 input ports
     // Read port B -> Read IN6-IN12 
-    
-  //Set to spi
-  REG_SET_BITS(GPIO_FUNC2_OUT_SEL_CFG_REG, FSPICLK_OUT_IDX, 0x000000ff);
-  REG_SET_BITS(GPIO_FUNC8_OUT_SEL_CFG_REG, FSPICS0_OUT_IDX, 0x000000ff);
+  
+  if(controllerStatus.controlFlags & CONTROL_FLAG_FPGA_CONNECTED)
+  {
+    uint8_t inputsFPGA = readInputsFPGA(static_cast<uint8_t>(inputs[0].digitalOutputStates >> 12));
 
-  uint8_t inputsFPGA = readInputsFPGA(static_cast<uint8_t>(inputs[0].digitalOutputStates >> 12));
-
-  //Set to drive gpio 
-  REG_SET_BITS(GPIO_FUNC2_OUT_SEL_CFG_REG, 128, 0x000000ff);
-  REG_SET_BITS(GPIO_FUNC8_OUT_SEL_CFG_REG, 128, 0x000000ff);
-
-  gpio_set_level(OUTPUT3_PIN, (~inputs[0].digitalOutputStates & 0x0004));
-  gpio_set_level(OUTPUT4_PIN, (~inputs[0].digitalOutputStates & 0x0008));
-  inputs[0].digitalInputStates |= ((inputsFPGA & 0x7f) << 5);  //Piny są odwrócone względem komunikacji do fpga ale bym tak zostawił by było mniej obliczeń
+    gpio_set_level(OUTPUT3_PIN, (~inputs[0].digitalOutputStates & 0x0004));
+    gpio_set_level(OUTPUT4_PIN, (~inputs[0].digitalOutputStates & 0x0008));
+    inputs[0].digitalInputStates |= ((inputsFPGA & 0x7f) << 5);  //Piny są odwrócone względem komunikacji do fpga ale bym tak zostawił by było mniej obliczeń
+  }
   /*|  //IN6
                                   (inputsFPGA << 6) |  //IN7
                                   (inputsFPGA << 7) |  //IN8
@@ -242,22 +241,26 @@ inline void writeOutputs()
 
   // SPI -> FPGA
   #if defined(W1VC128R_BOARD) || defined(W1VC1616R_BOARD)
-  //Set to spi
-  REG_SET_BITS(GPIO_FUNC2_OUT_SEL_CFG_REG, FSPICLK_OUT_IDX, 0x000000ff);
-  REG_SET_BITS(GPIO_FUNC8_OUT_SEL_CFG_REG, FSPICS0_OUT_IDX, 0x000000ff);
 
-  writeOutputsFPGA((inputs[0].digitalOutputStates >> 4));
-  
-  //Set to drive gpio 
-  REG_SET_BITS(GPIO_FUNC2_OUT_SEL_CFG_REG, 128, 0x000000ff);
-  REG_SET_BITS(GPIO_FUNC8_OUT_SEL_CFG_REG, 128, 0x000000ff);
+  if(controllerStatus.controlFlags & CONTROL_FLAG_FPGA_CONNECTED)
+  {
+    writeOutputsFPGA((inputs[0].digitalOutputStates >> 4));
+    // uint8_t toSend[4] = {
+    //   static_cast<uint8_t>(inputs[0].digitalOutputStates >> 12),
+    //   static_cast<uint8_t>(inputs[0].digitalOutputStates >> 4),
+    //   0xff, 
+    //   0x00
+    //   };
+    // writeExtFPGA(toSend);
+  }
+ 
   #endif
 
   // GPIO
-  gpio_set_level(OUTPUT1_PIN, inputs[0].digitalOutputStates & 0x0001);
-  gpio_set_level(OUTPUT2_PIN, inputs[0].digitalOutputStates & 0x0002);
   gpio_set_level(OUTPUT3_PIN, (~inputs[0].digitalOutputStates & 0x0004));
   gpio_set_level(OUTPUT4_PIN, (~inputs[0].digitalOutputStates & 0x0008));
+  gpio_set_level(OUTPUT1_PIN, inputs[0].digitalOutputStates & 0x0001);
+  gpio_set_level(OUTPUT2_PIN, inputs[0].digitalOutputStates & 0x0002);
   
   // ESP_LOGI("out", "Outputs:" BYTE_TO_BINARY_PATTERN " " BYTE_TO_BINARY_PATTERN " ", BYTE_TO_BINARY(inputs[0].digitalOutputStates>>8), BYTE_TO_BINARY(inputs[0].digitalOutputStates));
   // xSemaphoreGive(inputsMutex);
@@ -267,6 +270,7 @@ inline void writeOutputs()
 /*-------------Ladder Diagram Task-------------*/
 /*---------------------------------------------*/
 
+
 extern inline void ladderDiagramProgram();
 
 void ladderDiagramTask(void* arg)
@@ -275,10 +279,22 @@ void ladderDiagramTask(void* arg)
   TickType_t xLastWakeTime = xTaskGetTickCount(); // Add this to ladder generator
   TickType_t timeWait = 1 / portTICK_PERIOD_MS;
 
+  
+  buf = xLastWakeTime + 100000; //For I2C testing
+  buf2 = xLastWakeTime + 100000; //For I2C testing
+
   while(1) {
-    readInputs();
+    readInputs();// esp_task_wdt_reset();
     
-    usbJTAG();
+    // usbJTAG();
+    usb();
+
+    //testWriteI2C();
+    //testReadI2C();
+    
+    //process additional fpga command
+    processSendFPGA(0xff);
+
     // yield();
     while(recivedAll == false && boardsNumber > 0) {}
 

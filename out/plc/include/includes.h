@@ -1,4 +1,6 @@
 #pragma once
+#include <Arduino.h>
+
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_system.h"
@@ -11,7 +13,7 @@
 #include "lwip/sys.h"
 #include "esp_partition.h"
 #include "esp_ota_ops.h"
-#include "SPIFFS.h"
+// #include "SPIFFS.h"
 #include "esp_spiffs.h"
 #include "esp32-hal-gpio.h"
 #include "driver/temp_sensor.h"
@@ -26,5 +28,4 @@
 #include "soc/periph_defs.h"
 #include "soc/uhci_reg.h"
 
-#include <Arduino.h>
 #include "loggerUSB.h"

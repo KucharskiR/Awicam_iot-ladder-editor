@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.codec.binary.Hex;
 
 import com.fazecast.jSerialComm.SerialPort;
+import com.github.leofds.iotladdereditor.application.Mediator;
 import com.github.leofds.iotladdereditor.i18n.Strings;
 import com.github.leofds.iotladdereditor.util.crc.CRC;
 
@@ -74,41 +75,26 @@ public class SerialCommunication {
 
 	private static enum Error {
 		ERROR_RECEIVING, ERROR_SEND, ERROR_RECEIVING_OK, ERROR_SEND_TIME, ERROR_ESP_NOT_SEND_OK, ERROR_FROM_ESP,
-		ERROR_OPEN_SERIAL, ERROR_WAITING_ESP, ERROR_RESPONSE_TIMEOUT
+		ERROR_OPEN_SERIAL, ERROR_WAITING_ESP, ERROR_RESPONSE_TIMEOUT, ERROR_RESPONSE_FROM_DEVICE
 	}
 
 	private static enum Success {
 		SUCCESS_RECEIVED, SUCCESS_SEND, SUCCESS_RECEIVED_OK
 	}
 
-//	private static final byte[] END_OF_DATA = new byte[]{(byte) 0xff, (byte) 0xfe, (byte) 0xff};	<--- depracated 05.02.2024
-
 	private SerialPort comPort;
 	private InputStream inputStream;
 	private OutputStream outputStream;
 
-//	private String lastConsoleOutput = "";
-//	private OutputStream outputStream;
-//
-//	public String getLastConsoleOutput() {
-//		return lastConsoleOutput;
-//	}
-//
-//	public void setLastConsoleOutput(String lastConsoleOutput) {
-//		this.lastConsoleOutput = lastConsoleOutput;
-//	}
-//
-//	public OutputStream getOutputStream() {
-//		return outputStream;
-//	}
-//
-//	public void setOutputStream(OutputStream outputStream) {
-//		this.outputStream = outputStream;
-//	}
-
 	public SerialCommunication() {
 		
 	}
+	/**
+	 * Starts COM port connection on 'portName'
+	 * 
+	 * @param portName
+	 * @param baudRate
+	 */
 	
 	public void start(String portName, int baudRate) {
 		try {
@@ -127,11 +113,11 @@ public class SerialCommunication {
 
 		}
 	}
-	/* Name: closeCOM
+	/** Name: closeCOM
 	 * 
-	 * Description:
+	 *  Description:
 	 * 	Closing input and output streams and finally close COM port
-	 */
+	 **/
 	public void closeCOM() throws IOException {
 		synchronized (this) {
 			this.inputStream.close();
@@ -224,7 +210,6 @@ public class SerialCommunication {
 //        		Thread.sleep(80);
 //        		serial.closeCOM();
 //        	} catch (Exception e) {
-//        		// TODO Auto-generated catch block
 //        		e.printStackTrace();
 //        	}
 //        scanner.close();
@@ -233,16 +218,19 @@ public class SerialCommunication {
 	public SerialPort getComPort() {
 		return comPort;
 	}
+	
+	/**
+	 * Receive data via COM comunication and save data to file 'fileOut'
+	 * @param fileOut
+	 * @return 0 if success receive -1 if error
+	 */
 
 	public int receive(File fileOut) {
 		try {
 			if (comPort.openPort()) {
-
+				
 				// Create a FileOutputStream to save the received file
 				FileOutputStream fileOutputStream = new FileOutputStream(fileOut.getAbsolutePath());
-				
-				// Flush device buffer
-				while (inputStream.read() != -1);
 				
 				// Sending start command to ESP
 				byte[] initComm = packetGen((byte) USB_COMMAND_INIT_READ_LD, null);
@@ -258,7 +246,6 @@ public class SerialCommunication {
 				if (isEspResponseOk(resp)) {
 					success(Success.SUCCESS_RECEIVED_OK);
 					consoleOutput("ESP response OK");
-
 					long lenCnt = 0;
 					// Read and write the file data
 					do {
@@ -279,6 +266,11 @@ public class SerialCommunication {
 
 							// Sum data bytes to be compared to length
 							lenCnt += write.length;
+							
+							// Break loop if write data = 0 and lenCnt has counted more than 0 bytes
+							if (lenCnt > 0 && write.length == 0)
+								break;
+							
 							System.out.println("lenCnt = " + lenCnt);
 						} else {
 							// Not correct CRC info
@@ -303,7 +295,7 @@ public class SerialCommunication {
 									error(Error.ERROR_RECEIVING_OK);
 									return -1;
 								} else {
-									consoleOutput("File received!");
+									consoleOutput("Ladder info-> File received!");
 									break;
 								}
 							} else {
@@ -337,14 +329,12 @@ public class SerialCommunication {
 		return 0;
 	}
 	
-	/*
-	 * Description:
-	 * 	Send File object (fileIn) to the device
+	/**
+	 * Send File object (fileIn) to the device
 	 * 
-	 * Return: 
-	 * 	0 if successfully sent, -1 if error occur
+	 * @param fileIn
+	 * @return 0 if successfully sent, -1 if error occur
 	 */
-	
 	public int send(File fileIn) {
 		try {
 
@@ -355,7 +345,7 @@ public class SerialCommunication {
 				consoleOutput(Strings.fileToSend() + " " + fileIn.toString());
 
 				// Clear buffor
-				consoleOutput("Ladder info-> Clearing device buffor...");
+				consoleOutput("Ladder info-> Clearing device buffor... Please wait...");
 				@SuppressWarnings("unused")
 				byte[] clear = responseFromESP(inputStream);
 				clear = null;
@@ -393,8 +383,8 @@ public class SerialCommunication {
 
 							// Check response from ESP
 							if (!isEspResponseOk(responseFromESP(inputStream))) {
-								error(Error.ERROR_RECEIVING);
-								throw new Exception("Error receive exception");
+								error(Error.ERROR_RESPONSE_FROM_DEVICE);
+								throw new Exception("Error response exception");
 							}
 
 						} catch (Exception e) {
@@ -420,13 +410,13 @@ public class SerialCommunication {
 						if (isEspResponseOk(resArr)) {
 							success(Success.SUCCESS_SEND);
 							// Close connection
-							closeCOM();
+//							closeCOM();    TODO: usunąć closeCOM ze względu na przejście na connection globalny
 						} else if (!isEspResponseOk(resArr)) {
 							error(Error.ERROR_FROM_ESP);
-							closeCOM();
+//							closeCOM();
 						} else {
 							error(Error.ERROR_ESP_NOT_SEND_OK);
-							closeCOM();
+//							closeCOM();
 						}
 
 					} catch (Exception e) {
@@ -486,8 +476,6 @@ public class SerialCommunication {
 		}
 		
 		// Calculate CRC
-//		TODO: poniższy komentarz usunąć 
-//		System.out.println("Before crc: " + Hex.encodeHexString(sequence));
 		byte[] sequenceCrc = new byte[sequence.length+1];
 		// Copy arrays
 		System.arraycopy(sequence, 0, sequenceCrc, 0, sequence.length);
@@ -687,6 +675,9 @@ public class SerialCommunication {
 		case ERROR_RECEIVING:
 			consoleOutput("Ladder info-> Receiving function error");
 			break;
+		case ERROR_RESPONSE_FROM_DEVICE:
+			consoleOutput("Ladder info-> Response from device error");
+			break;
 		case ERROR_RECEIVING_OK:
 			consoleOutput("Ladder info-> Device not sent OK response");
 			break;
@@ -732,9 +723,7 @@ public class SerialCommunication {
 	}
 
 	private void consoleOutput(String msg) {
-//		lastConsoleOutput = msg;
 		System.out.println(msg);
-//		TODO: mediator output przywrócić po skończeniu
 //		Mediator.getInstance().outputConsoleMessage(msg);
 	}
 

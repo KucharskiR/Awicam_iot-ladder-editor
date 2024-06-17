@@ -35,6 +35,21 @@
 #define FPGA_SPI_SPEED_HZ 1000000 //1MHz => 20MHz
 
 
+#define FPGA_FLAG_I2C_MIDDLE_BYTE 0x00
+#define FPGA_FLAG_I2C_FIRST_BYTE 0x01
+#define FPGA_FLAG_I2C_LAST_BYTE 0x02
+#define FPGA_FLAG_I2C_RECEIVE_BYTES 0x10
+
+#define FPGA_FLAG_RECEIVE_BIT 0x10
+#define FPGA_FLAG_RECEIVE_LAST_BIT 0x20
+#define FPGA_FLAG_ACK_BIT 0x40
+#define FPGA_FLAG_RECEIVE_FROM_I2C_DEVICE 0x01
+
+
+
+#define FPGA_MAX_I2C_QUEUE_SIZE 8
+#define FPGA_MAX_QUEUE_SIZE 64
+
 /*---------------------------------------------*/
 /*-----------MultiIO CONFIGURATION-------------*/
 /*---------------------------------------------*/
@@ -97,134 +112,17 @@
 /*---------------------------------------------*/
 //Commands from PC
 
-/*
-Command: <USB_COMMAND_WRITE_LD>
-Response: 0xff <USB_ESP_OK / USB_ESP_ERROR> 0xff
-See sequence diagram for detailed work
-*/
-#define USB_COMMAND_WRITE_LD 0x11
+// /* Idea
 
-/*
-Command: <USB_COMMAND_READ_LD>
-Response: 0xff <USB_ESP_OK / USB_ESP_ERROR> 0xff
-See sequence diagram for detailed work
-*/
-#define USB_COMMAND_READ_LD 0x12
+// command:
+// <~0x80 & cmd> <len> <some> <crc>
 
-/*
-Command: <USB_COMMAND_WRITE_LD_END>
-Response: 0xff <USB_ESP_OK / USB_ESP_ERROR> 0xff
-See sequence diagram for detailed work
-*/
-#define USB_COMMAND_WRITE_LD_END 0xff
+// response:
+// <~0x80 & cmd> <len> <some> <crc>
 
-/*
-Command: <USB_COMMAND_GET_EXTENSION_MODULES_COUNT>
-Response: <extensionModulesCount 1> 
-*/
-#define USB_COMMAND_GET_EXTENSION_MODULES_COUNT 0x1f
-
-/*
-Command: <USB_COMMAND_GET_DEVICE_INFO> <deviceIndeks>
-Response: <deviceType 1> <firmwareVersion 1> <numberOfAnalogInputs 1> <deviceInitTime 4>
-*/
-#define USB_COMMAND_GET_DEVICE_INFO 0x20 
-
-/*
-NOT IMPLEMENTED
-Command: <USB_COMMAND_GET_DEVICE_STATUS> <deviceIndeks>
-Response: <?> <timeError> <errorCode> ...
-*/
-#define USB_COMMAND_GET_DEVICE_STATUS 0x21 
-
-/*
-Command: <USB_COMMAND_GET_DIGITAL_OUTPUTS> <deviceIndeks>
-Response: <outputsLowByte 1> <outputsHighByte 1>
-*/
-#define USB_COMMAND_GET_DIGITAL_OUTPUTS 0x27
-
-/*
-Command: <USB_COMMAND_GET_DIGITAL_INPUTS> <deviceIndeks>
-Response: <inputsLowByte 1> <inputsHighByte 1>
-*/
-#define USB_COMMAND_GET_DIGITAL_INPUTS 0x28
-
-/*
-NOT TESTED
-Command: <USB_COMMAND_GET_DIGITAL_INPUTS> <deviceIndeks>
-Response: analog data
-*/
-#define USB_COMMAND_GET_ANALOG_INPUTS 0x29 
-
-/*
-Command: <USB_COMMAND_GET_DIGITAL_INPUTS_ALL>
-Response: <inputs[0] 2> <inputs[1] 2> ...
-Send data for all (controller + extension modules) devices
-*/
-#define USB_COMMAND_GET_DIGITAL_INPUTS_ALL 0x2a
-
-/*
-Command: <USB_COMMAND_GET_DIGITAL_OUTPUTS_ALL>
-Response: <outputs[0] 2> <outputs[1] 2> ...
-Send data for all (controller + extension modules) devices
-*/
-#define USB_COMMAND_GET_DIGITAL_OUTPUTS_ALL 0x2b
-
-/*
-Command: <USB_COMMAND_ECHO> <data <=63>
-Response: <data <=63>
-*/
-#define USB_COMMAND_ECHO 0x30 
-
-/*
-Command: <USB_COMMAND_GET_DEVICE_TEMPERATURE>
-Response: <rawTemperature 1>
-To calculate use formula: 0.4386 * rawTemperature - 27.88 [*C]
-*/
-#define USB_COMMAND_GET_DEVICE_TEMPERATURE 0x31
-
-/*
-Command: <USB_COMMAND_GET_DEVICE_TIME> 
-Response: <deviceTime 8>
-First low byte
-*/
-#define USB_COMMAND_GET_DEVICE_TIME 0x32
-
-/*
-Command: <USB_COMMAND_SET_NEUTRAL_MODE>
-Response: -
-Stop executing LD and sets outputs to low
-*/
-#define USB_COMMAND_SET_NEUTRAL_MODE 0x40 
-
-/*
-Command: <USB_COMMAND_UNSET_NEUTRAL_MODE>
-Response: -
-Resmue executing LD
-*/
-#define USB_COMMAND_UNSET_NEUTRAL_MODE 0x41 
-
-/*
-Command: <USB_COMMAND_GET_ERRORS>
-Response: <errorCounter 4> <sendErrors 1> <errorTime 4> <errorCode 4> ...
-Send last 5 errors
-*/
-#define USB_COMMAND_GET_ERRORS 0xf0
-
-//ESP responses to PC
-#define USB_ESP_READY_TO_RECEIVE_PACKET 0x15
-#define USB_ESP_ERROR 0x17
-#define USB_ESP_OK 0x16
-
-#define USB_MODE_IDLE 1
-#define USB_MODE_READ 2
-#define USB_MODE_WRITE 3
-#define USB_MODE_BEFORE_RECEIVE_LD_SAVE 10
-#define USB_MODE_RECEIVE_LD_SAVE 11
-#define USB_MODE_SEND_LD_SAVE 12
-#define USB_MODE_BEFORE_SEND_LD_SAVE 14
-#define USB_MODE_TEST 20
-
+// error:
+// <0x80 | cmd> <len> <err_code> <crc>
+// */
 
 /*---------------------------------------------*/
 /*---------------PIN DEFINITIONS---------------*/
