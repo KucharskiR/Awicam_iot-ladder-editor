@@ -17,7 +17,6 @@
 package com.github.leofds.iotladdereditor.view;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.util.Locale;
@@ -31,6 +30,8 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 
 import com.github.leofds.iotladdereditor.application.Mediator;
@@ -164,10 +165,14 @@ public class Menu extends JMenuBar {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO odczytanie/wysłanie pliku z/do ESP a następnie zapisanie do pliku
-//				FileUtils.saveAsLadderProgramFromDevice();
-				ImportExportLD importExportObj = new ImportExportLD();
-				
+				SwingUtilities.invokeLater(() -> {
+					try {
+						UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}
+					new FileListApp().setVisible(true);
+				});
 			}
 		};
 	}

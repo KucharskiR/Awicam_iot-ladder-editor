@@ -31,6 +31,7 @@ import com.github.leofds.iotladdereditor.view.DevicePanel;
 import com.github.leofds.iotladdereditor.view.LadderEditorPanel;
 import com.github.leofds.iotladdereditor.view.MemoryPanel;
 import com.github.leofds.iotladdereditor.view.UI;
+import com.github.leofds.iotladdereditor.view.event.SerialCommunication;
 import com.github.leofds.iotladdereditor.view.tree.CustomTreeModel;
 import com.github.leofds.iotladdereditor.view.tree.TreeFactory;
 
@@ -45,6 +46,7 @@ public class Mediator {
 	private UI ui;
 	private ConsolePanel console;
 	private OutputStream consoleStream;
+	private SerialCommunication connection;
 
 	static {
 		me = new Mediator();
@@ -52,6 +54,14 @@ public class Mediator {
 
 	public static Mediator getInstance(){
 		return me;
+	}
+	
+	public SerialCommunication getConnection() {
+		return connection;
+	}
+
+	public void setConnection(SerialCommunication connection) {
+		this.connection = connection;
 	}
 
 	public void setProject(ProjectContainer project) {

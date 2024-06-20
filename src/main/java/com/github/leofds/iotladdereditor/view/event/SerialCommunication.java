@@ -11,7 +11,6 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.codec.binary.Hex;
 
 import com.fazecast.jSerialComm.SerialPort;
-import com.github.leofds.iotladdereditor.application.Mediator;
 import com.github.leofds.iotladdereditor.i18n.Strings;
 import com.github.leofds.iotladdereditor.util.crc.CRC;
 

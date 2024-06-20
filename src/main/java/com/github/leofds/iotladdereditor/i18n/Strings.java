@@ -223,6 +223,7 @@ public class Strings {
 	public static String portConnected() { return bundle.getString("portConnected"); }
 	public static String portConnectingError() { return bundle.getString("portConnectingError"); }
 	public static String fileToSend() { return bundle.getString("fileToSend"); }
+	public static String examplePopup() { return bundle.getString("examplePopup"); }
 
 	
 }

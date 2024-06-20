@@ -16,10 +16,13 @@
  ******************************************************************************/
 package com.github.leofds.iotladdereditor.example;
 
+import javax.swing.JOptionPane;
+
 import org.apache.commons.lang3.RandomStringUtils;
 
 import com.github.leofds.iotladdereditor.device.DeviceMemory;
 import com.github.leofds.iotladdereditor.device.PeripheralIO;
+import com.github.leofds.iotladdereditor.i18n.Strings;
 import com.github.leofds.iotladdereditor.ladder.LadderProgram;
 import com.github.leofds.iotladdereditor.ladder.ProgramProperties;
 import com.github.leofds.iotladdereditor.ladder.rung.Rung;
@@ -53,15 +56,28 @@ public class ExampleFactory {
 		}
 		return null;
 	}
+	
+	/**
+	 * Shows popup warning window
+	 */
+	private static void popupChooseOtherDevice() {
+		// Set message and title
+		String msg = Strings.examplePopup();
+		String title = Strings.warning() + "!";
+		
+		// Show the window
+		JOptionPane.showConfirmDialog(null,  msg, title, JOptionPane.WARNING_MESSAGE);
+		
+	}
 
 	private static LadderProgram createExampleHelloWorld() {
 		LadderProgram ladderProgram = new LadderProgram();
 		
 		NormallyOpenContact normaContact = new NormallyOpenContact();
-		normaContact.setMemory(ladderProgram.getDevice().getPeripheralIOByName("I1"));
+		normaContact.setMemory(ladderProgram.getDevice().getPeripheralIOByName("I0_1"));
 		
 		Coil coil = new Coil();
-		coil.setMemory(ladderProgram.getDevice().getPeripheralIOByName("Q1"));
+		coil.setMemory(ladderProgram.getDevice().getPeripheralIOByName("Q0_1"));
 		
 		Rungs rungs = ladderProgram.getRungs();
 		Rung rung0 = rungs.getList().get(0);
@@ -80,7 +96,7 @@ public class ExampleFactory {
 		timerOnDelay2.getMemory().setName("T2");
 		
 		Coil coil = new Coil();
-		coil.setMemory(ladderProgram.getDevice().getPeripheralIOByName("Q1"));
+		coil.setMemory(ladderProgram.getDevice().getPeripheralIOByName("Q0_1"));
 		
 		Reset reset = new Reset();
 		reset.setMemory(timerOnDelay1.getMemory());
@@ -96,6 +112,13 @@ public class ExampleFactory {
 	
 	private static LadderProgram createAllKeys() {
 		LadderProgram ladderProgram = new LadderProgram();
+		
+		// Check if the device has at least 8 outputs
+		if (ladderProgram.getDevice().getPeripherals().size() < 8) {
+			popupChooseOtherDevice();
+			return ladderProgram;
+		}
+			
 
 		Rungs rungs = ladderProgram.getRungs();
 		for(int i=1; i<8; i++) {
@@ -105,37 +128,37 @@ public class ExampleFactory {
 			Rung rung0 = rungs.getList().get(i);
 			
 			NormallyOpenContact normallyOpenContact = new NormallyOpenContact();
-			normallyOpenContact.setMemory(ladderProgram.getDevice().getPeripheralIOByName("I"+(i+1)));
+			normallyOpenContact.setMemory(ladderProgram.getDevice().getPeripheralIOByName("I0_"+(i+1)));
 			
 			Coil coil = new Coil();
-			coil.setMemory(ladderProgram.getDevice().getPeripheralIOByName("Q" + (i+1)));
+			coil.setMemory(ladderProgram.getDevice().getPeripheralIOByName("Q0_" + (i+1)));
 			
 			rung0.insertOverride(rung0.getBaseInstruction(0), normallyOpenContact);
 			rung0.insertOverride(rung0.getBaseInstruction(11), coil);
 		}
 		return ladderProgram;
 	}
-	
+
 	private static LadderProgram createParallelAndSerial() {
 		LadderProgram ladderProgram = new LadderProgram();
 		
 		NormallyOpenContact normallyOpenContact1 = new NormallyOpenContact();
-		normallyOpenContact1.setMemory(ladderProgram.getDevice().getPeripheralIOByName("I1"));
+		normallyOpenContact1.setMemory(ladderProgram.getDevice().getPeripheralIOByName("I0_1"));
 		
 		NormallyOpenContact nomrNormallyOpenContact2 = new NormallyOpenContact();
-		nomrNormallyOpenContact2.setMemory(ladderProgram.getDevice().getPeripheralIOByName("I2"));
+		nomrNormallyOpenContact2.setMemory(ladderProgram.getDevice().getPeripheralIOByName("I0_2"));
 		
 		NormallyOpenContact normallyOpenContact3 = new NormallyOpenContact();
-		normallyOpenContact3.setMemory(ladderProgram.getDevice().getPeripheralIOByName("I3"));
+		normallyOpenContact3.setMemory(ladderProgram.getDevice().getPeripheralIOByName("I0_3"));
 		
 		NormallyOpenContact normallyOpenContact4 = new NormallyOpenContact();
-		normallyOpenContact4.setMemory(ladderProgram.getDevice().getPeripheralIOByName("I4"));
+		normallyOpenContact4.setMemory(ladderProgram.getDevice().getPeripheralIOByName("I0_4"));
 		
 		Coil coil1 = new Coil();
-		coil1.setMemory(ladderProgram.getDevice().getPeripheralIOByName("Q1"));
+		coil1.setMemory(ladderProgram.getDevice().getPeripheralIOByName("Q0_1"));
 		
 		Coil coil2 = new Coil();
-		coil2.setMemory(ladderProgram.getDevice().getPeripheralIOByName("Q2"));
+		coil2.setMemory(ladderProgram.getDevice().getPeripheralIOByName("Q0_2"));
 		
 		Rungs rungs = ladderProgram.getRungs();
 		rungs.addRung();
@@ -154,6 +177,12 @@ public class ExampleFactory {
 	
 	private static LadderProgram createBinaryCounter() {
 		LadderProgram ladderProgram = new LadderProgram();
+		
+		// Check if the device has at least 8 outputs
+		if (ladderProgram.getDevice().getPeripherals().size() < 8) {
+			popupChooseOtherDevice();
+			return ladderProgram;
+		}
 
 		TimerOnDelay timerOnDelay1 = new TimerOnDelay();
 		timerOnDelay1.getMemory().setName("T1");
@@ -183,7 +212,7 @@ public class ExampleFactory {
 				And and = new And();
 				and.setSourceA(countUp1.getAccumMemory());
 				and.setSourceB(new DeviceMemory(""+Math.pow(2, i+(j*4)), Integer.class));
-				and.setDestiny(ladderProgram.getDevice().getPeripheralIOByName("Q"+(i+1+(j*4))));
+				and.setDestiny(ladderProgram.getDevice().getPeripheralIOByName("Q0_"+(i+1+(j*4))));
 				rung0.insertOverride(rung0.getBaseInstruction(i), and);
 			}
 		}
@@ -207,13 +236,13 @@ public class ExampleFactory {
 		noc1.setMemory(deviceMemoryI01);
 		
 		Coil coil1 = new Coil();
-		coil1.setMemory(ladderProgram.getDevice().getPeripheralIOByName("Q1"));
+		coil1.setMemory(ladderProgram.getDevice().getPeripheralIOByName("Q0_1"));
 		
 		TimerOnDelay timerOnDelay1 = new TimerOnDelay();
 		timerOnDelay1.getMemory().setName("T1");
 		timerOnDelay1.setPreset(3);
 		
-		PeripheralIO pripPeripheralIOI1 = ladderProgram.getDevice().getPeripheralIOByName("I1");
+		PeripheralIO pripPeripheralIOI1 = ladderProgram.getDevice().getPeripheralIOByName("I0_1");
 		
 		PositiveTransitionContact positiveTransitionContact = new PositiveTransitionContact();
 		positiveTransitionContact.setMemory(pripPeripheralIOI1);

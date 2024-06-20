@@ -2,7 +2,6 @@ package com.github.leofds.iotladdereditor.view;
 
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,11 +10,10 @@ import java.util.Stack;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 
+import com.github.leofds.iotladdereditor.application.Mediator;
 import com.github.leofds.iotladdereditor.util.zip.ZipContainer;
 import com.github.leofds.iotladdereditor.view.event.SerialCommunication;
 
@@ -44,25 +42,25 @@ public class FileListApp extends javax.swing.JFrame {
 	private static String comPort = "COM3";
 	private static SerialCommunication connection = new SerialCommunication();
 
-//    /**
+//    /**   TODO: usunąć main gdy nie potrzebne w przyszłych wersjach
 //     * @wbp.parser.entryPoint
 //     */
-	public static void main(String[] args) {
-		SwingUtilities.invokeLater(() -> {
-			try {
-				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			
-			try {
-				connection.start(comPort, 9600);
-			} catch (Exception e) {
-				System.out.println(e.getMessage());
-			}
-			new FileListApp().setVisible(true);
-		});
-	}
+//	public static void main(String[] args) {
+//		SwingUtilities.invokeLater(() -> {
+//			try {
+//				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
+//			
+//			try {
+//				connection.start(comPort, 9600);
+//			} catch (Exception e) {
+//				System.out.println(e.getMessage());
+//			}
+//			new FileListApp().setVisible(true);
+//		});
+//	}
 	
     // Variables declaration - do not modify                     
     private javax.swing.JButton buttonAddFile;
@@ -88,7 +86,7 @@ public class FileListApp extends javax.swing.JFrame {
         buttonUndo = new javax.swing.JButton();
         buttonClose = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
 		jTable1.setModel(new javax.swing.table.DefaultTableModel(new Object[][] {
@@ -415,15 +413,6 @@ public class FileListApp extends javax.swing.JFrame {
     }   
     
     private void buttonCloseActionPerformed(java.awt.event.ActionEvent evt) {    
-    	
-    	// TODO: usunąć close connection w przyszłości ponieważ connection będzie globalne dla całej aplikacji
-    	try {
-    		// Try to close COM connection
-			connection.closeCOM();
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.out.println(e.getMessage());
-		}
         this.dispose();
     }                                           
 
@@ -431,7 +420,7 @@ public class FileListApp extends javax.swing.JFrame {
 //		lastConsoleOutput = msg;
 		System.out.println(msg);
 //		TODO: mediator output przywrócić po skończeniu
-//		Mediator.getInstance().outputConsoleMessage(msg);
+		Mediator.getInstance().outputConsoleMessage(msg);
 	}
 
 	// Stack element class
