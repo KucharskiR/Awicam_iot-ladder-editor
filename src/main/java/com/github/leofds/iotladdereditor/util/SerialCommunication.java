@@ -1,4 +1,4 @@
-package com.github.leofds.iotladdereditor.view.event;
+package com.github.leofds.iotladdereditor.util;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.codec.binary.Hex;
 
 import com.fazecast.jSerialComm.SerialPort;
+import com.github.leofds.iotladdereditor.application.Mediator;
 import com.github.leofds.iotladdereditor.i18n.Strings;
 import com.github.leofds.iotladdereditor.util.crc.CRC;
 
@@ -93,9 +94,10 @@ public class SerialCommunication {
 	 * 
 	 * @param portName
 	 * @param baudRate
+	 * @return 0 if success -1 if error
 	 */
 	
-	public void start(String portName, int baudRate) {
+	public int start(String portName, int baudRate) {
 		try {
 			consoleOutput(Strings.connecting() + "...");
 			this.comPort = SerialPort.getCommPort(portName);
@@ -105,10 +107,12 @@ public class SerialCommunication {
 			this.outputStream = comPort.getOutputStream();
 			// Print Connected on port 
 			consoleOutput(Strings.portConnected() + portName);
+			return 0;
 
 		} catch (Exception e) {
 			// Print connection error to the console
 			consoleOutput(Strings.portConnectingError() + " " + e.getMessage());
+			return -1;
 
 		}
 	}
@@ -119,6 +123,7 @@ public class SerialCommunication {
 	 **/
 	public void closeCOM() throws IOException {
 		synchronized (this) {
+			consoleOutput(Strings.disconnecting());
 			this.inputStream.close();
 			this.outputStream.close();
 			this.comPort.clearBreak();
@@ -723,7 +728,7 @@ public class SerialCommunication {
 
 	private void consoleOutput(String msg) {
 		System.out.println(msg);
-//		Mediator.getInstance().outputConsoleMessage(msg);
+		Mediator.getInstance().outputConsoleMessage(msg);
 	}
 
 }

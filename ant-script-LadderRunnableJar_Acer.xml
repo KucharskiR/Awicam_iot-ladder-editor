@@ -5,9 +5,9 @@
     <!--define folder properties-->
     <property name="dir.buildfile" value="."/>
     <property name="dir.workspace" value="${dir.buildfile}/.."/>
-    <property name="dir.jarfile" value="C:/Users/kucha/Documents/LadderProgram"/>
+    <property name="dir.jarfile" value="c:/Users/kucha/Documents/Awicam_Projects/Ladder_Jar"/>
     <target name="create_run_jar">
-        <jar destfile="${dir.jarfile}/LadderProgram.jar">
+        <jar destfile="${dir.jarfile}/Awicam-Ladder.jar">
             <manifest>
                 <attribute name="Main-Class" value="org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader"/>
                 <attribute name="Rsrc-Main-Class" value="com.github.leofds.iotladdereditor.IotLadderEditor"/>
@@ -26,6 +26,6 @@
     </target>
 	 <!-- Run the generated JAR file -->
 	<target name="run" depends="create_run_jar">
-        <java jar="${dir.jarfile}/LadderProgram.jar" fork="true" />
-    </target>
+	        <java jar="${dir.jarfile}/Awicam-Ladder.jar" fork="true" />
+	    </target>
 </project>

@@ -14,8 +14,8 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 
 import com.github.leofds.iotladdereditor.application.Mediator;
+import com.github.leofds.iotladdereditor.util.SerialCommunication;
 import com.github.leofds.iotladdereditor.util.zip.ZipContainer;
-import com.github.leofds.iotladdereditor.view.event.SerialCommunication;
 
 public class FileListApp extends javax.swing.JFrame {
 

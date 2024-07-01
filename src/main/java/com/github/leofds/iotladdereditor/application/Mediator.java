@@ -26,12 +26,12 @@ import com.github.leofds.iotladdereditor.i18n.Strings;
 import com.github.leofds.iotladdereditor.ladder.LadderProgram;
 import com.github.leofds.iotladdereditor.ladder.rung.Rung;
 import com.github.leofds.iotladdereditor.ladder.symbol.instruction.LadderInstruction;
+import com.github.leofds.iotladdereditor.util.SerialCommunication;
 import com.github.leofds.iotladdereditor.view.ConsolePanel;
 import com.github.leofds.iotladdereditor.view.DevicePanel;
 import com.github.leofds.iotladdereditor.view.LadderEditorPanel;
 import com.github.leofds.iotladdereditor.view.MemoryPanel;
 import com.github.leofds.iotladdereditor.view.UI;
-import com.github.leofds.iotladdereditor.view.event.SerialCommunication;
 import com.github.leofds.iotladdereditor.view.tree.CustomTreeModel;
 import com.github.leofds.iotladdereditor.view.tree.TreeFactory;
 
@@ -57,7 +57,11 @@ public class Mediator {
 	}
 	
 	public SerialCommunication getConnection() {
-		return connection;
+		SerialCommunication connection = this.connection != null ?
+                connection = this.connection :
+                new SerialCommunication();
+		Mediator.getInstance().setConnection(connection);
+		return this.connection;
 	}
 
 	public void setConnection(SerialCommunication connection) {

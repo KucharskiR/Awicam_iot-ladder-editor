@@ -224,6 +224,11 @@ public class Strings {
 	public static String portConnectingError() { return bundle.getString("portConnectingError"); }
 	public static String fileToSend() { return bundle.getString("fileToSend"); }
 	public static String examplePopup() { return bundle.getString("examplePopup"); }
+	public static String disconnecting() { return bundle.getString("disconnecting"); }
+	public static String disconnected() { return bundle.getString("disconnected"); }
+	public static String disconnectionError() { return bundle.getString("disconnectionError"); }
+	public static String connectedToTheDevice() { return bundle.getString("connectedToTheDevice"); }
+	public static String connectToOnPort() { return bundle.getString("connectToOnPort"); }
 
 	
 }
