@@ -19,6 +19,7 @@ package com.github.leofds.iotladdereditor.view;
 import java.awt.Image;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -78,6 +79,16 @@ public class UI extends JFrame implements WindowListener{
 	@Override
 	public void windowClosing(WindowEvent e) {
 		FileUtils.confirmSave();
+		
+		// Close COM connection before closing app
+		if (Mediator.getInstance().getConnection().getComPort() != null) {
+			try {
+				Mediator.getInstance().getConnection().closeCOM();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		}
+		
 	}
 
 	@Override

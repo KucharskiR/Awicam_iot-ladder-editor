@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.codec.binary.Hex;
@@ -61,6 +62,8 @@ public class SerialCommunication {
 	private static final int USB_COMMAND_INIT_READ_LD = 0x30;
 	private static final int USB_COMMAND_READ_LD = 0x31;
 	private static final int USB_COMMAND_END_READ_LD = 0x32;
+	private static final int USB_COMMAND_CONTROLLER_INFO = 0x0F;
+	private static final int USB_COMMAND_DEVICE_INFO = 0x10;
 
 	// ESP packet error responses
 	private static final int USB_ERROR_BAD_CRC = 0x01;
@@ -79,7 +82,7 @@ public class SerialCommunication {
 	}
 
 	private static enum Success {
-		SUCCESS_RECEIVED, SUCCESS_SEND, SUCCESS_RECEIVED_OK
+		SUCCESS_RECEIVED, SUCCESS_SEND, SUCCESS_RECEIVED_OK, SUCCESS_GET_DEVICE_INFO
 	}
 
 	private SerialPort comPort;
@@ -99,7 +102,7 @@ public class SerialCommunication {
 	
 	public int start(String portName, int baudRate) {
 		try {
-			consoleOutput(Strings.connecting() + "...");
+			consoleOutput(Strings.connecting());
 			this.comPort = SerialPort.getCommPort(portName);
 			comPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0);
 			comPort.setComPortParameters(baudRate, 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY);
@@ -336,7 +339,7 @@ public class SerialCommunication {
 	/**
 	 * Send File object (fileIn) to the device
 	 * 
-	 * @param fileIn
+	 * @param File fileIn
 	 * @return 0 if successfully sent, -1 if error occur
 	 */
 	public int send(File fileIn) {
@@ -345,8 +348,6 @@ public class SerialCommunication {
 			if (comPort.openPort()) {
 
 				FileInputStream fileInputStream = new FileInputStream(fileIn);
-
-				consoleOutput(Strings.fileToSend() + " " + fileIn.toString());
 
 				// Clear buffor
 				consoleOutput("Ladder info-> Clearing device buffor... Please wait...");
@@ -413,14 +414,10 @@ public class SerialCommunication {
 
 						if (isEspResponseOk(resArr)) {
 							success(Success.SUCCESS_SEND);
-							// Close connection
-//							closeCOM();    TODO: usunąć closeCOM ze względu na przejście na connection globalny
 						} else if (!isEspResponseOk(resArr)) {
 							error(Error.ERROR_FROM_ESP);
-//							closeCOM();
 						} else {
 							error(Error.ERROR_ESP_NOT_SEND_OK);
-//							closeCOM();
 						}
 
 					} catch (Exception e) {
@@ -450,12 +447,57 @@ public class SerialCommunication {
 		return 0;
 	}
 	
-	/*
-	 *
-	 * Packet structrue: <command><length><data><crc>
+	/**
+	 * Get device info <br>
+	 * {@code <len=8> <deviceType 1B> <firmwareVersion 1B> <numberOfAnalogInputs 1B> <deviceInitTime 4B> <crc>}
 	 * 
+	 * @return 0 if success <br>-1 if error
 	 */
 	
+	public String controllerInfo() {
+		String name = null;
+		try {
+
+			if (comPort.openPort()) {
+
+				// Init packet
+				byte[] initComm = packetGen((byte) USB_COMMAND_CONTROLLER_INFO, null);
+
+				// Sending init command to ESP
+				outputStream.write(initComm);
+
+					// Get data from the device
+					byte[] data = dataPacket(responseFromESP(inputStream));
+					
+					// Copy 23 bytes from data to new array
+					byte[] first24BytesOfData = new byte[23];
+					System.arraycopy(data, 0, first24BytesOfData, 0, 23);
+					
+					// Convert 23 bytes to the name of the device
+					name = new String(first24BytesOfData, "ISO-8859-1");
+
+			} else {
+				error(Error.ERROR_OPEN_SERIAL);
+				throw new IOException();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			error(Error.ERROR_SEND);
+			// Print to console error from thread
+			consoleOutput(e.getMessage());
+			return null;
+		}
+		return name;
+	}
+	
+	/**
+	 * Function building the packet (command + length + data + CRC)
+	 * Packet structure: {@code <command><length><data><crc>}
+	 * 
+	 * @param {@code byte} command 
+	 * @param {@code byte[]} data
+	 * @return byte[] packet
+	 */
 	private byte[] packetGen(byte command, byte[] data) {
 		/*  Build command
 		 *  
@@ -491,14 +533,12 @@ public class SerialCommunication {
 		return sequenceCrc;
 	}
 	
-	/*
-	 * Name: dataPacket()
+	/**
+	 * Description:<br>
+	 * Retrieve <data> from packet received from the device
 	 * 
-	 * Description:
-	 * 	Retrieve <data> from packet received from the device
-	 * 
-	 * Return:
-	 * 	bytes array (byte[])
+	 * @param data byte[]
+	 * @return bytes array (byte[])
 	 */
 	private byte[] dataPacket(byte[] data) {
 		int len = data.length - 3;
@@ -712,13 +752,16 @@ public class SerialCommunication {
 	private void success(Success success) {
 		switch (success) {
 		case SUCCESS_SEND:
-			consoleOutput("Succesfully sended");
+			consoleOutput("Ladder info-> Succesfully sended");
 			break;
 		case SUCCESS_RECEIVED:
-			consoleOutput("Succesfully received");
+			consoleOutput("Ladder info-> Succesfully received");
 			break;
 		case SUCCESS_RECEIVED_OK:
-			consoleOutput("Received OK from ESP!");
+			consoleOutput("Ladder info-> Received OK from ESP!");
+			break;
+		case SUCCESS_GET_DEVICE_INFO:
+			consoleOutput("Ladder info-> Received device info");
 			break;
 
 		default:

@@ -7,6 +7,8 @@ import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -51,9 +53,9 @@ public class ConnectionPanel extends JPanel {
 		bottomPanel.add(lblDeviceNameLabel);
 		
 		comPortComboBox = new JComboBox<>();
-		comPortComboBox.setPreferredSize(new Dimension(70, 24));
+		comPortComboBox.setPreferredSize(new Dimension(220, 24));
 		comPortComboBox.setBorder(new EmptyBorder(4, 4, 4, 4));
-		comPortComboBox.setMaximumSize(new Dimension(70, 24));
+		comPortComboBox.setMaximumSize(new Dimension(220, 24));
 		bottomPanel.add(comPortComboBox);
 		
 		populateComPortComboBox();
@@ -94,22 +96,36 @@ public class ConnectionPanel extends JPanel {
 		// Get global connection 
 		SerialCommunication connect = Mediator.getInstance().getConnection();
 		
+		// Get whole port name
 		String portName = comPortComboBox.getSelectedItem().toString();
+		
+		// Get only COM<number> from whole COM port name
+		String[] parts = portName.split(":");
+		portName = parts[0];
 		
 		if (btnConnect.getText() == Strings.connect()) {
 			
+			// Set Connecting... text
+			btnConnect.setText(Strings.connecting());
+			
 			if (portName != null) {
 				if(connect.start(portName, 9600) == 0) {
+					
 					// Set green label
 					lblLightLabel.setIcon(new ImageIcon(ContentPanel.class.getResource("/images/indicator_green_light_18x18.png")));
+					
 					// Set Disconnect text on button
 					btnConnect.setText(Strings.disconnect());
-					// TODO: set name of device here in v.0.0.2
-					lblDeviceNameLabel.setText(Strings.connectedToTheDevice() + "<device here in next releases>");
+					
+					// Get controller name
+					String controllerName = connect.controllerInfo();
+					lblDeviceNameLabel.setText(Strings.connectedToTheDevice() + " " + controllerName);
+					
 				} else {
 					// Set red label
 					lblLightLabel.setIcon(new ImageIcon(ContentPanel.class.getResource("/images/indicator_red_light_18x18.png")));
 					lblDeviceNameLabel.setText(Strings.connectToOnPort());
+					
 					// Set Connect text on button
 					btnConnect.setText(Strings.connect());
 				}
@@ -120,11 +136,17 @@ public class ConnectionPanel extends JPanel {
 			btnConnect.setText(Strings.connect());
 			try {
 				connect.closeCOM();
+				
+				// Clear combo list and populate all ports
+				comPortComboBox.removeAllItems();
+				populateComPortComboBox();
+				
 				// Output Disconnected to console
 				consoleOutput(Strings.disconnected());
 				lblDeviceNameLabel.setText(Strings.connectToOnPort());
 			} catch (IOException e) {
 				e.printStackTrace();
+				
 				// Output Disconnection error to console
 				consoleOutput(Strings.disconnectionError() + e.getMessage());
 			}
@@ -137,7 +159,8 @@ public class ConnectionPanel extends JPanel {
 		SerialPort[] ports = SerialPort.getCommPorts();
 		for (SerialPort port : ports) {
 			String portName = port.getSystemPortName();
-			comPortComboBox.addItem(portName);
+			String portExtend = port.getPortDescription();
+			comPortComboBox.addItem(portName + ": " + portExtend);
 		}
 	}
 	
