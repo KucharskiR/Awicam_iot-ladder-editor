@@ -18,6 +18,7 @@ package com.github.leofds.iotladdereditor.compiler;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
@@ -33,10 +34,20 @@ import com.github.leofds.iotladdereditor.compiler.generator.factory.CodeGenerato
 import com.github.leofds.iotladdereditor.i18n.Strings;
 import com.github.leofds.iotladdereditor.util.FileUtils;
 
+import com.github.cliftonlabs.json_simple.JsonArray;
+import com.github.cliftonlabs.json_simple.JsonException;
+import com.github.cliftonlabs.json_simple.JsonObject;
+import com.github.cliftonlabs.json_simple.Jsoner;
+
+
 public class Compiler{
 	
 	private int compilationStatus;
 	private int uploadingStatus;
+	private int platformioStatus;
+	private String pathPlatformIO;
+	private String pathPython;
+	private String workingDirectory;
 
 	public int getCompilationStatus() {
 		return compilationStatus;
@@ -57,9 +68,11 @@ public class Compiler{
 	public Compiler(int compilationStatus) {
 		super();
 		this.compilationStatus = compilationStatus;
+		this.setWorkingDir();
 	}
 
 	public Compiler() {
+		this.setWorkingDir();
 	}
 
 	public static boolean build(ProjectContainer project){
@@ -99,6 +112,90 @@ public class Compiler{
 		consoleOutput(date);
 	}
 
+	private void setWorkingDir() {
+		String currentWorkingDirectory = System.getProperty("user.dir");
+
+		String workingDirectory = currentWorkingDirectory + "/out/plc";
+		this.workingDirectory = workingDirectory; 
+	}
+
+	private boolean downloadPio() {
+
+		return false;
+	}
+
+	private boolean loadPio() {
+		// Info string
+		// String info = Strings.compilationStartInfo();
+		
+		// this.compilationStatus = 2; // TODO change add more compilation status
+
+		// Output to the console
+		consoleOutput("Looking for PlatformIO ...");
+		
+		// Create waiting window
+    // createAndShowWaitingWindow();
+
+		try {
+			// TODO add read python path
+			String pythonPath = "C:/Users/barte/AppData/Local/Programs/Python/Python311/python311.exe";
+
+			String command = pythonPath + " get-pio.py check core --dump-state tmpdir/pioinstaller-state.json"; 
+
+			// Create the process builder
+			ProcessBuilder processBuilder = new ProcessBuilder(command.split(" "));
+
+			// Set the working directory
+			processBuilder.directory(new File(this.workingDirectory));
+
+			// Redirect error stream to output stream
+			processBuilder.redirectErrorStream(true);
+
+			// Start the process
+			Process process = processBuilder.start();
+
+			// Get the process output
+			BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+			String line;
+			while ((line = reader.readLine()) != null) {
+				System.out.println(line);
+				consoleOutput(line);
+			}
+
+			// Wait for the process to complete
+			int exitCode = process.waitFor();
+			
+			if (exitCode != 0)
+			{
+				consoleOutput("PlatformIO not found! Installing...");
+				return false;
+			}
+			consoleOutput("\nPlatformIO found!\r\n");
+
+			try (FileReader jsonFile = new FileReader("tmpdir/pioinstaller-state.json")) {
+
+            JsonObject jsonObject = (JsonObject) Jsoner.deserialize(jsonFile);
+
+						jsonObject.keySet();
+            JsonArray msg = (JsonArray) jsonObject.get("messages");
+            for (Object o : msg) {
+                System.out.println(o);
+            }
+
+        } catch (IOException | JsonException e) {
+            throw new RuntimeException(e);
+        }
+
+				
+		} catch (IOException | InterruptedException e) {
+			e.printStackTrace();
+			consoleOutput(e.getMessage());
+			this.compilationStatus = 1;
+			return false;
+		}
+		return true;
+	}
+
 	public void compile() {
 		// command cmd compile function
 
@@ -114,6 +211,7 @@ public class Compiler{
 //		createAndShowWaitingWindow();
 
 		try {
+			loadPio();
 			/*
 			 * 
 			 * Replace "your-command-here" with the actual command you want to 
