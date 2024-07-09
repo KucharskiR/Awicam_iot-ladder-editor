@@ -29,5 +29,5 @@ hs_err_pid*
 /.settings
 .project  
 .classpath
-#/out/ 
-
+/out/ 
+/.vscode
