@@ -115,14 +115,11 @@ public class Compiler {
 	private void setWorkingDir() {
 		String currentWorkingDirectory = System.getProperty("user.dir");
 
-		// String workingDirectory = currentWorkingDirectory + "/out/plc";
-		// this.outDirectory = currentWorkingDirectory + "/out";
-
 		this.workingDirectory = currentWorkingDirectory + "/out";
 
 		this.srcDirectory = workingDirectory + "/plc-controller";
 		
-		this.pythonPath = currentWorkingDirectory + "/out/Python311-32/python.exe";
+		this.pythonPath = workingDirectory + "/Python311-32/python.exe";
 
 		this.platformioFilePath = this.workingDirectory + "tmp.js";
 	}
