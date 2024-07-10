@@ -18,6 +18,7 @@ package com.github.leofds.iotladdereditor.compiler;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
@@ -33,10 +34,20 @@ import com.github.leofds.iotladdereditor.compiler.generator.factory.CodeGenerato
 import com.github.leofds.iotladdereditor.i18n.Strings;
 import com.github.leofds.iotladdereditor.util.FileUtils;
 
-public class Compiler{
+import com.github.cliftonlabs.json_simple.JsonException;
+import com.github.cliftonlabs.json_simple.JsonObject;
+import com.github.cliftonlabs.json_simple.Jsoner;
+import java.util.Set;
+
+public class Compiler {
 	
 	private int compilationStatus;
 	private int uploadingStatus;
+	private String platformioPath;
+	private String pythonPath;
+	private String platformioFilePath;
+	private String workingDirectory;
+	private String srcDirectory;
 
 	public int getCompilationStatus() {
 		return compilationStatus;
@@ -57,9 +68,11 @@ public class Compiler{
 	public Compiler(int compilationStatus) {
 		super();
 		this.compilationStatus = compilationStatus;
+		this.setWorkingDir();
 	}
 
 	public Compiler() {
+		this.setWorkingDir();
 	}
 
 	public static boolean build(ProjectContainer project){
@@ -99,6 +112,134 @@ public class Compiler{
 		consoleOutput(date);
 	}
 
+	private void setWorkingDir() {
+		String currentWorkingDirectory = System.getProperty("user.dir");
+
+		this.workingDirectory = currentWorkingDirectory + "/out";
+
+		this.srcDirectory = workingDirectory + "/plc-controller";
+		
+		this.pythonPath = workingDirectory + "/Python311-32/python.exe";
+
+		this.platformioFilePath = this.workingDirectory + "tmp.js";
+	}
+
+	private boolean downloadPio() {
+
+		try {
+			String command = this.pythonPath + " get-pio.py"; 
+			// Create the process builder
+			ProcessBuilder processBuilder = new ProcessBuilder(command.split(" "));
+
+			// Set the working directory
+			processBuilder.directory(new File(this.workingDirectory));
+
+			// Redirect error stream to output stream
+			processBuilder.redirectErrorStream(true);
+
+			// Start the process
+			Process process = processBuilder.start();
+
+			// Get the process output
+			BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+			String line;
+			while ((line = reader.readLine()) != null) {
+				System.out.println(line);
+				consoleOutput(line);
+			}
+
+			// Wait for the process to complete
+			int exitCode = process.waitFor();
+			
+			if (exitCode != 0)
+			{
+				consoleOutput("ERROR \r\nPlatformIO not install! ");
+				return false;
+			}
+			consoleOutput("\nPlatformIO installed successfully!\r\n");
+			
+		} catch (IOException | InterruptedException e) {
+			e.printStackTrace();
+			consoleOutput(e.getMessage());
+			return false;
+		}
+
+		return true;
+	}
+
+	private boolean loadPio() {
+		// Info string
+		// String info = Strings.compilationStartInfo();	
+
+		// Output to the console
+		consoleOutput("Looking for PlatformIO ...");
+		
+		// Create waiting window
+    // createAndShowWaitingWindow();
+
+		try {
+			// TODO add read python path
+ 
+			// String pythonPath = "py";
+			String command = this.pythonPath + " get-pio.py check core --dump-state " + this.platformioFilePath; 
+
+			// Create the process builder
+			ProcessBuilder processBuilder = new ProcessBuilder(command.split(" "));
+
+			// Set the working directory
+			processBuilder.directory(new File(this.workingDirectory));
+
+			// Redirect error stream to output stream
+			processBuilder.redirectErrorStream(true);
+
+			// Start the process
+			Process process = processBuilder.start();
+
+			// Get the process output
+			BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+			String line;
+			while ((line = reader.readLine()) != null) {
+				System.out.println(line);
+				consoleOutput(line);
+			}
+
+			// Wait for the process to complete
+			int exitCode = process.waitFor();
+			
+			if (exitCode != 0)
+			{
+				consoleOutput("PlatformIO not found! Installing...");
+				return false;
+			}
+			consoleOutput("\nPlatformIO found!\r\n");
+
+			try (FileReader jsonFile = new FileReader(this.platformioFilePath)) {
+				JsonObject jsonObject = (JsonObject) Jsoner.deserialize(jsonFile);
+
+				// Print json file
+				Set<String> keys = jsonObject.keySet();
+				for (String key : keys) {
+					consoleOutput(key + ": " + jsonObject.get(key).toString());
+				}
+
+				this.platformioPath = jsonObject.get("platformio_exe").toString();
+				this.pythonPath = jsonObject.get("python_exe").toString();
+
+			} catch (IOException | JsonException e) {
+				// throw new RuntimeException(e);
+			}
+
+			File file = new File(this.platformioFilePath);
+			file.delete();
+				
+		} catch (IOException | InterruptedException e) {
+			e.printStackTrace();
+			consoleOutput(e.getMessage());
+			return false;
+		}
+		return true;
+	}
+
 	public void compile() {
 		// command cmd compile function
 
@@ -108,52 +249,28 @@ public class Compiler{
 		this.compilationStatus = 2;
 
 		// Output to the console
-		consoleOutput(info+"...");
+		consoleOutput(info + "...");
 		
 		// Create waiting window
 //		createAndShowWaitingWindow();
 
 		try {
-			/*
-			 * 
-			 * Replace "your-command-here" with the actual command you want to 
-			 * run in the separate cmd window. The "/c" flag is used to indicate 
-			 * that the command should be executed and then the cmd window should be closed.
-			 *  The "start" command is used to open a new cmd window, and the "/k" flag 
-			 *  is used to keep the cmd window open after the command execution.
-			 * 
-			 */
+			// Load PlatformIO path
+			if (loadPio() == false) {
+				downloadPio();
+				loadPio();
+			}
 			
-			// Command to run
-//			String command = "cmd /c start cmd /k arduino-cli compile --fqbn esp32:esp32:esp32s2 plc.ino"; // Replace "dir" with your desired command
-//			String command = "cmd /c arduino-cli compile --fqbn esp32:esp32:esp32c3 plc.ino"; // Replace "dir" with your desired command
-//			String command = "cmd /c arduino-cli compile --fqbn esp32:esp32:esp32c3:CDCOnBoot=cdc --build-property build.extra_flags=-DCORE_DEBUG_LEVEL=5 plc.ino"; // Replace "dir" with your desired command
-			String command = "cmd /c arduino-cli compile --no-color --verbose --log-level info --fqbn esp32:esp32:esp32c3:CDCOnBoot=cdc --build-property \"build.extra_flags=-DCORE_DEBUG_LEVEL=5 -DARDUINO_USB_MODE=1 -DARDUINO_USB_CDC_ON_BOOT=1\" plc.ino"; // Replace "dir" with your desired command
-
-			String currentWorkingDirectory = System.getProperty("user.dir");
-//			System.out.println("Current Working Directory: " + currentWorkingDirectory);
-
-			// Working directory
-			String workingDirectory = currentWorkingDirectory + "/out/plc"; // Replace with your desired directory path
-			/*
-			 * //
-			 * C:\Users\Dell\Documents\KucharskiR_projects\20230803_Ladder_Editor\Awicam_iot
-			 * -ladder-editor\out\plc
-			 * 
-			 * // String workingDirectory = "C:/Users/Dell/Documents/KucharskiR_projects/"
-			 * // + "20230803_Ladder_Editor/Awicam_iot-ladder-editor/out/plc"; // Replace
-			 * with your desired directory path
-			 * 
-			 * // String workingDirectory = "C:/path/to/your/directory"; // Replace with
-			 * your desired directory path
-			 * 
-			 */
-
+			String controllerName = Mediator.getInstance().getProject().getLadderProgram().getDevice().getName();
+			String command = this.platformioPath 
+			// + " --silent"
+			+ " run --environment " + controllerName;
+			
 			// Create the process builder
 			ProcessBuilder processBuilder = new ProcessBuilder(command.split(" "));
 
 			// Set the working directory
-			processBuilder.directory(new File(workingDirectory));
+			processBuilder.directory(new File(this.srcDirectory));
 
 			// Redirect error stream to output stream
 			processBuilder.redirectErrorStream(true);
@@ -194,8 +311,6 @@ public class Compiler{
 	public int upload(String port) {
 		// TODO Auto-generated method stub
 
-		// command cmd compile function
-
 		// Info string
 		String info = Strings.uploadingInfo();
 		
@@ -208,43 +323,34 @@ public class Compiler{
 //		createAndShowWaitingWindow();
 
 		try {
-			/*
-			 * 
-			 * Replace "your-command-here" with the actual command you want to 
-			 * run in the separate cmd window. The "/c" flag is used to indicate 
-			 * that the command should be executed and then the cmd window should be closed.
-			 *  The "start" command is used to open a new cmd window, and the "/k" flag 
-			 *  is used to keep the cmd window open after the command execution.
-			 * 
-			 */
-			
+			// Load PlatformIO path
+			if (loadPio() == false) {
+				downloadPio();
+				loadPio();
+			}
+
 			// Command to run
-			String command = "cmd /c arduino-cli upload -p " + port + " --no-color --verbose --fqbn esp32:esp32:esp32c3 plc.ino"; // Replace "dir" with your desired command
+			String controllerName = Mediator.getInstance().getProject().getLadderProgram().getDevice().getName();
 
-			String currentWorkingDirectory = System.getProperty("user.dir");
-//			System.out.println("Current Working Directory: " + currentWorkingDirectory);
+			String uploadPort = "";
+			if (port.length() > 0)
+				uploadPort = port;
+			else
+				uploadPort = Mediator.getInstance().getConnection().getComPort().toString();
 
-			// Working directory
-			String workingDirectory = currentWorkingDirectory + "/out/plc"; // Replace with your desired directory path
-			/*
-			 * //
-			 * C:\Users\Dell\Documents\KucharskiR_projects\20230803_Ladder_Editor\Awicam_iot
-			 * -ladder-editor\out\plc
-			 * 
-			 * // String workingDirectory = "C:/Users/Dell/Documents/KucharskiR_projects/"
-			 * // + "20230803_Ladder_Editor/Awicam_iot-ladder-editor/out/plc"; // Replace
-			 * with your desired directory path
-			 * 
-			 * // String workingDirectory = "C:/path/to/your/directory"; // Replace with
-			 * your desired directory path
-			 * 
-			 */
+			String command = this.platformioPath 
+			+ " run --environment " + controllerName 
+			// + " --silent"
+			+ " --target nobuild" 
+			+ " --target upload"
+			+ " --upload-port " + uploadPort; 
+
 
 			// Create the process builder
 			ProcessBuilder processBuilder = new ProcessBuilder(command.split(" "));
 
 			// Set the working directory
-			processBuilder.directory(new File(workingDirectory));
+			processBuilder.directory(new File(this.srcDirectory));
 
 			// Redirect error stream to output stream
 			processBuilder.redirectErrorStream(true);
@@ -277,6 +383,5 @@ public class Compiler{
 			consoleOutput(e.getMessage());
 			return 1;
 		}
-	
 	}
 }

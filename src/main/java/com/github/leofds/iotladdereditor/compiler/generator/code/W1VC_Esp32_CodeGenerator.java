@@ -83,7 +83,7 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 		
 //		addPinsSymbolCommunication(ir);
 
-		c.createNewFile("plc/plc.ino");
+		c.createNewFile("plc-controller/src/user_program.cpp");
 		addFileDescription(c);
 //		addIncludes(c);
 		if(isConnectionConfigured()) {
@@ -123,9 +123,11 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 		addInitSystemFunction(p, ir, c);
 //		addTaskScan(ir, c);
 		
-		addLadderDiagramTask(ir, c);
-		addSetup(ir, c);
-		addLoop(c);
+		// addLadderDiagramTask(ir, c);
+		// addSetup(ir, c);
+		// addLoop(c);
+		addInitUserProgram(ir, c);
+		addRunUserProgram(ir, c);
 		for (Symbol symbol : ir.getSymbolTable()) {
 			System.out.println(symbol.toString());
 		}
@@ -188,7 +190,8 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 	private void addIncludes(SourceCode c) {
 		// TODO Auto-generated method stub
 //		c.addl("#include \"include/main.h\"\r\n" + "");
-		c.addl("#include \"include/controller.h\"\r\n");
+// c.addl("#include \"include/controller.h\"\r\n");
+		c.addl("#include \"user_program.h\"\r\n");
 	}
 	
 	/*
@@ -342,7 +345,8 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 						+ peripheralIO.getName() 
 						+ "(" 
 						+ peripheralIO.getPin() 
-						+ ", &inputs["
+						+ ", &deviceData["
+						// + ", &inputs["
 						+ peripheralIO.getDeviceNum()
 						+ "]"
 						+ outputOrInput + ");");
@@ -1207,6 +1211,25 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 				c.addl("\r\n");
 	}
 
+	private void addRunUserProgram(IR ir, SourceCode c) {
+		c.newLine();
+		c.add("void runUserProgram()\r\n"
+				+ "{\r\n"
+				+ "    refreshTime64bit();\r\n");
+		
+		// rung loop generator
+		for(Symbol symbol:ir.getSymbolTable()){
+			if( symbol != null && 
+				symbol.getKind() != null && 
+				symbol.getKind().equals(Kind.FUNCTION) && 
+				symbol.getName().contains(ProgramFunc.RUNG.value)){
+				c.addl("    "+symbol.getName()+"();");
+			}
+		}
+		c.add("\r\n" + "}");
+		c.addl("\r\n");
+	}
+
 	private void addSetup( IR ir, SourceCode c) {
 		c.add("void setup()\r\n"
 				+ "{\r\n"
@@ -1284,6 +1307,15 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 		
 	}
 	
+	private void addInitUserProgram( IR ir, SourceCode c) {
+		c.add("void initUserProgram()\r\n"
+				+ "{\r\n"
+				+ "  init();\r\n"
+				+ "  initContext();\r\n"
+				+ "}"
+				);
+		c.addl("\r\n");
+	}
 //	private void addSetup(SourceCode c) {
 //		c.newLine();
 //		c.addl( "void setup() {\r\n" + 

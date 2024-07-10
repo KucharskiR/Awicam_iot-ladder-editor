@@ -69,6 +69,13 @@
 			<artifactId>commons-codec</artifactId>
 			<version>1.16.1</version>
 		</dependency>
+
+		<!-- JSON -->
+		<dependency>
+			<groupId>com.github.cliftonlabs</groupId>
+			<artifactId>json-simple</artifactId>
+			<version>4.0.1</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<resources>
