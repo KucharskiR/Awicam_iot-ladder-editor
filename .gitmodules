@@ -1,0 +1,3 @@
+[submodule "out/plc-controller"]
+	path = out/plc-controller
+	url = https://bitbucket.org/twojtczak/plc-controller/src/main/
