@@ -143,6 +143,7 @@ public class TreeFactory {
 		CustomTreeNode logicNode = new CustomTreeNode("Logic",new ImageIcon(TreeFactory.class.getResource("/images/AND_16x16.png")));
 		CustomTreeNode mathNode = new CustomTreeNode("Math",new ImageIcon(TreeFactory.class.getResource("/images/Math_16x16.png")));
 		CustomTreeNode systemNode = new CustomTreeNode("System",new ImageIcon(TreeFactory.class.getResource("/images/Settings_16x16.png")));
+		CustomTreeNode programmingLangsNode = new CustomTreeNode("Prog",new ImageIcon(TreeFactory.class.getResource("/images/Programming_langs_16x16.png")));
 		
 		contactsNode.addChild(new CustomTreeNode("Normally open contact", NormallyOpenContact.class,new ImageIcon(TreeFactory.class.getResource("/images/NormallyOpenContact_24x24.png"))));
 		contactsNode.addChild(new CustomTreeNode("Normally closed contact", NormallyClosedContact.class,new ImageIcon(TreeFactory.class.getResource("/images/NormallyClosedContact_24x24.png"))));
@@ -187,6 +188,8 @@ public class TreeFactory {
 		
 		systemNode.addChild(new CustomTreeNode("Scan Time", ScanTime.class, new ImageIcon(TreeFactory.class.getResource("/images/SettingsB_16x16.png"))));
 		
+		programmingLangsNode.addChild(new CustomTreeNode("Assembler", ScanTime.class, new ImageIcon(TreeFactory.class.getResource("/images/SettingsB_16x16.png"))));
+		
 		rootNode.addChild(new CustomTreeNode("Rung", Rung.class,new ImageIcon(TreeFactory.class.getResource("/images/Rung_16x16.png"))));
 		rootNode.addChild(contactsNode);
 		rootNode.addChild(coilsNode);
@@ -196,6 +199,7 @@ public class TreeFactory {
 		rootNode.addChild(logicNode);
 		rootNode.addChild(mathNode);
 		rootNode.addChild(systemNode);
+		rootNode.addChild(programmingLangsNode);
 		return rootNode;
 	}
 }
