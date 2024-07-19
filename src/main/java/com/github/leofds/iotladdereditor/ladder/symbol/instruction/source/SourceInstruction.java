@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.github.leofds.iotladdereditor.ladder.symbol.instruction.programming;
+package com.github.leofds.iotladdereditor.ladder.symbol.instruction.source;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -33,13 +33,16 @@ import com.github.leofds.iotladdereditor.application.ProjectContainer;
 import com.github.leofds.iotladdereditor.device.DeviceMemory;
 import com.github.leofds.iotladdereditor.i18n.Strings;
 import com.github.leofds.iotladdereditor.ladder.symbol.instruction.LadderInstruction;
+import com.github.leofds.iotladdereditor.ladder.symbol.instruction.source.view.SourcePropertyScreen;
+import com.github.leofds.iotladdereditor.ladder.symbol.instruction.timer.view.TimerPropertyScreen;
+import com.github.leofds.iotladdereditor.ladder.view.DialogScreen;
 
-public abstract class ProgrammingInstruction extends LadderInstruction{
+public abstract class SourceInstruction extends LadderInstruction{
 
 	private static final long serialVersionUID = 1L;
 
-	public ProgrammingInstruction(DeviceMemory memory) {
-		super(2, 2, 0, 0, memory);
+	public SourceInstruction() {
+		super(2, 2, 0, 0, new DeviceMemory("",SourceInstruction.class));
 	}
 
 	@Override
@@ -56,16 +59,34 @@ public abstract class ProgrammingInstruction extends LadderInstruction{
 	public List<JMenuItem> getMenuItens(final ProjectContainer project){
 		List<JMenuItem> itens = new ArrayList<JMenuItem>();
 		JMenuItem remove = new JMenuItem(Strings.remove());
+		JMenuItem property = new JMenuItem(Strings.property());
 		itens.add(remove);
+		itens.add(property);
 		remove.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				Mediator me = Mediator.getInstance();
 				me.setChangedProgram();
-				project.getLadderProgram().getRungs().delete(ProgrammingInstruction.this);
+				project.getLadderProgram().getRungs().delete(SourceInstruction.this);
 				me.updateProjectAndViews();
 			}
 		});
+		property.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				SourceInstruction.this.viewInstructionProperty();
+			}
+		});
 		return itens;
+	}
+	
+	@Override
+	public DialogScreen getPropertyScreen() {
+		return new SourcePropertyScreen(getLabel());
+	}
+	
+	@Override
+	public void beforeShowScreen(DialogScreen dialog) {
+		SourcePropertyScreen screen = (SourcePropertyScreen) dialog;
 	}
 }

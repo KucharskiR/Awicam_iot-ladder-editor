@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.github.leofds.iotladdereditor.ladder.symbol.instruction.programming;
+package com.github.leofds.iotladdereditor.ladder.symbol.instruction.source;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -34,19 +34,20 @@ import com.github.leofds.iotladdereditor.device.Device;
 import com.github.leofds.iotladdereditor.device.DeviceMemory;
 import com.github.leofds.iotladdereditor.ladder.view.DialogScreen;
 
-public class Assembler extends ProgrammingInstruction{
+public class Assembler extends SourceInstruction{
 
 	private static final long serialVersionUID = 1L;
 	
 	private int seconds;
 	
 	public Assembler() {
-		super(new DeviceMemory("assembler", null));
+		super();
 		setLabel("ASSEMBLER");
 		seconds = 1;
 	}
 	
-	public int getSeconds() {
+	// TODO: change this method to return fileName
+	public int getFileName() {
 		return seconds;
 	}
 
@@ -60,21 +61,24 @@ public class Assembler extends ProgrammingInstruction{
 		
 		g2d.setColor(new Color(0, 0, 255));
 		g2d.setFont(new Font("Arial", Font.PLAIN, 12));
-		g2d.drawString("Seconds", (blockWidth)/4, blockHeight*getHeight()/1.5f);
-		int len = g2d.getFontMetrics().stringWidth("SYSTEM");
-		g2d.drawString("SYSTEM", (blockWidth*getWidth()-len)/2, blockHeight*getHeight()/4);
+		g2d.drawString("File", (blockWidth)/4, blockHeight*getHeight()/1.5f);
+		int len = g2d.getFontMetrics().stringWidth("ASSEMBLER");
+		g2d.drawString("SOURCE", (blockWidth*getWidth()-len)/2, blockHeight*getHeight()/4);
 		len = g2d.getFontMetrics().stringWidth(getLabel());
 		g2d.drawString(getLabel(), (blockWidth*getWidth()-len)/2, blockHeight*getHeight()/2.8f);
 		
+		
+		// TODO: show file name here
 		g2d.setColor(new Color(0, 0, 0));
-		len = g2d.getFontMetrics().stringWidth(""+getSeconds());
-		g2d.drawString(""+getSeconds(), blockWidth*getWidth()-len-15,  blockHeight*getHeight()/1.5f);
+		len = g2d.getFontMetrics().stringWidth(""+getFileName());
+		g2d.drawString(""+getFileName(), blockWidth*getWidth()-len-15,  blockHeight*getHeight()/1.5f);
 	}
 
 	@Override
 	public List<Quadruple> generateIR(GenContext context) {
 		SymbolTable symbolTable = context.getSymbolTable();
 		Symbol comment 			= symbolTable.addLiteral(getLabel());
+		// TODO: wywołanie tej funkcji
 		Symbol sysPrintLoops	= symbolTable.addFunc(ProgramFunc.SCANTIME.value, Void.class);
 		Symbol zero			    = symbolTable.addIntConst("0");
 		
