@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.github.leofds.iotladdereditor.compiler.domain.GenContext;
+import com.github.leofds.iotladdereditor.compiler.domain.Kind;
 import com.github.leofds.iotladdereditor.compiler.domain.ProgramFunc;
 import com.github.leofds.iotladdereditor.compiler.domain.Quadruple;
 import com.github.leofds.iotladdereditor.compiler.domain.Symbol;
@@ -75,16 +76,32 @@ public class Assembler extends SourceInstruction{
 	}
 
 	@Override
+	public List<Quadruple> generateIRInit(GenContext context) {
+//		SymbolTable symbolTable = context.getSymbolTable();
+////		Symbol comment 			= symbolTable.addLiteral(getLabel());
+////		// TODO: wywołanie tej funkcji
+////		Symbol sysPrintLoops	= symbolTable.addFunc(ProgramFunc.SCANTIME.value, Void.class);
+////		Symbol zero			    = symbolTable.addIntConst("0");
+////		Symbol sourceFilePath = new Symbol("assembler", Kind.SOURCE, getSourceFilePathname());
+//		Symbol symbSourceFilePath = symbolTable.addLabel("assembler", getSourceFilePathname());
+//		
+		List<Quadruple> quadruples = new ArrayList<Quadruple>();
+//		quadruples.add( QuadrupleFactory.createLabel(symbSourceFilePath));
+		return quadruples;
+	}
+	
+	@Override
 	public List<Quadruple> generateIR(GenContext context) {
 		SymbolTable symbolTable = context.getSymbolTable();
-		Symbol comment 			= symbolTable.addLiteral(getLabel());
-		// TODO: wywołanie tej funkcji
-		Symbol sysPrintLoops	= symbolTable.addFunc(ProgramFunc.SCANTIME.value, Void.class);
-		Symbol zero			    = symbolTable.addIntConst("0");
+//		Symbol comment 			= symbolTable.addLiteral(getLabel());
+//		// TODO: wywołanie tej funkcji
+//		Symbol sysPrintLoops	= symbolTable.addFunc(ProgramFunc.SCANTIME.value, Void.class);
+//		Symbol zero			    = symbolTable.addIntConst("0");
+		Symbol symbSourceFilePath = new Symbol("assembler", Kind.SOURCE, getSourceFilePathname());
+//		Symbol symbSourceFilePath = symbolTable.addLabel("assembler", getSourceFilePathname());
 		
 		List<Quadruple> quadruples = new ArrayList<Quadruple>();
-		quadruples.add( QuadrupleFactory.createComment(comment) );
-		quadruples.add( QuadrupleFactory.createCall(sysPrintLoops, zero) );
+		quadruples.add( QuadrupleFactory.createLabel(symbSourceFilePath));
 		return quadruples;
 	}
 
@@ -93,29 +110,17 @@ public class Assembler extends SourceInstruction{
 	}
 
 	@Override
-	public List<Quadruple> generateIRInit(GenContext context) {
-		return null;
-	}
-
-	@Override
 	public boolean addMemory(DeviceMemory memory, int x, int y) {
 		return false;
 	}
 
 	@Override
-	public DialogScreen getPropertyScreen() {
-		return null;
-	}
-
-	@Override
-	public void beforeShowScreen(DialogScreen dialog) {
-	}
-
-	@Override
-	public void afterShowScreen(DialogScreen dialog) {
-	}
-
-	@Override
 	public void updateDevice(Device device) {
 	}
+
+//	@Override
+//	public void afterShowScreen(DialogScreen dialog) {
+//		// TODO Auto-generated method stub
+//		
+//	}
 }

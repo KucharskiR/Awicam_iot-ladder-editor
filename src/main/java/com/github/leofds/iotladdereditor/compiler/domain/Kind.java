@@ -21,4 +21,5 @@ public enum Kind{
 	CONSTANT,
 	LABEL,
 	FUNCTION,
+	SOURCE,
 };

@@ -229,6 +229,7 @@ public class Strings {
 	public static String disconnectionError() { return bundle.getString("disconnectionError"); }
 	public static String connectedToTheDevice() { return bundle.getString("connectedToTheDevice"); }
 	public static String connectToOnPort() { return bundle.getString("connectToOnPort"); }
+	public static String fileChoose() { return bundle.getString("file"); }
 
 	
 }

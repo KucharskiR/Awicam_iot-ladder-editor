@@ -39,5 +39,5 @@ public enum Operator {
 	OR,
 	XOR,
 	PARAM,
-	RETURN;
+	RETURN,
 }

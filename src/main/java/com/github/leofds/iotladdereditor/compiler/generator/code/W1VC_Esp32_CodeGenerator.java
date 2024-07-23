@@ -832,6 +832,10 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 							labels.remove(result.getName());
 						}
 						break;
+					case SOURCE:
+						//TODO: 
+						
+						break;
 					default:
 						break;
 					}

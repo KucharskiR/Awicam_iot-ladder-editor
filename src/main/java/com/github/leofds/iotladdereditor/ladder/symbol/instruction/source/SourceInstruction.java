@@ -34,12 +34,31 @@ import com.github.leofds.iotladdereditor.device.DeviceMemory;
 import com.github.leofds.iotladdereditor.i18n.Strings;
 import com.github.leofds.iotladdereditor.ladder.symbol.instruction.LadderInstruction;
 import com.github.leofds.iotladdereditor.ladder.symbol.instruction.source.view.SourcePropertyScreen;
-import com.github.leofds.iotladdereditor.ladder.symbol.instruction.timer.view.TimerPropertyScreen;
 import com.github.leofds.iotladdereditor.ladder.view.DialogScreen;
 
 public abstract class SourceInstruction extends LadderInstruction{
 
 	private static final long serialVersionUID = 1L;
+	private String sourceFilePathname;
+	
+	private DeviceMemory sourceMemory = new DeviceMemory(":SOURCE", String.class);
+	
+
+	public DeviceMemory getSourceMemory() {
+		return sourceMemory;
+	}
+
+	public void setSourceMemory(DeviceMemory sourceMemory) {
+		this.sourceMemory = sourceMemory;
+	}
+
+	public String getSourceFilePathname() {
+		return sourceFilePathname;
+	}
+
+	public void setSourceFilePathname(String sourceFilePathname) {
+		this.sourceFilePathname = sourceFilePathname;
+	}
 
 	public SourceInstruction() {
 		super(2, 2, 0, 0, new DeviceMemory("",SourceInstruction.class));
@@ -82,11 +101,19 @@ public abstract class SourceInstruction extends LadderInstruction{
 	
 	@Override
 	public DialogScreen getPropertyScreen() {
-		return new SourcePropertyScreen(getLabel());
+		return new SourcePropertyScreen(getLabel(), getMemory());
 	}
 	
 	@Override
 	public void beforeShowScreen(DialogScreen dialog) {
+//		SourcePropertyScreen screen = (SourcePropertyScreen) dialog;
+	}
+	
+	@Override
+	public void afterShowScreen(DialogScreen dialog) {
 		SourcePropertyScreen screen = (SourcePropertyScreen) dialog;
+		getMemory().setName(screen.getName());
+		setSourceFilePathname(screen.getFilePath());
+		Mediator.getInstance().outputConsoleMessage(sourceFilePathname);
 	}
 }
