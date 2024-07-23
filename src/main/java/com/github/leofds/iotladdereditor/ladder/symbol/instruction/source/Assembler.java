@@ -101,7 +101,7 @@ public class Assembler extends SourceInstruction{
 //		Symbol symbSourceFilePath = symbolTable.addLabel("assembler", getSourceFilePathname());
 		
 		List<Quadruple> quadruples = new ArrayList<Quadruple>();
-		quadruples.add( QuadrupleFactory.createLabel(symbSourceFilePath));
+		quadruples.add( QuadrupleFactory.createSource(symbSourceFilePath));
 		return quadruples;
 	}
 

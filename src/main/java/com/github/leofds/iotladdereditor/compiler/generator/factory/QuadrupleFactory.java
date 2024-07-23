@@ -22,6 +22,10 @@ import com.github.leofds.iotladdereditor.compiler.domain.Symbol;
 
 public class QuadrupleFactory {
 
+	public static Quadruple createSource(Symbol sourcePath){
+		return new Quadruple(Operator.SOURCE, null , null, sourcePath);
+	}
+	
 	public static Quadruple createReturn(){
 		return new Quadruple(Operator.RETURN, null , null, null);
 	}

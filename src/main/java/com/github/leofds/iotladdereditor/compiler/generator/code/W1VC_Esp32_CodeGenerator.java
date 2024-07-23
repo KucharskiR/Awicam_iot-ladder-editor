@@ -834,7 +834,6 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 						break;
 					case SOURCE:
 						//TODO: 
-						
 						break;
 					default:
 						break;

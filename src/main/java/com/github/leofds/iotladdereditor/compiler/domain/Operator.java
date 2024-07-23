@@ -40,4 +40,5 @@ public enum Operator {
 	XOR,
 	PARAM,
 	RETURN,
+	SOURCE,
 }
