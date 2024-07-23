@@ -67,7 +67,7 @@ public class IR {
 			if(quad.getOperator() != null){
 				switch (quad.getOperator()) {
 				case SOURCE:
-					out.append(String.format("  source %s\r\n",quad.getResult().getScope()));
+					out.append(String.format("  source %s,%s\r\n",quad.getResult().getScope(),quad.getResult().getName()));
 					break;
 				case LABEL:
 					out.append(String.format("%s:\r\n",quad.getResult().getName()));

@@ -39,7 +39,7 @@ import com.github.leofds.iotladdereditor.ladder.view.DialogScreen;
 public abstract class SourceInstruction extends LadderInstruction{
 
 	private static final long serialVersionUID = 1L;
-	private String sourceFilePathname;
+	private String sourceFilePath;
 	
 	private DeviceMemory sourceMemory = new DeviceMemory(":SOURCE", String.class);
 	
@@ -52,12 +52,12 @@ public abstract class SourceInstruction extends LadderInstruction{
 		this.sourceMemory = sourceMemory;
 	}
 
-	public String getSourceFilePathname() {
-		return sourceFilePathname;
+	public String getSourceFilePath() {
+		return sourceFilePath;
 	}
 
-	public void setSourceFilePathname(String sourceFilePathname) {
-		this.sourceFilePathname = sourceFilePathname;
+	public void setSourceFilePath(String sourceFilePathname) {
+		this.sourceFilePath = sourceFilePathname;
 	}
 
 	public SourceInstruction() {
@@ -106,14 +106,16 @@ public abstract class SourceInstruction extends LadderInstruction{
 	
 	@Override
 	public void beforeShowScreen(DialogScreen dialog) {
-//		SourcePropertyScreen screen = (SourcePropertyScreen) dialog;
+		SourcePropertyScreen screen = (SourcePropertyScreen) dialog;
+		screen.setFilePath(getSourceFilePath());
+		screen.getPathLbl().setText(getSourceFilePath());
 	}
 	
 	@Override
 	public void afterShowScreen(DialogScreen dialog) {
 		SourcePropertyScreen screen = (SourcePropertyScreen) dialog;
 		getMemory().setName(screen.getName());
-		setSourceFilePathname(screen.getFilePath());
-		Mediator.getInstance().outputConsoleMessage(sourceFilePathname);
+		setSourceFilePath(screen.getFilePath());
+		Mediator.getInstance().outputConsoleMessage(Strings.fileChoose() + " " + getSourceFilePath());
 	}
 }

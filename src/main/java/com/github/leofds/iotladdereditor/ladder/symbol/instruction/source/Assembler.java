@@ -38,22 +38,23 @@ import com.github.leofds.iotladdereditor.ladder.view.DialogScreen;
 public class Assembler extends SourceInstruction{
 
 	private static final long serialVersionUID = 1L;
+	private static final String sourceType = "asm";
 	
-	private int seconds;
+	private String fileName;;
 	
 	public Assembler() {
 		super();
 		setLabel("ASSEMBLER");
-		seconds = 1;
+		fileName = "";
 	}
 	
 	// TODO: change this method to return fileName
-	public int getFileName() {
-		return seconds;
+	public String getFileName() {
+		return fileName;
 	}
 
-	public void setSeconds(int seconds) {
-		this.seconds = seconds;
+	public void setSeconds(String seconds) {
+		this.fileName = seconds;
 	}
 
 	@Override
@@ -62,7 +63,7 @@ public class Assembler extends SourceInstruction{
 		
 		g2d.setColor(new Color(0, 0, 255));
 		g2d.setFont(new Font("Arial", Font.PLAIN, 12));
-		g2d.drawString("File", (blockWidth)/4, blockHeight*getHeight()/1.5f);
+//		g2d.drawString("File", (blockWidth)/4, blockHeight*getHeight()/1.5f);
 		int len = g2d.getFontMetrics().stringWidth("ASSEMBLER");
 		g2d.drawString("SOURCE", (blockWidth*getWidth()-len)/2, blockHeight*getHeight()/4);
 		len = g2d.getFontMetrics().stringWidth(getLabel());
@@ -77,28 +78,14 @@ public class Assembler extends SourceInstruction{
 
 	@Override
 	public List<Quadruple> generateIRInit(GenContext context) {
-//		SymbolTable symbolTable = context.getSymbolTable();
-////		Symbol comment 			= symbolTable.addLiteral(getLabel());
-////		// TODO: wywołanie tej funkcji
-////		Symbol sysPrintLoops	= symbolTable.addFunc(ProgramFunc.SCANTIME.value, Void.class);
-////		Symbol zero			    = symbolTable.addIntConst("0");
-////		Symbol sourceFilePath = new Symbol("assembler", Kind.SOURCE, getSourceFilePathname());
-//		Symbol symbSourceFilePath = symbolTable.addLabel("assembler", getSourceFilePathname());
-//		
 		List<Quadruple> quadruples = new ArrayList<Quadruple>();
-//		quadruples.add( QuadrupleFactory.createLabel(symbSourceFilePath));
 		return quadruples;
 	}
 	
 	@Override
 	public List<Quadruple> generateIR(GenContext context) {
 		SymbolTable symbolTable = context.getSymbolTable();
-//		Symbol comment 			= symbolTable.addLiteral(getLabel());
-//		// TODO: wywołanie tej funkcji
-//		Symbol sysPrintLoops	= symbolTable.addFunc(ProgramFunc.SCANTIME.value, Void.class);
-//		Symbol zero			    = symbolTable.addIntConst("0");
-		Symbol symbSourceFilePath = new Symbol("assembler", Kind.SOURCE, getSourceFilePathname());
-//		Symbol symbSourceFilePath = symbolTable.addLabel("assembler", getSourceFilePathname());
+		Symbol symbSourceFilePath = new Symbol(sourceType, Kind.SOURCE, getSourceFilePath());
 		
 		List<Quadruple> quadruples = new ArrayList<Quadruple>();
 		quadruples.add( QuadrupleFactory.createSource(symbSourceFilePath));
