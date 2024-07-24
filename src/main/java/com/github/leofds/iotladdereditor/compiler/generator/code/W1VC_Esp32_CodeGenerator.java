@@ -16,6 +16,7 @@
  ******************************************************************************/
 package com.github.leofds.iotladdereditor.compiler.generator.code;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -23,6 +24,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Map.Entry;
 import java.util.Stack;
 import java.util.stream.Stream;
@@ -80,7 +82,6 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 	
 	private void createSourceFile(ProjectContainer p,SourceCode c){
 		IR ir = p.getIr();
-		
 //		addPinsSymbolCommunication(ir);
 
 		c.createNewFile("plc-controller/src/user_program.cpp");
@@ -115,6 +116,8 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 			addTelemetryFunction(ir, c);
 		}
 		addUpdateSystem(c);
+
+		addSourceBlocks(ir, c);
 
 //		addInputSystemFunction(p, c);
 //		addOutputSystemFunction(p, c);
@@ -477,7 +480,7 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 	
 	private void addTimerSystemFunction(SourceCode c){
 		c.newLine();
-		c.addl("uint64_t "+ProgramFunc.GETTIME.value+"(){");
+		c.addl("uint64_t "+ProgramFunc.GETTIME.value+"() {");
 		c.addl("  return "+varTime+".v;");
 		c.addl("}");
 	}
@@ -544,7 +547,7 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 	
 	private void addUpdateSystem(SourceCode c){
 		c.newLine();
-		c.addl("void "+ProgramFunc.UPDATE.value+"(){");
+		c.addl("void "+ProgramFunc.UPDATE.value+"() {");
 		c.addl("  unsigned long now = millis();");
 		c.addl("  if(now < "+varTime+".p[0]){");
 		c.addl("    "+varTime+".p[1]++;");
@@ -600,7 +603,7 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 	
 	private void addInitSystemFunction(ProjectContainer project,IR ir,SourceCode c){
 		c.newLine();
-		c.addl("void "+ProgramFunc.INIT.value+"(){");
+		c.addl("void "+ProgramFunc.INIT.value+"() {");
 
 		c.addl("  "+varTime+".v = 0;");
 		Map<String, DeviceMemory> inputFiles = CodeGeneratorUtils.getInput(project, c);
@@ -634,7 +637,7 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 	 */
 	private void addInputSystemFunction(ProjectContainer project,SourceCode c){
 		c.newLine();
-		c.addl("void "+ProgramFunc.INPUT.value+"(){");
+		c.addl("void "+ProgramFunc.INPUT.value+"() {");
 		
 		device.getName();
 		
@@ -671,7 +674,7 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 	
 	private void addOutputSystemFunction(ProjectContainer project,SourceCode c){
 		c.newLine();
-		c.addl("void "+ProgramFunc.OUTPUT.value+"(){");
+		c.addl("void "+ProgramFunc.OUTPUT.value+"() {");
 		
 		c.addl("  for (uint8_t i = 1; i < boardsNumber + 1; i++)");
 		c.addl("    SendDigitalOutputs(i, inputs[i].digitalOutputStates);");
@@ -722,11 +725,11 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 			if(symbol != null){
 				if(symbol.getName() != null && symbol.getName().equals(ProgramFunc.SCANTIME.value)){
 					c.newLine();
-					c.addl("void "+ProgramFunc.SCANTIME.value+"(){");
+					c.addl("void "+ProgramFunc.SCANTIME.value+"() {");
 					c.addl("  static uint64_t ltime = 0;");
 					c.addl("  static uint32_t scanCount = 0;");
 					c.addl("  uint64_t ctime = "+varTime+".v;");
-					c.addl("  if(ctime - ltime > 1000){");
+					c.addl("  if(ctime - ltime > 1000) {");
 					c.addl("    char buf[64];");
 					c.addl("    float st;");
 					c.addl("    st = 1.0/scanCount;");
@@ -734,7 +737,7 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 					c.addl("    Serial.println(buf);");
 					c.addl("    scanCount = 0;");
 					c.addl("    ltime = ctime;");
-					c.addl("  }else{");
+					c.addl("  } else {");
 					c.addl("    scanCount++;");
 					c.addl("  }");
 					c.addl("}");
@@ -818,7 +821,7 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 //								return;
 							c.newLine();
 							c.add( getFunc(ir, result) );
-							c.addl("{");
+							c.addl(" {");
 							addLocalVariables(ir, c, result.getName()); // this comment removes local variables from initContext()
 						}else{
 							return;
@@ -832,9 +835,6 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 							labels.remove(result.getName());
 						}
 						break;
-					case SOURCE:
-						//TODO: 
-						break;
 					default:
 						break;
 					}
@@ -844,7 +844,7 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 						c.add("  ");
 					}
 					labels.removeLast();
-					c.addl("}else{");
+					c.addl("} else {");
 					labels.add(result.getName());
 					break;
 				case RETURN:
@@ -889,56 +889,56 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 					for(int i=0;i<labels.size();i++){ 
 						c.add("  ");
 					}
-					c.addl("  if(!"+cname(argument1.getName())+"){");
+					c.addl("  if(!"+cname(argument1.getName())+") {");
 					labels.add(result.getName());
 					break;
 				case IFFALSE:
 					for(int i=0;i<labels.size();i++){ 
 						c.add("  ");
 					}
-					c.addl("  if("+cname(argument1.getName())+"){");
+					c.addl("  if("+cname(argument1.getName())+") {");
 					labels.add(result.getName());
 					break;
 				case IFEQ:
 					for(int i=0;i<labels.size();i++){ 
 						c.add("  ");
 					}
-					c.addl("  if("+cname(argument1.getName())+" != "+cname(argument2.getName())+"){");
+					c.addl("  if("+cname(argument1.getName())+" != "+cname(argument2.getName())+") {");
 					labels.add(result.getName());
 					break;
 				case IFGEQ:
 					for(int i=0;i<labels.size();i++){ 
 						c.add("  ");
 					}
-					c.addl("  if("+cname(argument1.getName())+" < "+cname(argument2.getName())+"){");
+					c.addl("  if("+cname(argument1.getName())+" < "+cname(argument2.getName())+") {");
 					labels.add(result.getName());
 					break;
 				case IFG:
 					for(int i=0;i<labels.size();i++){ 
 						c.add("  ");
 					}
-					c.addl("  if("+cname(argument1.getName())+" <= "+cname(argument2.getName())+"){");
+					c.addl("  if("+cname(argument1.getName())+" <= "+cname(argument2.getName())+") {");
 					labels.add(result.getName());
 					break;
 				case IFLE:
 					for(int i=0;i<labels.size();i++){ 
 						c.add("  ");
 					}
-					c.addl("  if("+cname(argument1.getName())+" > "+cname(argument2.getName())+"){");
+					c.addl("  if("+cname(argument1.getName())+" > "+cname(argument2.getName())+") {");
 					labels.add(result.getName());
 					break;
 				case IFL:
 					for(int i=0;i<labels.size();i++){ 
 						c.add("  ");
 					}
-					c.addl("  if("+cname(argument1.getName())+" >= "+cname(argument2.getName())+"){");
+					c.addl("  if("+cname(argument1.getName())+" >= "+cname(argument2.getName())+") {");
 					labels.add(result.getName());
 					break;
 				case IFNEQ:
 					for(int i=0;i<labels.size();i++){ 
 						c.add("  ");
 					}
-					c.addl("  if("+cname(argument1.getName())+" == "+cname(argument2.getName())+"){");
+					c.addl("  if("+cname(argument1.getName())+" == "+cname(argument2.getName())+") {");
 					labels.add(result.getName());
 					break;
 				case SUB:
@@ -985,6 +985,25 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 					break;
 				case COMMENT:
 					break;
+				case SOURCE:
+					c.addl("\t/*Begin of assemby function*/");
+					c.addl(
+						// "\r\nvoid rungAsm() {\r\n"
+						"\tuint64_t val = 0; \r\n"
+						+ "\tval = deviceData[3].digitalInputStates;\r\n"
+						+ "\tval = (val << 16) | deviceData[2].digitalInputStates;\r\n"
+						+ "\tval = (val << 16) | deviceData[1].digitalInputStates;\r\n"
+						+ "\tval = (val << 16) | deviceData[0].digitalInputStates;\r\n"
+						+ "\tuint64_t r = " + getAsmFunctionName(quadruple.getResult().getScope()) + "(val);\r\n"
+						+ "\tdeviceData[0].digitalOutputStates = (uint16_t)(r);\r\n"
+						+ "\tdeviceData[1].digitalOutputStates = (uint16_t)(r>>16);\r\n"
+						+ "\tdeviceData[2].digitalOutputStates = (uint16_t)(r>>32);\r\n"
+						+ "\tdeviceData[3].digitalOutputStates = (uint16_t)(r>>48);"
+						// + "}\r\n"
+					);
+					c.addl("\t/*End of assemby function*/");
+
+				break;
 				default:
 					break;
 				}
@@ -1216,9 +1235,8 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 
 	private void addRunUserProgram(IR ir, SourceCode c) {
 		c.newLine();
-		c.add("void runUserProgram()\r\n"
-				+ "{\r\n"
-				+ "    refreshTime64bit();\r\n");
+		c.add("void runUserProgram() {\r\n"
+				+ "\trefreshTime64bit();\r\n");
 		
 		// rung loop generator
 		for(Symbol symbol:ir.getSymbolTable()){
@@ -1226,7 +1244,7 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 				symbol.getKind() != null && 
 				symbol.getKind().equals(Kind.FUNCTION) && 
 				symbol.getName().contains(ProgramFunc.RUNG.value)){
-				c.addl("    "+symbol.getName()+"();");
+				c.addl("\t"+symbol.getName()+"();");
 			}
 		}
 		c.add("\r\n" + "}");
@@ -1311,8 +1329,7 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 	}
 	
 	private void addInitUserProgram( IR ir, SourceCode c) {
-		c.add("void initUserProgram()\r\n"
-				+ "{\r\n"
+		c.add("void initUserProgram() {\r\n"
 				+ "  init();\r\n"
 				+ "  initContext();\r\n"
 				+ "}"
@@ -1350,4 +1367,81 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 		c.addl("");
 	}
 
+
+	private void addSourceBlocks(IR ir, SourceCode c) {
+		LabelList labels = new LabelList();
+		Stack<String> pars = new Stack<String>();
+		List<Quadruple> quadruples = ir.getQuadruples();
+		for (Quadruple quadruple : quadruples) {
+			Operator operator = quadruple.getOperator();
+			Symbol argument1 = quadruple.getArgument1();
+			Symbol argument2 = quadruple.getArgument2();
+			Symbol result = quadruple.getResult();
+
+			if(operator == Operator.SOURCE) {
+				c.addl("");
+				String pathToFile = quadruple.getResult().getScope();
+				addAsmHeader(c, pathToFile);
+				addAsmFunction(c, pathToFile);
+			}
+		}
+	}
+
+	private void addAsmHeader(SourceCode c, String pathToFile) {
+		try {
+			String functionName = getAsmFunctionName(pathToFile);
+			
+			c.addl("extern \"C\" uint64_t " + functionName + "(uint64_t);");
+
+		} catch (Exception e) {
+			System.out.println("Generating assembler file error!");
+			e.printStackTrace();
+		} 
+	}
+
+	private void addAsmFunction(SourceCode c, String pathToFile) {
+		File file = new File(pathToFile);
+
+		c.addl("\r\nasm volatile (R\"(");
+		try {
+			Scanner reader = new Scanner(file);
+			while (reader.hasNextLine()) {
+				String line = reader.nextLine();
+				c.addl(line);
+			}			
+
+			reader.close();
+		} catch (Exception e) {
+			System.out.println("Generating assembler file error!");
+			e.printStackTrace();
+		} 
+		c.addl(")\");");
+	}
+
+	private String getAsmFunctionName(String pathToFile) {
+		File file = new File(pathToFile);
+
+		String functionName = "";
+		try {
+			Scanner reader = new Scanner(file);
+			if(!reader.hasNextLine()) {
+				reader.close();
+				throw new Exception("Bad file content!");
+			}
+
+			String firstLine = reader.nextLine();
+			String parts[] = firstLine.split(" ");
+
+			if(parts.length < 2) {
+				reader.close();
+				throw new Exception("Bad lenght!");
+			}
+			reader.close();
+			functionName = parts[1];
+		} catch (Exception e) {
+			System.out.println("Cant get assembler function name!");
+			e.printStackTrace();
+		}
+		return functionName;
+	}
 }

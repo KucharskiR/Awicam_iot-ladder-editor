@@ -119,7 +119,8 @@ public class Compiler {
 
 		this.srcDirectory = workingDirectory + "/plc-controller";
 		
-		this.pythonPath = workingDirectory + "/Python311-32/python.exe";
+		// this.pythonPath = workingDirectory + "/Python311-32/python.exe";
+		this.pythonPath = workingDirectory + "/Python311-64/python.exe";
 
 		this.platformioFilePath = this.workingDirectory + "tmp.js";
 	}
