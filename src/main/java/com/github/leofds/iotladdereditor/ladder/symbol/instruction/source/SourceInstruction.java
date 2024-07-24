@@ -35,6 +35,7 @@ import com.github.leofds.iotladdereditor.i18n.Strings;
 import com.github.leofds.iotladdereditor.ladder.symbol.instruction.LadderInstruction;
 import com.github.leofds.iotladdereditor.ladder.symbol.instruction.source.view.SourcePropertyScreen;
 import com.github.leofds.iotladdereditor.ladder.view.DialogScreen;
+import com.github.leofds.iotladdereditor.util.CodeEditor;
 
 public abstract class SourceInstruction extends LadderInstruction{
 
@@ -79,8 +80,11 @@ public abstract class SourceInstruction extends LadderInstruction{
 		List<JMenuItem> itens = new ArrayList<JMenuItem>();
 		JMenuItem remove = new JMenuItem(Strings.remove());
 		JMenuItem property = new JMenuItem(Strings.property());
+		JMenuItem edit = new JMenuItem("Edit");
 		itens.add(remove);
 		itens.add(property);
+		itens.add(edit);
+
 		remove.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -96,6 +100,15 @@ public abstract class SourceInstruction extends LadderInstruction{
 				SourceInstruction.this.viewInstructionProperty();
 			}
 		});
+		
+		edit.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				CodeEditor editor = new CodeEditor(getSourceFilePath());
+				editor.openInExternalEditor();
+			}
+		});
+
 		return itens;
 	}
 	
