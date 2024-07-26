@@ -86,9 +86,13 @@ public class Assembler extends SourceInstruction{
 	public List<Quadruple> generateIR(GenContext context) {
 		SymbolTable symbolTable = context.getSymbolTable();
 		Symbol symbSourceFilePath = new Symbol(sourceType, Kind.SOURCE, getSourceFilePath());
-		
+		Symbol status		= symbolTable.addBoolVar(context.getCurrentStatus(), context.getScope());
+		Symbol label 		= symbolTable.addLabel(context.genLabel(), context.getScope());
+
 		List<Quadruple> quadruples = new ArrayList<Quadruple>();
-		quadruples.add( QuadrupleFactory.createSource(symbSourceFilePath));
+		quadruples.add(QuadrupleFactory.createIfFalse(status, label));
+		quadruples.add(QuadrupleFactory.createSource(symbSourceFilePath));
+		quadruples.add(QuadrupleFactory.createLabel(label));
 		return quadruples;
 	}
 
