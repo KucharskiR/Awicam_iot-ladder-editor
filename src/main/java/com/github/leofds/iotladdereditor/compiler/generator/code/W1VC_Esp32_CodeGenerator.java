@@ -57,7 +57,7 @@ import com.github.leofds.iotladdereditor.ladder.symbol.instruction.count.CountIn
 import com.github.leofds.iotladdereditor.ladder.symbol.instruction.timer.TimerInstruction;
 import com.github.leofds.iotladdereditor.util.AboutUils;
 
-public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
+public class W1VC_Esp32_CodeGenerator implements CodeGenerator {
 	
 	private static final String varTime = "LD_TIME";
 	
@@ -80,7 +80,7 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 		return c;
 	}
 	
-	private void createSourceFile(ProjectContainer p,SourceCode c){
+	private void createSourceFile(ProjectContainer p,SourceCode c) {
 		IR ir = p.getIr();
 //		addPinsSymbolCommunication(ir);
 
@@ -1372,6 +1372,9 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 		LabelList labels = new LabelList();
 		Stack<String> pars = new Stack<String>();
 		List<Quadruple> quadruples = ir.getQuadruples();
+
+		boolean addedGlobalData = false;
+
 		for (Quadruple quadruple : quadruples) {
 			Operator operator = quadruple.getOperator();
 			Symbol argument1 = quadruple.getArgument1();
@@ -1379,6 +1382,11 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 			Symbol result = quadruple.getResult();
 
 			if(operator == Operator.SOURCE) {
+				if(!addedGlobalData) {
+					c.addl("extern \"C\" uint8_t global_data[1024];");
+					c.addl("uint8_t global_data[1024]{0};");
+					addedGlobalData = true;
+				}
 				c.addl("");
 				String pathToFile = quadruple.getResult().getScope();
 				addAsmHeader(c, pathToFile);
@@ -1392,6 +1400,8 @@ public class W1VC_Esp32_CodeGenerator implements CodeGenerator{
 			String functionName = getAsmFunctionName(pathToFile);
 			
 			c.addl("extern \"C\" uint64_t " + functionName + "(uint64_t);");
+			c.addl("extern \"C\" uint8_t " + functionName + "_data[1024];");
+			c.addl("uint8_t " + functionName + "_data[1024]{0};");
 
 		} catch (Exception e) {
 			System.out.println("Generating assembler file error!");
