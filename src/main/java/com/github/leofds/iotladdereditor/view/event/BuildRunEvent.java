@@ -82,8 +82,6 @@ public class BuildRunEvent implements Observer {
 	}
 
 	private void uploading() {
-		// TODO Auto-generated method stub
-
 		JFrame frame = new JFrame("Uploading...");
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 

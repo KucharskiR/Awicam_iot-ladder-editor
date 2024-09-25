@@ -4,8 +4,8 @@
     <!--ANT 1.7 is required-->
     <!--define folder properties-->
     <property name="dir.buildfile" value="."/>
-    <property name="dir.workspace" value="C:/Users/Dell/Documents/KucharskiR_projects/eclipse-workspace-java-awicam"/>
-    <property name="dir.jarfile" value="C:/Users/Dell/Documents/KucharskiR_projects/20230803_Ladder_Editor/Ladder_Jar"/>
+    <property name="dir.workspace" value="C:/Users/Dell/OneDrive/Documents/Documents_Dell/KucharskiR_projects/eclipse-workspace-java-awicam"/>
+    <property name="dir.jarfile" value="${dir.buildfile}"/>
     <target name="create_run_jar">
         <jar destfile="${dir.jarfile}/Awicam-Ladder.jar">
             <manifest>
@@ -15,9 +15,9 @@
                 <attribute name="Rsrc-Class-Path" value="./ jgoodies-forms-1.8.0.jar miglayout15-swing.jar maven-model-3.0.2.jar plexus-utils-2.0.4.jar commons-lang3-3.12.0.jar org.knowhowlab.comm.rxtx-patched-0.2.jar jSerialComm-2.10.4.jar commons-codec-1.16.1.jar json-simple-4.0.1.jar"/>
             </manifest>
             <zipfileset src="jar-in-jar-loader.zip"/>
-            <fileset dir="${dir.buildfile}/target/classes"/>
-            <zipfileset dir="${dir.buildfile}" includes="jgoodies-forms-1.8.0.jar"/>
-            <zipfileset dir="${dir.buildfile}" includes="miglayout15-swing.jar"/>
+            <fileset dir="${dir.jarfile}/target/classes"/>
+            <zipfileset dir="${dir.jarfile}" includes="jgoodies-forms-1.8.0.jar"/>
+            <zipfileset dir="${dir.jarfile}" includes="miglayout15-swing.jar"/>
             <zipfileset dir="C:/Users/Dell/.m2/repository/org/apache/maven/maven-model/3.0.2" includes="maven-model-3.0.2.jar"/>
             <zipfileset dir="C:/Users/Dell/.m2/repository/org/codehaus/plexus/plexus-utils/2.0.4" includes="plexus-utils-2.0.4.jar"/>
             <zipfileset dir="C:/Users/Dell/.m2/repository/org/apache/commons/commons-lang3/3.12.0" includes="commons-lang3-3.12.0.jar"/>

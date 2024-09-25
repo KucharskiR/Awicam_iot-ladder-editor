@@ -57,9 +57,9 @@ public class Mediator {
 	}
 	
 	public SerialCommunication getConnection() {
-		SerialCommunication connection = this.connection != null ?
-                connection = this.connection :
-                new SerialCommunication();
+		SerialCommunication connection = 
+				this.connection != null ?
+                this.connection : new SerialCommunication();
 		Mediator.getInstance().setConnection(connection);
 		return this.connection;
 	}

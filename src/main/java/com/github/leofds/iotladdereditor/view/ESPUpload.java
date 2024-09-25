@@ -134,10 +134,20 @@ public class ESPUpload extends JFrame {
 		connectButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				String selectedPort = (String) comPortComboBox.getSelectedItem();
+//				String selectedPort = (String) comPortComboBox.getSelectedItem(); // DEPRECATED since 25.09.2024 because of global connection
+				String selectedPort = Mediator.getInstance().getConnection().getComPort().getSystemPortName();
 				if (selectedPort != null) {
 					
-					// uploading thread
+					// Perform actions to connect using the selected COM port
+					// For example: Open and configure the serial port
+//                	Compiler uploadCompiler = new Compiler();
+//                	uploadCompiler.upload(selectedPort);
+					uploadingStart = true;
+					portName = selectedPort;
+
+					System.out.println("Connecting to " + selectedPort);
+
+					// uploading thread 'uploadingTerminalThread'
 					Thread uploadingTerminalThread = new Thread(() -> {
 						sharedResource.setData(false);
 
@@ -159,16 +169,7 @@ public class ESPUpload extends JFrame {
 
 					});
 					
-					
-					// Perform actions to connect using the selected COM port
-					// For example: Open and configure the serial port
-//                	Compiler uploadCompiler = new Compiler();
-//                	uploadCompiler.upload(selectedPort);
-					uploadingStart = true;
-					portName = selectedPort;
-
-					System.out.println("Connecting to " + selectedPort);
-
+					// thread start
 					uploadingTerminalThread.start();
 //					uploadingWaitingBar.start();
 				}

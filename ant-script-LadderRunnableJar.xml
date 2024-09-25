@@ -4,15 +4,15 @@
     <!--ANT 1.7 is required-->
     <!--define folder properties-->
     <property name="dir.buildfile" value="."/>
-    <property name="dir.workspace" value="C:/Users/Dell/Documents/KucharskiR_projects/eclipse-workspace-java-awicam"/>
-    <property name="dir.jarfile" value="C:/Users/Dell/Documents/KucharskiR_projects/20230803_Ladder_Editor/Ladder_Jar"/>
+    <property name="dir.workspace" value="C:/Users/Dell/OneDrive/Documents/Documents_Dell/KucharskiR_projects/eclipse-workspace-java-awicam"/>
+    <property name="dir.jarfile" value="C:/Users/Dell/OneDrive/Documents/Documents_Dell/KucharskiR_projects/20230803_Ladder_Editor/Ladder_Jar"/>
     <target name="create_run_jar">
         <jar destfile="${dir.jarfile}/Awicam-Ladder.jar">
             <manifest>
                 <attribute name="Main-Class" value="org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader"/>
                 <attribute name="Rsrc-Main-Class" value="com.github.leofds.iotladdereditor.IotLadderEditor"/>
                 <attribute name="Class-Path" value="."/>
-                <attribute name="Rsrc-Class-Path" value="./ jgoodies-forms-1.8.0.jar miglayout15-swing.jar maven-model-3.0.2.jar plexus-utils-2.0.4.jar commons-lang3-3.12.0.jar org.knowhowlab.comm.rxtx-patched-0.2.jar jSerialComm-2.10.4.jar commons-codec-1.16.1.jar"/>
+                <attribute name="Rsrc-Class-Path" value="./ jgoodies-forms-1.8.0.jar miglayout15-swing.jar maven-model-3.0.2.jar plexus-utils-2.0.4.jar commons-lang3-3.12.0.jar org.knowhowlab.comm.rxtx-patched-0.2.jar jSerialComm-2.10.4.jar commons-codec-1.16.1.jar json-simple-4.0.1.jar"/>
             	<attribute name="SplashScreen-Image" value="images/splash.gif"/>
             </manifest>
             <zipfileset src="jar-in-jar-loader.zip"/>

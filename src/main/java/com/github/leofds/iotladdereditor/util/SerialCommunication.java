@@ -451,11 +451,11 @@ public class SerialCommunication {
 	 * Get device info <br>
 	 * {@code <len=8> <deviceType 1B> <firmwareVersion 1B> <numberOfAnalogInputs 1B> <deviceInitTime 4B> <crc>}
 	 * 
-	 * @return 0 if success <br>-1 if error
+	 * @return name of the device or 'Invalid device'
 	 */
 	
 	public String controllerInfo() {
-		String name = null;
+		String name = "---";
 		try {
 
 			if (comPort.openPort()) {
@@ -484,8 +484,10 @@ public class SerialCommunication {
 			e.printStackTrace();
 			error(Error.ERROR_SEND);
 			// Print to console error from thread
-			consoleOutput(e.getMessage());
-			return null;
+			if (e.getMessage() != null) 
+				consoleOutput(e.getMessage());
+			
+			return Strings.noCorrectDevice();
 		}
 		return name;
 	}

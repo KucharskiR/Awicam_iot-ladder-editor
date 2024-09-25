@@ -165,7 +165,6 @@ public class ConnectionPanel extends JPanel {
 	}
 	
 	private void consoleOutput(String msg) {
-		System.out.println(msg);
 		Mediator.getInstance().outputConsoleMessage(msg);
 	}
 

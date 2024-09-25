@@ -230,6 +230,7 @@ public class Strings {
 	public static String connectedToTheDevice() { return bundle.getString("connectedToTheDevice"); }
 	public static String connectToOnPort() { return bundle.getString("connectToOnPort"); }
 	public static String fileChoose() { return bundle.getString("file"); }
+	public static String noCorrectDevice() { return bundle.getString("noCorrectDevice"); }
 
 	
 }
